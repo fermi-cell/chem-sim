@@ -665,6 +665,16 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
                 -ms-overflow-style: none;
                 scrollbar-width: none;
             }
+            #idealGasFormulaScrollWrap::-webkit-scrollbar {
+                height: 4px;
+            }
+            #idealGasFormulaScrollWrap::-webkit-scrollbar-thumb {
+                background: rgba(245, 158, 11, 0.5);
+                border-radius: 4px;
+            }
+            #idealGasFormulaScrollWrap::-webkit-scrollbar-track {
+                background: transparent;
+            }
             #threeContainer {
                 position: absolute;
                 inset: 0;
@@ -889,9 +899,9 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
                             </button>
                         </div>
                         
-                        <!-- KaTeX Formula Container with Dynamic Auto-Scaling -->
-                        <div class="w-full flex-1 flex items-center justify-center overflow-hidden my-auto py-1">
-                            <div id="latexIdealGasFormula" class="inline-block whitespace-nowrap text-white transition-transform duration-200 origin-center" style="transform: scale(1);"></div>
+                        <!-- KaTeX Formula Container with Horizontal Touch-Scrolling & Auto-Alignment -->
+                        <div id="idealGasFormulaScrollWrap" class="w-full flex-1 flex items-center overflow-x-auto my-auto py-1.5 touch-pan-x cursor-grab active:cursor-grabbing select-none" style="-webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;">
+                            <div id="latexIdealGasFormula" class="inline-block whitespace-nowrap text-white px-2"></div>
                         </div>
                     </div>
 
@@ -1256,14 +1266,15 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
 
             function fitFormula(elem) {
                 if (!elem) return;
-                elem.style.transform = 'scale(1)';
                 const parent = elem.parentElement;
                 if (!parent) return;
-                const pWidth = parent.clientWidth - 20;
+                elem.style.transform = 'none';
+                const pWidth = parent.clientWidth;
                 const eWidth = elem.scrollWidth;
-                if (eWidth > pWidth && pWidth > 50) {
-                    const scale = Math.max(0.55, pWidth / eWidth);
-                    elem.style.transform = `scale(${scale.toFixed(3)})`;
+                if (eWidth <= pWidth) {
+                    parent.style.justifyContent = 'center';
+                } else {
+                    parent.style.justifyContent = 'flex-start';
                 }
             }
 
@@ -1364,6 +1375,14 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
                     numbersHtml += activeGasItems.map(item => `<span class="${item.textClass} font-black">${item.p.toFixed(1)}</span>`).join(' + ');
                     numbersHtml += ` <span class="text-slate-400 text-lg sm:text-xl font-bold ml-1">atm</span>`;
                     eqContainer.innerHTML = numbersHtml;
+                    const eqParent = eqContainer.parentElement;
+                    if (eqParent) {
+                        if (eqContainer.scrollWidth > eqParent.clientWidth - 10) {
+                            eqParent.style.justifyContent = 'flex-start';
+                        } else {
+                            eqParent.style.justifyContent = 'center';
+                        }
+                    }
                 } else {
                     formulaText.innerHTML = `<span>P<sub>總</sub></span> = 0.0 atm`;
                     eqContainer.innerHTML = `<span class="text-slate-400 text-lg font-bold tracking-wide">P = 0.0 atm (尚未注入氣體)</span>`;
@@ -1407,20 +1426,6 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
                         if (g.mol > 0) {
                             g.centerPct = currentAccum + g.pct / 2;
                             currentAccum += g.pct;
-                            g.wrap.style.display = 'flex';
-                            g.wrap.style.top = '33px';
-                            g.wrap.style.transform = 'translateX(-50%)';
-                            g.box.className = `px-3 py-2 rounded-xl bg-slate-900/95 border ${g.borderClass} shadow-lg pointer-events-auto`;
-                            g.box.innerHTML = `
-                                <div class="flex flex-col items-center justify-center gap-1.5 sans-tc-bold tracking-wide text-center" style="color: ${g.colorHex}; min-width: 112px;">
-                                    <div class="text-xl sm:text-2xl font-black leading-none">${g.label} 貢獻</div>
-                                    <div class="flex flex-col items-center justify-center leading-none mono-num font-black">
-                                        <span class="text-2xl sm:text-3xl leading-none">${g.mol}</span>
-                                        <span class="w-10 sm:w-12 h-[3px] rounded-full bg-current opacity-95 my-1"></span>
-                                        <span class="text-2xl sm:text-3xl leading-none">${totalMol}</span>
-                                    </div>
-                                </div>
-                            `;
                             activeGases.push(g);
                         } else {
                             if (g.wrap) g.wrap.style.display = 'none';
@@ -1429,84 +1434,118 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
                     });
 
                     const trackWidth = trackArea ? trackArea.clientWidth : 0;
-                    const edgePad = 10;
-                    const gapPx = 20;
-                    const startPositions = [];
+                    const numActive = activeGases.length;
+                    const isNarrowMobile = trackWidth < 460;
+                    const isVeryNarrow = trackWidth < 380;
+
+                    // Dynamically size boxes based on container width & active gas count
+                    activeGases.forEach(g => {
+                        g.wrap.style.display = 'flex';
+                        g.wrap.style.top = '33px';
+                        
+                        if (isVeryNarrow || (isNarrowMobile && numActive >= 3)) {
+                            // Ultra-compact for small phones
+                            g.box.className = `px-1.5 py-1.5 rounded-xl bg-slate-900/95 border ${g.borderClass} shadow-lg pointer-events-auto`;
+                            g.box.innerHTML = `
+                                <div class="flex flex-col items-center justify-center gap-0.5 sans-tc-bold tracking-wide text-center" style="color: ${g.colorHex}; min-width: 66px;">
+                                    <div class="text-xs font-black leading-tight whitespace-nowrap">${g.label} 貢獻</div>
+                                    <div class="flex flex-col items-center justify-center leading-none mono-num font-black">
+                                        <span class="text-base leading-tight">${g.mol}</span>
+                                        <span class="w-6 h-[2px] rounded-full bg-current opacity-90 my-0.5"></span>
+                                        <span class="text-base leading-tight">${totalMol}</span>
+                                    </div>
+                                </div>
+                            `;
+                        } else if (isNarrowMobile || numActive >= 3) {
+                            // Compact for normal mobile
+                            g.box.className = `px-2 py-1.5 rounded-xl bg-slate-900/95 border ${g.borderClass} shadow-lg pointer-events-auto`;
+                            g.box.innerHTML = `
+                                <div class="flex flex-col items-center justify-center gap-1 sans-tc-bold tracking-wide text-center" style="color: ${g.colorHex}; min-width: 80px;">
+                                    <div class="text-sm font-black leading-tight whitespace-nowrap">${g.label} 貢獻</div>
+                                    <div class="flex flex-col items-center justify-center leading-none mono-num font-black">
+                                        <span class="text-xl leading-tight">${g.mol}</span>
+                                        <span class="w-8 h-[2px] rounded-full bg-current opacity-90 my-0.5"></span>
+                                        <span class="text-xl leading-tight">${totalMol}</span>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            // Standard desktop
+                            g.box.className = `px-3 py-2 rounded-xl bg-slate-900/95 border ${g.borderClass} shadow-lg pointer-events-auto`;
+                            g.box.innerHTML = `
+                                <div class="flex flex-col items-center justify-center gap-1.5 sans-tc-bold tracking-wide text-center" style="color: ${g.colorHex}; min-width: 108px;">
+                                    <div class="text-xl sm:text-2xl font-black leading-none whitespace-nowrap">${g.label} 貢獻</div>
+                                    <div class="flex flex-col items-center justify-center leading-none mono-num font-black">
+                                        <span class="text-2xl sm:text-3xl leading-none">${g.mol}</span>
+                                        <span class="w-10 sm:w-12 h-[3px] rounded-full bg-current opacity-95 my-1"></span>
+                                        <span class="text-2xl sm:text-3xl leading-none">${totalMol}</span>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+
+                    // Measure actual rendered widths
                     activeGases.sort((a, b) => a.centerPct - b.centerPct);
+                    activeGases.forEach(g => {
+                        g.boxWidth = g.box.offsetWidth || (isVeryNarrow ? 70 : (isNarrowMobile ? 86 : 118));
+                        g.idealX = trackWidth * (g.centerPct / 100);
+                    });
+
+                    const edgePad = isVeryNarrow ? 4 : (isNarrowMobile ? 6 : 10);
+                    const minGap = isVeryNarrow ? 4 : (isNarrowMobile ? 6 : 12);
+                    const availableW = Math.max(1, trackWidth - edgePad * 2);
+
+                    let totalBoxesW = 0;
+                    activeGases.forEach((g, i) => {
+                        totalBoxesW += g.boxWidth;
+                        if (i > 0) totalBoxesW += minGap;
+                    });
+
+                    let scaleFactor = 1;
+                    if (totalBoxesW > availableW && totalBoxesW > 0) {
+                        scaleFactor = Math.max(0.68, availableW / totalBoxesW);
+                    }
 
                     activeGases.forEach(g => {
-                        g.boxWidth = Math.max(g.box.offsetWidth || 118, 100);
-                        g.halfW = g.boxWidth / 2;
-                        g.idealX = trackWidth * (g.centerPct / 100);
+                        g.halfW = (g.boxWidth * scaleFactor) / 2;
                         g.minX = g.halfW + edgePad;
                         g.maxX = Math.max(g.minX, trackWidth - g.halfW - edgePad);
                         g.finalX = Math.min(g.maxX, Math.max(g.minX, g.idealX));
                     });
 
-                    // Forward pass: keep labels on one row and push rightward if overlapping.
+                    // Forward pass: ensure min spacing
+                    const actualGap = minGap * scaleFactor;
                     for (let i = 1; i < activeGases.length; i++) {
                         const prev = activeGases[i - 1];
                         const curr = activeGases[i];
-                        const minAllowed = prev.finalX + prev.halfW + curr.halfW + gapPx;
+                        const minAllowed = prev.finalX + prev.halfW + curr.halfW + actualGap;
                         if (curr.finalX < minAllowed) curr.finalX = minAllowed;
                     }
 
-                    // Backward pass: if the rightmost badge exceeds bounds, compress all badges leftward.
+                    // Backward pass: keep within right boundary
                     for (let i = activeGases.length - 1; i >= 0; i--) {
                         const curr = activeGases[i];
                         if (curr.finalX > curr.maxX) curr.finalX = curr.maxX;
                         if (i < activeGases.length - 1) {
                             const next = activeGases[i + 1];
-                            const maxAllowed = next.finalX - next.halfW - curr.halfW - gapPx;
+                            const maxAllowed = next.finalX - next.halfW - curr.halfW - actualGap;
                             if (curr.finalX > maxAllowed) curr.finalX = maxAllowed;
                         }
-                        if (curr.finalX < curr.minX) curr.finalX = curr.minX;
                     }
 
-                    // One more gentle forward pass to preserve order after compression.
+                    // Final pass: strict zero-overlap constraint
                     for (let i = 1; i < activeGases.length; i++) {
                         const prev = activeGases[i - 1];
                         const curr = activeGases[i];
-                        const minAllowed = prev.finalX + prev.halfW + curr.halfW + gapPx;
-                        if (curr.finalX < minAllowed) curr.finalX = Math.min(curr.maxX, minAllowed);
-                    }
-
-                    // If still crowded, slightly reduce inter-box gap while keeping them in one row.
-                    let hasOverlap = false;
-                    for (let i = 1; i < activeGases.length; i++) {
-                        const prev = activeGases[i - 1];
-                        const curr = activeGases[i];
-                        if (curr.finalX - curr.halfW < prev.finalX + prev.halfW + 8) {
-                            hasOverlap = true;
-                            break;
-                        }
-                    }
-                    if (hasOverlap && activeGases.length >= 2) {
-                        const tighterGap = 10;
-                        activeGases.forEach(g => { g.finalX = Math.min(g.maxX, Math.max(g.minX, g.idealX)); });
-                        for (let i = 1; i < activeGases.length; i++) {
-                            const prev = activeGases[i - 1];
-                            const curr = activeGases[i];
-                            const minAllowed = prev.finalX + prev.halfW + curr.halfW + tighterGap;
-                            if (curr.finalX < minAllowed) curr.finalX = minAllowed;
-                        }
-                        for (let i = activeGases.length - 1; i >= 0; i--) {
-                            const curr = activeGases[i];
-                            if (curr.finalX > curr.maxX) curr.finalX = curr.maxX;
-                            if (i < activeGases.length - 1) {
-                                const next = activeGases[i + 1];
-                                const maxAllowed = next.finalX - next.halfW - curr.halfW - tighterGap;
-                                if (curr.finalX > maxAllowed) curr.finalX = maxAllowed;
-                            }
-                            if (curr.finalX < curr.minX) curr.finalX = curr.minX;
-                        }
+                        const minAllowed = prev.finalX + prev.halfW + curr.halfW + 2;
+                        if (curr.finalX < minAllowed) curr.finalX = minAllowed;
                     }
 
                     const leaderSvg = document.getElementById('contribLeaders');
                     if (leaderSvg) {
                         leaderSvg.setAttribute('viewBox', `0 0 ${Math.max(1,trackWidth)} 202`);
                         leaderSvg.setAttribute('preserveAspectRatio','none');
-                        // True segment centers stay fixed; badges move independently to prevent collision.
                         leaderSvg.innerHTML = activeGases.map(g => {
                             const originX = g.idealX;
                             const endX = g.finalX;
@@ -1518,9 +1557,11 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
                     }
                     activeGases.forEach(g => {
                         if (!g.wrap || !g.box || !g.tick) return;
-                        g.wrap.style.left = `${g.finalX}px`;
+                        g.wrap.style.left = `${g.finalX.toFixed(1)}px`;
                         g.wrap.style.top = '33px';
                         g.wrap.style.zIndex = '20';
+                        g.wrap.style.transform = scaleFactor < 0.99 ? `translateX(-50%) scale(${scaleFactor.toFixed(3)})` : 'translateX(-50%)';
+                        g.wrap.style.transformOrigin = 'top center';
                         g.tick.style.display = 'none';
                     });
                 } else {
@@ -1737,6 +1778,30 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
                 if (contributionTrack && typeof ResizeObserver !== 'undefined') {
                     const observer = new ResizeObserver(() => updatePressureCalculations());
                     observer.observe(contributionTrack);
+                }
+
+                // Drag to scroll for formula
+                const fWrap = document.getElementById('idealGasFormulaScrollWrap');
+                if (fWrap) {
+                    let isDown = false, sX = 0, sL = 0;
+                    fWrap.addEventListener('pointerdown', (e) => {
+                        if (e.pointerType === 'mouse') {
+                            isDown = true;
+                            sX = e.pageX - fWrap.offsetLeft;
+                            sL = fWrap.scrollLeft;
+                            try { fWrap.setPointerCapture(e.pointerId); } catch(err){}
+                        }
+                    });
+                    fWrap.addEventListener('pointermove', (e) => {
+                        if (!isDown) return;
+                        const x = e.pageX - fWrap.offsetLeft;
+                        fWrap.scrollLeft = sL - (x - sX);
+                    });
+                    fWrap.addEventListener('pointerup', (e) => {
+                        isDown = false;
+                        try { fWrap.releasePointerCapture(e.pointerId); } catch(err){}
+                    });
+                    fWrap.addEventListener('pointercancel', () => { isDown = false; });
                 }
             }
 
