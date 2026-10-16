@@ -1,0 +1,2535 @@
+<!DOCTYPE html>
+<html lang="zh-TW"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIxNTQwNDU0ODUwMDIyMzM3NzcxNiIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjXzAxMWM2NzM5MjA2MDg2ZjVfZGFsdG9uX2xhd19zaW11bGF0aW9uLmh0bWwtODIzIn0sImV4cCI6MTc5MjA2NDY0OSwiaWF0IjoxNzkyMDYxMDQ5LCJhbGciOiJSUzI1NiJ9.mUvv9DEx_gT1dzoylrg69aT8U3ZaZqQfqjWSeomzZsKzp29tDhqplUVyAMS6XsheFFuxTRpOplobHesixC8cntqZc-runa6xu6GgvqzTwDq0p2ojx-8wpdf_scW7ZpxW8uJlr8lsW8nZ5Gvpmq-RadW9bjCTuEEIB3_7yvuAu_s4k7Nnm00NA-F3rsSCrDhtqxjMWgBQbCtfgCmsqRsBh0BgEsbHcps3TQd6sk_34PJNeMQCpGP99cf7liV3sEHEZvbYqvX0GYk6LNzxK6vZhrMf0B17j7LBJn8C5i4voMmSRurJnOXBnz_jx-oeQii_HzDFMrSYP1eqTw7SarOjbQ","c_011c6739206086f5_dalton_law_simulation.html-823")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>道爾頓分壓定律 3D 擬真互動實驗室</title>
+        
+        <!-- Tailwind CSS CDN -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <!-- Three.js 3D Engine CDN -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous"></script>
+        <!-- KaTeX Math Formula Rendering CDN -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" crossorigin="anonymous"></script>
+        
+        <!-- Google Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;family=JetBrains+Mono:wght@600;800;900&amp;family=Noto+Sans+TC:wght@500;700;900&amp;display=swap" rel="stylesheet">
+
+        <style>
+            body {
+                font-family: 'Inter', 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+                background-color: #050914;
+                color: #e2e8f0;
+            }
+            .sans-tc-bold {
+                font-family: 'Noto Sans TC', 'Inter', 'Microsoft JhengHei', sans-serif;
+                font-weight: 900;
+            }
+            .mono-num {
+                font-family: 'JetBrains Mono', monospace;
+            }
+            .glass-panel {
+                background: rgba(13, 20, 36, 0.94);
+                backdrop-filter: blur(16px);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+            }
+            .glass-subcard {
+                background: rgba(15, 23, 42, 0.90);
+                border: 1px solid rgba(255, 255, 255, 0.07);
+            }
+            .gauge-dial-face {
+                background: radial-gradient(circle at 45% 45%, #ffffff 0%, #f4efe7 70%, #dfd6c6 100%);
+                box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.45);
+            }
+            .gauge-metal-bezel {
+                background: conic-gradient(from 45deg, #475569, #cbd5e1, #94a3b8, #334155, #cbd5e1, #475569);
+                box-shadow: 0 6px 18px rgba(0,0,0,0.85), inset 0 1.5px 2.5px rgba(255,255,255,0.9);
+            }
+            sub {
+                font-size: 0.72em;
+                vertical-align: -0.20em;
+                font-weight: 800;
+            }
+            .katex-display {
+                margin: 0.1em 0 !important;
+            }
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+            #threeContainer {
+                position: absolute;
+                inset: 0;
+                overflow: hidden;
+                isolation: isolate;
+            }
+            #threeContainer::before,
+            #threeContainer::after {
+                content: none;
+                display: none;
+            }
+            #threeContainer canvas {
+                touch-action: none;
+                display: block;
+                position: relative;
+                z-index: 1;
+            }
+        </style>
+    <style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.pointer-events-auto{pointer-events:auto}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.inset-x-2{left:0.5rem;right:0.5rem}.bottom-1\.5{bottom:0.375rem}.bottom-9{bottom:2.25rem}.left-2\.5{left:0.625rem}.right-2\.5{right:0.625rem}.top-2\.5{top:0.625rem}.z-10{z-index:10}.z-20{z-index:20}.col-span-12{grid-column:span 12 / span 12}.col-span-2{grid-column:span 2 / span 2}.mx-auto{margin-left:auto;margin-right:auto}.my-1\.5{margin-top:0.375rem;margin-bottom:0.375rem}.my-auto{margin-top:auto;margin-bottom:auto}.mb-0\.5{margin-bottom:0.125rem}.mb-1{margin-bottom:0.25rem}.box-border{box-sizing:border-box}.inline-block{display:inline-block}.flex{display:flex}.grid{display:grid}.h-2{height:0.5rem}.h-2\.5{height:0.625rem}.h-24{height:6rem}.h-3{height:0.75rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-8{height:2rem}.h-auto{height:auto}.h-full{height:100%}.min-h-screen{min-height:100vh}.min-h-0{min-height:0px}.min-h-\[340px\]{min-height:340px}.min-h-\[92px\]{min-height:92px}.w-0\.5{width:0.125rem}.w-2{width:0.5rem}.w-2\.5{width:0.625rem}.w-24{width:6rem}.w-3{width:0.75rem}.w-4{width:1rem}.w-5{width:1.25rem}.w-8{width:2rem}.w-\[1px\]{width:1px}.w-full{width:100%}.max-w-\[1920px\]{max-width:1920px}.flex-1{flex:1 1 0%}.flex-\[0\.92\]{flex:0.92}.flex-\[1\.15\]{flex:1.15}.flex-shrink-0{flex-shrink:0}.origin-center{transform-origin:center}.-translate-x-1\/2{--tw-translate-x:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.cursor-pointer{cursor:pointer}.grid-cols-12{grid-template-columns:repeat(12, minmax(0, 1fr))}.grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.items-stretch{align-items:stretch}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-0\.5{gap:0.125rem}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-2\.5{gap:0.625rem}.gap-3{gap:0.75rem}.overflow-hidden{overflow:hidden}.overflow-visible{overflow:visible}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.whitespace-nowrap{white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.rounded-l{border-top-left-radius:0.25rem;border-bottom-left-radius:0.25rem}.rounded-r{border-top-right-radius:0.25rem;border-bottom-right-radius:0.25rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-amber-400\/80{border-color:rgb(251 191 36 / 0.8)}.border-amber-500\/40{border-color:rgb(245 158 11 / 0.4)}.border-amber-500\/60{border-color:rgb(245 158 11 / 0.6)}.border-amber-600\/70{border-color:rgb(217 119 6 / 0.7)}.border-emerald-400\/80{border-color:rgb(52 211 153 / 0.8)}.border-rose-500\/40{border-color:rgb(244 63 94 / 0.4)}.border-rose-500\/60{border-color:rgb(244 63 94 / 0.6)}.border-rose-600\/80{border-color:rgb(225 29 72 / 0.8)}.border-rose-700{--tw-border-opacity:1;border-color:rgb(190 18 60 / var(--tw-border-opacity, 1))}.border-rose-900\/60{border-color:rgb(136 19 55 / 0.6)}.border-sky-500\/40{border-color:rgb(14 165 233 / 0.4)}.border-sky-500\/60{border-color:rgb(14 165 233 / 0.6)}.border-sky-600\/70{border-color:rgb(2 132 199 / 0.7)}.border-sky-700{--tw-border-opacity:1;border-color:rgb(3 105 161 / var(--tw-border-opacity, 1))}.border-sky-800\/70{border-color:rgb(7 89 133 / 0.7)}.border-sky-900\/60{border-color:rgb(12 74 110 / 0.6)}.border-slate-400\/40{border-color:rgb(148 163 184 / 0.4)}.border-slate-500\/60{border-color:rgb(100 116 139 / 0.6)}.border-slate-500\/70{border-color:rgb(100 116 139 / 0.7)}.border-slate-600{--tw-border-opacity:1;border-color:rgb(71 85 105 / var(--tw-border-opacity, 1))}.border-slate-700{--tw-border-opacity:1;border-color:rgb(51 65 85 / var(--tw-border-opacity, 1))}.border-slate-700\/60{border-color:rgb(51 65 85 / 0.6)}.border-slate-700\/70{border-color:rgb(51 65 85 / 0.7)}.border-slate-700\/80{border-color:rgb(51 65 85 / 0.8)}.border-slate-700\/90{border-color:rgb(51 65 85 / 0.9)}.border-slate-800{--tw-border-opacity:1;border-color:rgb(30 41 59 / var(--tw-border-opacity, 1))}.border-slate-800\/80{border-color:rgb(30 41 59 / 0.8)}.border-stone-500\/40{border-color:rgb(120 113 108 / 0.4)}.border-stone-700\/60{border-color:rgb(68 64 60 / 0.6)}.bg-amber-400{--tw-bg-opacity:1;background-color:rgb(251 191 36 / var(--tw-bg-opacity, 1))}.bg-amber-500\/20{background-color:rgb(245 158 11 / 0.2)}.bg-amber-950\/90{background-color:rgb(69 26 3 / 0.9)}.bg-emerald-400{--tw-bg-opacity:1;background-color:rgb(52 211 153 / var(--tw-bg-opacity, 1))}.bg-rose-500{--tw-bg-opacity:1;background-color:rgb(244 63 94 / var(--tw-bg-opacity, 1))}.bg-rose-500\/90{background-color:rgb(244 63 94 / 0.9)}.bg-rose-950{--tw-bg-opacity:1;background-color:rgb(76 5 25 / var(--tw-bg-opacity, 1))}.bg-rose-950\/90{background-color:rgb(76 5 25 / 0.9)}.bg-sky-400{--tw-bg-opacity:1;background-color:rgb(56 189 248 / var(--tw-bg-opacity, 1))}.bg-sky-400\/90{background-color:rgb(56 189 248 / 0.9)}.bg-sky-950{--tw-bg-opacity:1;background-color:rgb(8 47 73 / var(--tw-bg-opacity, 1))}.bg-sky-950\/80{background-color:rgb(8 47 73 / 0.8)}.bg-sky-950\/90{background-color:rgb(8 47 73 / 0.9)}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.bg-slate-300\/90{background-color:rgb(203 213 225 / 0.9)}.bg-slate-700{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.bg-slate-900\/80{background-color:rgb(15 23 42 / 0.8)}.bg-slate-900\/90{background-color:rgb(15 23 42 / 0.9)}.bg-slate-900\/95{background-color:rgb(15 23 42 / 0.95)}.bg-slate-950{--tw-bg-opacity:1;background-color:rgb(2 6 23 / var(--tw-bg-opacity, 1))}.bg-slate-950\/70{background-color:rgb(2 6 23 / 0.7)}.bg-slate-950\/85{background-color:rgb(2 6 23 / 0.85)}.bg-slate-950\/90{background-color:rgb(2 6 23 / 0.9)}.bg-slate-950\/95{background-color:rgb(2 6 23 / 0.95)}.bg-stone-400{--tw-bg-opacity:1;background-color:rgb(168 162 158 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-gradient-to-b{background-image:linear-gradient(to bottom, var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.bg-gradient-to-tr{background-image:linear-gradient(to top right, var(--tw-gradient-stops))}.from-emerald-600{--tw-gradient-from:#059669 var(--tw-gradient-from-position);--tw-gradient-to:rgb(5 150 105 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-sky-500{--tw-gradient-from:#0ea5e9 var(--tw-gradient-from-position);--tw-gradient-to:rgb(14 165 233 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-slate-900\/90{--tw-gradient-from:rgb(15 23 42 / 0.9) var(--tw-gradient-from-position);--tw-gradient-to:rgb(15 23 42 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-slate-950{--tw-gradient-from:#020617 var(--tw-gradient-from-position);--tw-gradient-to:rgb(2 6 23 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.via-\[\#0d1424\]{--tw-gradient-to:rgb(13 20 36 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #0d1424 var(--tw-gradient-via-position), var(--tw-gradient-to)}.via-indigo-500{--tw-gradient-to:rgb(99 102 241 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #6366f1 var(--tw-gradient-via-position), var(--tw-gradient-to)}.to-\[\#070b14\]{--tw-gradient-to:#070b14 var(--tw-gradient-to-position)}.to-amber-500{--tw-gradient-to:#f59e0b var(--tw-gradient-to-position)}.to-slate-950\/95{--tw-gradient-to:rgb(2 6 23 / 0.95) var(--tw-gradient-to-position)}.to-teal-600{--tw-gradient-to:#0d9488 var(--tw-gradient-to-position)}.p-2{padding:0.5rem}.p-0\.5{padding:0.125rem}.p-1{padding:0.25rem}.p-1\.5{padding:0.375rem}.p-2\.5{padding:0.625rem}.p-3{padding:0.75rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.pb-1{padding-bottom:0.25rem}.pb-2{padding-bottom:0.5rem}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.tracking-tight{letter-spacing:-0.025em}.tracking-wide{letter-spacing:0.025em}.tracking-wider{letter-spacing:0.05em}.text-amber-300{--tw-text-opacity:1;color:rgb(252 211 77 / var(--tw-text-opacity, 1))}.text-amber-400{--tw-text-opacity:1;color:rgb(251 191 36 / var(--tw-text-opacity, 1))}.text-amber-400\/80{color:rgb(251 191 36 / 0.8)}.text-emerald-300{--tw-text-opacity:1;color:rgb(110 231 183 / var(--tw-text-opacity, 1))}.text-emerald-400\/80{color:rgb(52 211 153 / 0.8)}.text-rose-200{--tw-text-opacity:1;color:rgb(254 205 211 / var(--tw-text-opacity, 1))}.text-rose-300{--tw-text-opacity:1;color:rgb(253 164 175 / var(--tw-text-opacity, 1))}.text-rose-400{--tw-text-opacity:1;color:rgb(251 113 133 / var(--tw-text-opacity, 1))}.text-sky-200{--tw-text-opacity:1;color:rgb(186 230 253 / var(--tw-text-opacity, 1))}.text-sky-300{--tw-text-opacity:1;color:rgb(125 211 252 / var(--tw-text-opacity, 1))}.text-sky-400{--tw-text-opacity:1;color:rgb(56 189 248 / var(--tw-text-opacity, 1))}.text-slate-100{--tw-text-opacity:1;color:rgb(241 245 249 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-stone-200{--tw-text-opacity:1;color:rgb(231 229 228 / var(--tw-text-opacity, 1))}.text-stone-400{--tw-text-opacity:1;color:rgb(168 162 158 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.shadow{--tw-shadow:0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_10px_rgba\(56\2c 189\2c 248\2c 0\.9\)\]{--tw-shadow:0 0 10px rgba(56,189,248,0.9);--tw-shadow-colored:0 0 10px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_6px_\#38bdf8\]{--tw-shadow:0 0 6px #38bdf8;--tw-shadow-colored:0 0 6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_6px_\#a8a29e\]{--tw-shadow:0 0 6px #a8a29e;--tw-shadow-colored:0 0 6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_6px_\#f43f5e\]{--tw-shadow:0 0 6px #f43f5e;--tw-shadow-colored:0 0 6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_6px_\#fff\]{--tw-shadow:0 0 6px #fff;--tw-shadow-colored:0 0 6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_8px_rgba\(251\2c 191\2c 36\2c 0\.6\)\]{--tw-shadow:0 0 8px rgba(251,191,36,0.6);--tw-shadow-colored:0 0 8px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_10px_25px_rgba\(0\2c 0\2c 0\2c 0\.85\)\]{--tw-shadow:0 10px 25px rgba(0,0,0,0.85);--tw-shadow-colored:0 10px 25px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_2px_8px_rgba\(168\2c 162\2c 158\2c 0\.08\)\]{--tw-shadow:0 2px 8px rgba(168,162,158,0.08);--tw-shadow-colored:0 2px 8px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_2px_8px_rgba\(244\2c 63\2c 94\2c 0\.1\)\]{--tw-shadow:0 2px 8px rgba(244,63,94,0.1);--tw-shadow-colored:0 2px 8px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_2px_8px_rgba\(255\2c 255\2c 255\2c 0\.05\)\]{--tw-shadow:0 2px 8px rgba(255,255,255,0.05);--tw-shadow-colored:0 2px 8px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_2px_8px_rgba\(56\2c 189\2c 248\2c 0\.1\)\]{--tw-shadow:0 2px 8px rgba(56,189,248,0.1);--tw-shadow-colored:0 2px 8px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-inner{--tw-shadow:inset 0 2px 4px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:inset 0 2px 4px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-emerald-950\/50{--tw-shadow-color:rgb(2 44 34 / 0.5);--tw-shadow:var(--tw-shadow-colored)}.shadow-sky-500\/20{--tw-shadow-color:rgb(14 165 233 / 0.2);--tw-shadow:var(--tw-shadow-colored)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-200{transition-duration:200ms}.duration-300{transition-duration:300ms}.hover\:bg-amber-500\/35:hover{background-color:rgb(245 158 11 / 0.35)}.hover\:bg-rose-900:hover{--tw-bg-opacity:1;background-color:rgb(136 19 55 / var(--tw-bg-opacity, 1))}.hover\:bg-sky-900:hover{--tw-bg-opacity:1;background-color:rgb(12 74 110 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-700:hover{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-800\/90:hover{background-color:rgb(30 41 59 / 0.9)}.hover\:from-emerald-500:hover{--tw-gradient-from:#10b981 var(--tw-gradient-from-position);--tw-gradient-to:rgb(16 185 129 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:to-teal-500:hover{--tw-gradient-to:#14b8a6 var(--tw-gradient-to-position)}.active\:scale-95:active{--tw-scale-x:.95;--tw-scale-y:.95;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.active\:bg-rose-800:active{--tw-bg-opacity:1;background-color:rgb(159 18 57 / var(--tw-bg-opacity, 1))}.active\:bg-sky-800:active{--tw-bg-opacity:1;background-color:rgb(7 89 133 / var(--tw-bg-opacity, 1))}.active\:bg-slate-600:active{--tw-bg-opacity:1;background-color:rgb(71 85 105 / var(--tw-bg-opacity, 1))}@media (min-width: 640px){.sm\:h-\[114px\]{height:114px}.sm\:min-h-\[420px\]{min-height:420px}.sm\:w-\[114px\]{width:114px}.sm\:flex-row{flex-direction:row}.sm\:items-center{align-items:center}.sm\:gap-3{gap:0.75rem}.sm\:p-3{padding:0.75rem}.sm\:p-3\.5{padding:0.875rem}.sm\:p-4{padding:1rem}.sm\:text-2xl{font-size:1.5rem;line-height:2rem}.sm\:text-3xl{font-size:1.875rem;line-height:2.25rem}.sm\:text-base{font-size:1rem;line-height:1.5rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}.sm\:text-xs{font-size:0.75rem;line-height:1rem}}@media (min-width: 768px){.md\:p-3{padding:0.75rem}.md\:text-3xl{font-size:1.875rem;line-height:2.25rem}.md\:text-4xl{font-size:2.25rem;line-height:2.5rem}.md\:text-xl{font-size:1.25rem;line-height:1.75rem}}@media (min-width: 1024px){.lg\:col-span-5{grid-column:span 5 / span 5}.lg\:col-span-7{grid-column:span 7 / span 7}.lg\:h-screen{height:100vh}.lg\:h-full{height:100%}.lg\:max-h-screen{max-height:100vh}.lg\:min-h-0{min-height:0px}.lg\:overflow-hidden{overflow:hidden}.lg\:text-4xl{font-size:2.25rem;line-height:2.5rem}}@media (min-width: 1280px){.xl\:col-span-5{grid-column:span 5 / span 5}.xl\:col-span-7{grid-column:span 7 / span 7}}</style></head>
+    <body class="min-h-screen lg:h-screen lg:max-h-screen overflow-y-auto lg:overflow-hidden p-2 md:p-3 flex flex-col box-border">
+
+<main class="max-w-[1920px] mx-auto w-full flex-1 min-h-0 grid grid-cols-12 gap-3 items-stretch my-0 relative">
+            
+            <!-- LEFT COLUMN: Physical Lab Station (Unified 3D Chamber + Integrated HUD Manometer) -->
+            <div class="col-span-12 lg:col-span-5 xl:col-span-5 flex flex-col justify-between gap-2 h-auto lg:h-full min-h-0">
+                <div class="w-full h-full glass-panel rounded-2xl p-2.5 sm:p-3 border border-slate-700/70 shadow-2xl flex flex-col justify-between overflow-hidden gap-2">
+                    
+                    <!-- 3D Chamber Stage with Integrated HUD Manometer -->
+                    <div class="relative w-full flex-1 min-h-[340px] sm:min-h-[420px] lg:min-h-0 rounded-xl overflow-hidden border border-slate-700/80 shadow-inner bg-gradient-to-b from-slate-950 via-[#0d1424] to-[#070b14] flex flex-col justify-between">
+                        
+                        <!-- Top-Left Chamber Header Badges -->
+                        <div class="absolute top-2.5 left-2.5 z-20 flex flex-col gap-2 pointer-events-none">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-sky-400 shadow-[0_0_10px_rgba(56,189,248,0.9)] animate-pulse"></span>
+                                <span class="text-xs sm:text-sm font-black tracking-wide text-slate-100 bg-slate-950/90 px-3 py-1 rounded-lg border border-slate-700/90 shadow-md">中央玻璃透視室</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-1.5 bg-slate-950/95 border-2 border-amber-400/80 px-2.5 py-1 rounded-xl shadow-lg">
+                                    <span class="text-[10px] sm:text-xs font-bold text-amber-400/80 uppercase tracking-wider">體積</span>
+                                    <span class="text-sm sm:text-base font-black mono-num text-amber-300">V = 1.0 L</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 bg-slate-950/95 border-2 border-emerald-400/80 px-2.5 py-1 rounded-xl shadow-lg">
+                                    <span class="text-[10px] sm:text-xs font-bold text-emerald-400/80 uppercase tracking-wider">溫度</span>
+                                    <span class="text-sm sm:text-base font-black mono-num text-emerald-300">T = 300 K</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Top-Right Integrated Pure Circular Manometer Gauge HUD -->
+                        <div id="fixedGauge" class="absolute top-2.5 right-2.5 z-20 pointer-events-none flex flex-col items-center">
+                            <div class="w-24 h-24 sm:w-[114px] sm:h-[114px] rounded-full gauge-metal-bezel p-1.5 flex items-center justify-center shadow-[0_10px_25px_rgba(0,0,0,0.85)]">
+                                <div class="w-full h-full rounded-full gauge-dial-face relative flex items-center justify-center">
+                                    <svg id="manometerSvg" viewBox="0 0 260 260" class="w-full h-full">
+                                        <g id="dialTicksGroup"></g>
+                                        <text x="130" y="76" text-anchor="middle" fill="#1e293b" font-size="11.5" font-weight="900" font-family="'Inter', sans-serif" letter-spacing="0.5">單針壓力計</text>
+                                        <text x="130" y="92" text-anchor="middle" fill="#64748b" font-size="9.5" font-weight="800" font-family="'JetBrains Mono', monospace">1mol=24.6atm</text>
+                                        <text x="130" y="198" text-anchor="middle" fill="#0f172a" font-size="22" font-weight="900" font-family="'JetBrains Mono', monospace" id="dialCenterReading">0.0 atm</text>
+                                        
+                                        <!-- Gauge Needle -->
+                                        <g id="manometerNeedle" style="transform-origin: 130px 130px; transform: rotate(-135deg);">
+                                            <polygon points="126,135 134,135 131,26 129,26" fill="#0f172a"></polygon>
+                                            <circle cx="130" cy="158" r="8" fill="#1e293b"></circle>
+                                            <polygon points="127,135 133,135 131,165 129,165" fill="#1e293b"></polygon>
+                                            <circle cx="130" cy="130" r="10" fill="#94a3b8" stroke="#334155" stroke-width="2"></circle>
+                                            <circle cx="130" cy="130" r="4" fill="#0f172a"></circle>
+                                        </g>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chamber Legend Overlay -->
+                        <div class="absolute bottom-9 left-2.5 z-10 flex items-center gap-2 text-[11px] font-bold bg-slate-950/85 px-2 py-0.5 rounded-lg border border-slate-800 shadow pointer-events-none">
+                            <span class="flex items-center gap-1 text-slate-100">
+                                <span class="w-2 h-2 rounded-full bg-white"></span> H₂
+                            </span>
+                            <span class="flex items-center gap-1 text-sky-400">
+                                <span class="w-2 h-2 rounded-full bg-sky-400"></span> He
+                            </span>
+                            <span class="flex items-center gap-1 text-rose-400">
+                                <span class="w-2 h-2 rounded-full bg-rose-500"></span> O₂
+                            </span>
+                        </div>
+
+                        <!-- Three.js Canvas Container -->
+                        <div id="threeContainer" class="w-full h-full absolute inset-0 overflow-hidden"></div>
+                        <!-- Pipe projected from 3D valve onto the fixed 2D pressure gauge -->
+                        <svg id="gaugePipeOverlay" aria-hidden="true" class="absolute inset-0 w-full h-full pointer-events-none" style="z-index:12; overflow:visible;">
+                            <defs>
+                                <linearGradient id="pressurePipeSheen" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#d4e5f2"/>
+                                    <stop offset="32%" stop-color="#65768a"/>
+                                    <stop offset="72%" stop-color="#111827"/>
+                                    <stop offset="100%" stop-color="#030712"/>
+                                </linearGradient>
+                            </defs>
+                            <path id="gaugePipeShadow" fill="none" stroke="rgba(0,0,0,.5)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path id="gaugePipeBody" fill="none" stroke="url(#pressurePipeSheen)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path id="gaugePipeHighlight" fill="none" stroke="rgba(230,245,255,.72)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+
+                        <!-- Bottom Chamber Sub-bar -->
+                        <div class="absolute bottom-1.5 inset-x-2 z-10 flex items-center justify-between text-[11px] text-slate-400 font-mono pointer-events-none">
+                            <span class="bg-slate-900/80 px-2 py-0.5 rounded border border-slate-800">單指或滑鼠拖曳 360° 旋轉容器</span>
+                            <span id="particleCountLabel" class="text-slate-100 font-bold bg-slate-900/90 px-2 py-0.5 rounded border border-slate-700">0 mol (0 顆示意)</span>
+                        </div>
+                    </div>
+
+                    <div class="w-full glass-subcard rounded-2xl p-2.5 flex flex-col gap-2 flex-shrink-0 border border-slate-700/80 shadow-lg bg-gradient-to-b from-slate-900/90 to-slate-950/95">
+                        
+                        <!-- 3 Gas Stepper Decks -->
+                        <div class="grid grid-cols-3 gap-2">
+                            
+                            <!-- H2 Deck (Silver/White Aesthetic) -->
+                            <div class="bg-slate-900/90 hover:bg-slate-800/90 transition rounded-xl p-2 flex flex-col justify-between border-2 border-slate-400/40 shadow-[0_2px_8px_rgba(255,255,255,0.05)]">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs sm:text-sm font-black text-slate-100 flex items-center gap-1">
+                                        <span class="w-2 h-2 rounded-full bg-white shadow-[0_0_6px_#fff]"></span>
+                                        H₂ 氫氣
+                                    </span>
+                                    <span class="text-[11px] sm:text-xs text-slate-300 font-mono font-bold" id="subPH2">0.0 atm</span>
+                                </div>
+                                <div class="flex items-center justify-between gap-1 bg-slate-950/70 p-1 rounded-lg border border-slate-700/60">
+                                    <button onclick="adjustMol('h2', -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white font-black text-base flex items-center justify-center border border-slate-600 active:scale-95 transition cursor-pointer shadow-sm">-</button>
+                                    <span class="text-sm sm:text-base font-black mono-num text-white text-center flex-1" id="valH2">0 mol</span>
+                                    <button onclick="adjustMol('h2', 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white font-black text-base flex items-center justify-center border border-slate-600 active:scale-95 transition cursor-pointer shadow-sm">+</button>
+                                </div>
+                            </div>
+
+                            <!-- He Deck (Sky Blue Aesthetic) -->
+                            <div class="bg-slate-900/90 hover:bg-slate-800/90 transition rounded-xl p-2 flex flex-col justify-between border-2 border-sky-500/40 shadow-[0_2px_8px_rgba(56,189,248,0.1)]">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs sm:text-sm font-black text-sky-300 flex items-center gap-1">
+                                        <span class="w-2 h-2 rounded-full bg-sky-400 shadow-[0_0_6px_#38bdf8]"></span>
+                                        He 氦氣
+                                    </span>
+                                    <span class="text-[11px] sm:text-xs text-sky-300 font-mono font-bold" id="subPHe">0.0 atm</span>
+                                </div>
+                                <div class="flex items-center justify-between gap-1 bg-slate-950/70 p-1 rounded-lg border border-sky-900/60">
+                                    <button onclick="adjustMol('he', -1)" class="w-8 h-8 rounded-lg bg-sky-950 hover:bg-sky-900 active:bg-sky-800 text-sky-200 font-black text-base flex items-center justify-center border border-sky-700 active:scale-95 transition cursor-pointer shadow-sm">-</button>
+                                    <span class="text-sm sm:text-base font-black mono-num text-sky-300 text-center flex-1" id="valHe">0 mol</span>
+                                    <button onclick="adjustMol('he', 1)" class="w-8 h-8 rounded-lg bg-sky-950 hover:bg-sky-900 active:bg-sky-800 text-sky-200 font-black text-base flex items-center justify-center border border-sky-700 active:scale-95 transition cursor-pointer shadow-sm">+</button>
+                                </div>
+                            </div>
+
+                            <!-- O2 Deck (Rose Red Aesthetic) -->
+                            <div class="bg-slate-900/90 hover:bg-slate-800/90 transition rounded-xl p-2 flex flex-col justify-between border-2 border-rose-500/40 shadow-[0_2px_8px_rgba(244,63,94,0.1)]">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs sm:text-sm font-black text-rose-300 flex items-center gap-1">
+                                        <span class="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_6px_#f43f5e]"></span>
+                                        O₂ 氧氣
+                                    </span>
+                                    <span class="text-[11px] sm:text-xs text-rose-300 font-mono font-bold" id="subPO2">0.0 atm</span>
+                                </div>
+                                <div class="flex items-center justify-between gap-1 bg-slate-950/70 p-1 rounded-lg border border-rose-900/60">
+                                    <button onclick="adjustMol('o2', -1)" class="w-8 h-8 rounded-lg bg-rose-950 hover:bg-rose-900 active:bg-rose-800 text-rose-200 font-black text-base flex items-center justify-center border border-rose-700 active:scale-95 transition cursor-pointer shadow-sm">-</button>
+                                    <span class="text-sm sm:text-base font-black mono-num text-rose-300 text-center flex-1" id="valO2">0 mol</span>
+                                    <button onclick="adjustMol('o2', 1)" class="w-8 h-8 rounded-lg bg-rose-950 hover:bg-rose-900 active:bg-rose-800 text-rose-200 font-black text-base flex items-center justify-center border border-rose-700 active:scale-95 transition cursor-pointer shadow-sm">+</button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Utility Action Deck: Column 1 aligns with H2, Columns 2&3 align with He + O2 -->
+                        <div class="grid grid-cols-3 gap-2 items-stretch">
+                            
+                            <!-- Column 1: Natural Rock Control -->
+                            <div class="bg-slate-900/90 hover:bg-slate-800/90 transition rounded-xl p-2 flex flex-col justify-between border-2 border-amber-600/50 shadow-[0_2px_10px_rgba(217,119,6,0.15)]">
+                                <div class="flex flex-col mb-1.5">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs sm:text-sm font-black text-amber-200 flex items-center gap-1.5 truncate">
+                                            <span class="text-sm leading-none">🪨</span>
+                                            天然岩石 (固體)
+                                        </span>
+                                    </div>
+                                    <div class="flex justify-end items-center mt-0.5">
+                                        <span class="text-[11px] sm:text-xs text-amber-400 font-mono font-bold">ΔP = 0</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between gap-1 bg-slate-950/70 p-1 rounded-lg border border-amber-800/60">
+                                    <button onclick="adjustStone(-1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-amber-100 font-black text-base flex items-center justify-center border border-slate-600 active:scale-95 transition cursor-pointer shadow-sm">-</button>
+                                    <span class="text-sm sm:text-base font-black mono-num text-amber-200 text-center flex-1" id="valStone">5 顆</span>
+                                    <button onclick="adjustStone(1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-amber-100 font-black text-base flex items-center justify-center border border-slate-600 active:scale-95 transition cursor-pointer shadow-sm">+</button>
+                                </div>
+                            </div>
+
+                            <!-- Columns 2 & 3: Function Action Buttons -->
+                            <div class="col-span-2 grid grid-cols-3 gap-2 items-stretch">
+                                <button id="playPauseBtn" onclick="togglePlayPause()" class="h-full rounded-xl bg-sky-950/90 hover:bg-sky-900 active:bg-sky-800 text-sky-200 border-2 border-sky-600/70 font-black text-sm sm:text-base flex flex-col sm:flex-row items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer shadow-md p-1.5">
+                                    <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                                    <span>暫停</span>
+                                </button>
+                                <button onclick="resetDefaults()" class="h-full rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-slate-100 border-2 border-slate-500/70 font-black text-sm sm:text-base flex flex-col sm:flex-row items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer shadow-md p-1.5">
+                                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                    <span>重置</span>
+                                </button>
+                                <button onclick="evacuateAll()" class="h-full rounded-xl bg-rose-950/90 hover:bg-rose-900 active:bg-rose-800 text-rose-200 border-2 border-rose-600/80 font-black text-sm sm:text-base flex flex-col sm:flex-row items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer shadow-md p-1.5">
+                                    <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                                    <span>取走氣體</span>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-span-12 lg:col-span-7 xl:col-span-7 flex flex-col justify-between gap-2.5 h-auto lg:h-full min-h-0">
+                <div class="w-full h-full glass-panel rounded-2xl p-3 sm:p-4 border border-slate-700/70 shadow-2xl flex flex-col justify-between gap-3 overflow-y-auto overflow-x-hidden">
+                    
+                    <!-- Board Card 1: Ideal Gas Equation Expansion -->
+                    <div class="w-full bg-slate-900/95 border border-amber-500/40 rounded-xl p-3 shadow-inner flex flex-col justify-between flex-1 min-h-0 relative overflow-hidden">
+                        <div class="flex items-center justify-between text-xs sm:text-sm text-amber-300 font-mono font-bold mb-1 flex-shrink-0">
+                            <span class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                                理想氣體分壓計算 (P = nRT / V)
+                            </span>
+                            <button id="btnToggleCombined" onclick="toggleCombinedCalc()" class="px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/35 text-amber-300 border border-amber-500/60 text-xs sm:text-sm font-bold transition active:scale-95 flex items-center gap-1.5 shadow-sm cursor-pointer">
+                                <span id="combinedBtnIcon">➕</span>
+                                <span id="combinedBtnText">計算總壓 (合併 n)</span>
+                            </button>
+                        </div>
+                        
+                        <!-- KaTeX Formula Container with Dynamic Auto-Scaling -->
+                        <div class="w-full flex-1 flex items-center justify-center overflow-hidden my-auto py-1">
+                            <div id="latexIdealGasFormula" class="inline-block whitespace-nowrap text-white transition-transform duration-200 origin-center" style="transform: scale(1);"></div>
+                        </div>
+                    </div>
+
+                    <!-- Board Card 2: Dalton's Law Giant Symbolic & Numerical Decomposition -->
+                    <div class="w-full bg-slate-900/95 border border-slate-700/80 rounded-xl p-2.5 sm:p-3.5 shadow-xl flex flex-col justify-between flex-[0.92] min-h-0 overflow-hidden">
+                        <div class="flex items-center justify-between text-xs sm:text-sm text-slate-400 font-bold px-1 border-b border-slate-800 pb-1 flex-shrink-0">
+                            <span class="text-amber-400 font-black tracking-wide flex items-center gap-2 text-sm sm:text-base">
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]"></span>
+                                道爾頓分壓定律 (Dalton's Law)
+                            </span>
+                            <span class="font-mono text-slate-400 text-xs sm:text-sm">P總 = P₁ + P₂ + P₃...</span>
+                        </div>
+
+                        <!-- Symbolic Row: P_total = P_H2 + P_He + P_O2 -->
+                        <div class="flex items-center justify-center py-0.5">
+                            <div id="formulaText" class="text-slate-100 font-black text-2xl sm:text-3xl md:text-4xl tracking-wide flex items-center gap-2.5 text-center whitespace-nowrap"><span>P<sub>總</sub></span> = 0.0 atm</div>
+                        </div>
+
+                        <!-- Numerical Row: 73.8 = 24.6 + 24.6 + 24.6 atm -->
+                        <div class="bg-slate-950/90 rounded-xl py-2 px-3 border border-slate-800 shadow-inner flex items-center justify-center overflow-x-auto no-scrollbar">
+                            <div id="equationContainer" class="font-mono text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black flex items-center justify-center gap-2 sm:gap-3 whitespace-nowrap"></div>
+                        </div>
+                    </div>
+
+                    <!-- Board Card 3: Mole Fractions and Dynamic Segment-Centered Contributions -->
+                    <div class="w-full bg-slate-900/95 border border-slate-700/80 rounded-xl p-2.5 sm:p-3 shadow-xl flex flex-col justify-between gap-1.5 flex-[1.15] min-h-[290px] flex-shrink-0 overflow-hidden">
+                        <div class="flex justify-between items-center text-xs sm:text-sm text-slate-300 font-mono font-bold px-1 flex-shrink-0">
+                            <span class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                <span class="text-amber-400 font-black text-sm sm:text-base tracking-wide">分壓貢獻比例</span>
+                                <span class="text-slate-400 text-xs sm:text-sm">(各成分莫耳分率)</span>
+                            </span>
+                            <span id="stackedPercentText" class="text-amber-300 font-black bg-amber-950/90 border border-amber-600/70 px-3 py-0.5 rounded-lg text-xs sm:text-sm shadow-sm">真空 0.0 atm</span>
+                        </div>
+                        
+                        <!-- Stacked Color Bar -->
+                        <div class="w-full h-4 sm:h-4.5 bg-slate-950 rounded-lg overflow-hidden flex border border-slate-700/90 p-0.5 gap-0.5 shadow-inner flex-shrink-0">
+                            <div id="barH2" class="h-full bg-slate-100 rounded-l transition-all duration-300" style="width: 0%"></div>
+                            <div id="barHe" class="h-full bg-sky-400 transition-all duration-300" style="width: 0%"></div>
+                            <div id="barO2" class="h-full bg-rose-500 rounded-r transition-all duration-300" style="width: 0%"></div>
+                        </div>
+
+                        <!-- Absolute Dynamic Positioned Contribution Badges (Zero-Overlap & Zero-Bottom-Clip Guarantee) -->
+                        <div id="contribTrackArea" class="w-full flex-1 relative min-h-[202px] overflow-visible">
+                            <svg id="contribLeaders" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:1"></svg>
+                            <div id="emptyFracMsg" class="absolute inset-0 flex items-center justify-center text-slate-400 text-sm font-semibold">
+                                無氣體分子，尚未建立分壓貢獻
+                            </div>
+                            
+                            <!-- Badges dynamically positioned via left: X% with pin ticks -->
+                            <div id="badgeWrapH2" class="absolute transition-all duration-300 -translate-x-1/2 flex flex-col items-center pointer-events-none" style="display: none; left: 0%; top: 0px;">
+                                <div class="w-0.5 bg-slate-300/90 mb-0.5 rounded-full transition-all duration-300" id="badgeTickH2" style="height: 5px;"></div>
+                                <div id="badgeBoxH2" class="whitespace-nowrap px-3 py-0.5 rounded-xl bg-slate-900/95 border border-slate-500/60 shadow-lg pointer-events-auto"></div>
+                            </div>
+
+                            <div id="badgeWrapHe" class="absolute transition-all duration-300 -translate-x-1/2 flex flex-col items-center pointer-events-none" style="display: none; left: 0%; top: 0px;">
+                                <div class="w-0.5 bg-sky-400/90 mb-0.5 rounded-full transition-all duration-300" id="badgeTickHe" style="height: 5px;"></div>
+                                <div id="badgeBoxHe" class="whitespace-nowrap px-3 py-0.5 rounded-xl bg-slate-900/95 border border-sky-500/60 shadow-lg pointer-events-auto"></div>
+                            </div>
+
+                            <div id="badgeWrapO2" class="absolute transition-all duration-300 -translate-x-1/2 flex flex-col items-center pointer-events-none" style="display: none; left: 0%; top: 0px;">
+                                <div class="w-0.5 bg-rose-500/90 mb-0.5 rounded-full transition-all duration-300" id="badgeTickO2" style="height: 5px;"></div>
+                                <div id="badgeBoxO2" class="whitespace-nowrap px-3 py-0.5 rounded-xl bg-slate-900/95 border border-rose-500/60 shadow-lg pointer-events-auto"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+        <!-- Download sits below the teaching workspace, not in the primary viewing area. -->
+        <footer class="max-w-[1920px] mx-auto w-full flex justify-end px-1 pt-1 pb-1 flex-shrink-0">
+            <button onclick="downloadCurrentHtml()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-950/50 transition active:scale-95 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    <span>下載 HTML 檔案</span>
+                </button>
+        </footer>
+
+
+        <script>
+            // Gas Laws Constants: PV = nRT -> R = 0.082, T = 300 K, V = 1.0 L
+            const R_CONST = 0.082;
+            const TEMP_K = 300;
+            const VOL_L = 1.0;
+            const ATM_PER_MOL = (R_CONST * TEMP_K) / VOL_L; // 0.082 * 300 = 24.6 atm
+            const MOLECULES_PER_MOL = 5;
+
+            // Gas species attributes
+            const SPECIES = {
+                h2: { name: 'H₂', mass: 2.0, baseSpeed: 0.16, radius: 0.20, isDiatomic: true, bondLen: 0.32, color: 0xffffff, roughness: 0.1, metalness: 0.2 },
+                he: { name: 'He', mass: 4.0, baseSpeed: 0.11, radius: 0.28, isDiatomic: false, bondLen: 0, color: 0x38bdf8, roughness: 0.15, metalness: 0.4 },
+                o2: { name: 'O₂', mass: 32.0, baseSpeed: 0.075, radius: 0.35, isDiatomic: true, bondLen: 0.50, color: 0xf43f5e, roughness: 0.2, metalness: 0.3 }
+            };
+
+            // Global State Variables
+            let molState = { h2: 0, he: 0, o2: 0 };
+            let stoneCount = 5;
+            let isRunning = true;
+            let showCombinedFormula = false;
+
+            // Three.js Core Variables
+            let scene, camera, renderer;
+            const boxSize = { x: 15, y: 9.5, z: 11 }; // Calibrated aspect ratio
+            let molecules = [];
+            let stoneMeshes = [];
+            let wallImpacts = [];
+            let impactRingGeo = null;
+            let currentNeedleAngle = -135;
+            let targetNeedleAngle = -135;
+
+            function downloadCurrentHtml() {
+                const clone = document.documentElement.cloneNode(true);
+                
+                // Clear any dynamically injected WebGL canvas & temporary elements in clone
+                const canvasCont = clone.querySelector('#threeContainer');
+                if (canvasCont) canvasCont.innerHTML = '';
+                const ticksGroup = clone.querySelector('#dialTicksGroup');
+                if (ticksGroup) ticksGroup.innerHTML = '';
+                const latexElem = clone.querySelector('#latexIdealGasFormula');
+                if (latexElem) latexElem.innerHTML = '';
+                const eqCont = clone.querySelector('#equationContainer');
+                if (eqCont) eqCont.innerHTML = '';
+                ['badgeBoxH2', 'badgeBoxHe', 'badgeBoxO2'].forEach(id => {
+                    const el = clone.querySelector('#' + id);
+                    if (el) el.innerHTML = '';
+                });
+
+                const htmlContent = "<!DOCTYPE html>\n" + clone.outerHTML;
+                const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'dalton_law_simulation.html';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            // Custom Rounded Box Geometry generator for cast glass tank
+            function createRoundedBox(width, height, depth, radius, smoothness) {
+                const shape = new THREE.Shape();
+                const eps = 0.00001;
+                const r = radius - eps;
+                const hw = width / 2;
+                const hh = height / 2;
+
+                shape.absarc(hw - r, hh - r, r, 0, Math.PI / 2, false);
+                shape.absarc(-hw + r, hh - r, r, Math.PI / 2, Math.PI, false);
+                shape.absarc(-hw + r, -hh + r, r, Math.PI, Math.PI * 1.5, false);
+                shape.absarc(hw - r, -hh + r, r, Math.PI * 1.5, Math.PI * 2, false);
+
+                const extrudeSettings = {
+                    steps: 1,
+                    depth: depth - radius * 2,
+                    bevelEnabled: true,
+                    bevelSegments: smoothness,
+                    bevelSize: r,
+                    bevelThickness: r
+                };
+
+                const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+                geometry.center();
+                return geometry;
+            }
+
+            function buildGlassChamber() {
+                const wallThickness = 0.24; // Crisp, sleek double-wall glass thickness
+                const ox = boxSize.x + wallThickness * 2;
+                const oy = boxSize.y + wallThickness * 2;
+                const oz = boxSize.z + wallThickness * 2;
+                const hx = boxSize.x / 2, hy = boxSize.y / 2, hz = boxSize.z / 2;
+                const ohx = ox / 2, ohy = oy / 2, ohz = oz / 2;
+
+                // Clear laboratory glass: low face opacity, specular reflections on the actual 3D faces.
+                // No fullscreen overlay and no disconnected rectangular reflection meshes.
+                const outerBoxGeo = new THREE.BoxGeometry(ox, oy, oz);
+                const outerGlassMat = new THREE.MeshPhysicalMaterial({
+                    color: 0xf1fbff,
+                    transparent: true,
+                    opacity: 0.075,
+                    roughness: 0.045,
+                    metalness: 0.0,
+                    reflectivity: 0.88,
+                    clearcoat: 1.0,
+                    clearcoatRoughness: 0.025,
+                    depthWrite: false,
+                    side: THREE.FrontSide
+                });
+                const outerGlassMesh = new THREE.Mesh(outerBoxGeo, outerGlassMat);
+                outerGlassMesh.renderOrder = 1;
+                scene.add(outerGlassMesh);
+
+                // Fresnel reflection and two soft studio-light reflections.
+                // These are fragments of the box surface itself, so they follow the
+                // 3D camera when the user turns the chamber onto its side or top.
+                const surfaceSheen = new THREE.ShaderMaterial({
+                    transparent: true,
+                    depthWrite: false,
+                    depthTest: true,
+                    side: THREE.FrontSide,
+                    vertexShader: `
+                        varying vec3 vViewNormal;
+                        varying vec3 vViewPosition;
+                        varying vec3 vObjectPosition;
+                        void main() {
+                            vec4 mv = modelViewMatrix * vec4(position, 1.0);
+                            vViewNormal = normalize(normalMatrix * normal);
+                            vViewPosition = -mv.xyz;
+                            vObjectPosition = position;
+                            gl_Position = projectionMatrix * mv;
+                        }
+                    `,
+                    fragmentShader: `
+                        varying vec3 vViewNormal;
+                        varying vec3 vViewPosition;
+                        varying vec3 vObjectPosition;
+                        void main() {
+                            vec3 n = normalize(vViewNormal);
+                            vec3 v = normalize(vViewPosition);
+                            float facing = abs(dot(n, v));
+                            float fresnel = pow(1.0 - facing, 3.0);
+                            // Reflect a bright strip from the studio environment, not a physical plane.
+                            vec3 reflected = reflect(-v, n);
+                            vec3 light1 = normalize(vec3(-0.48, 0.75, 0.46));
+                            vec3 light2 = normalize(vec3(0.72, 0.26, 0.65));
+                            float strip1 = pow(max(0.0, dot(reflected, light1)), 15.0);
+                            float strip2 = pow(max(0.0, dot(reflected, light2)), 26.0);
+                            float gentle = pow(max(0.0, dot(reflected, normalize(vec3(0.18, 0.94, -0.27)))), 5.0);
+                            float alpha = 0.018 + fresnel * 0.38 + strip1 * 0.33 + strip2 * 0.24 + gentle * 0.065;
+                            gl_FragColor = vec4(vec3(0.89, 0.97, 1.0), clamp(alpha, 0.0, 0.54));
+                        }
+                    `
+                });
+                const sheenMesh = new THREE.Mesh(outerBoxGeo, surfaceSheen);
+                sheenMesh.scale.setScalar(1.002);
+                sheenMesh.renderOrder = 2;
+                scene.add(sheenMesh);
+
+                // 2. Clean luminous outer rim edges
+                const outerEdgeGeo = new THREE.EdgesGeometry(outerBoxGeo);
+                const outerEdgeMat = new THREE.LineBasicMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 0.78
+                });
+                scene.add(new THREE.LineSegments(outerEdgeGeo, outerEdgeMat));
+
+                // 3. Inner chamber wall edge glow
+                const innerBoxGeo = new THREE.BoxGeometry(boxSize.x, boxSize.y, boxSize.z);
+                const innerEdgeGeo = new THREE.EdgesGeometry(innerBoxGeo);
+                const innerLineMat = new THREE.LineBasicMaterial({
+                    color: 0x7dd3fc,
+                    transparent: true,
+                    opacity: 0.35
+                });
+                scene.add(new THREE.LineSegments(innerEdgeGeo, innerLineMat));
+
+                // 4. Clean 8-corner thickness struts connecting inner & outer glass walls
+                const strutVerts = [];
+                for (let sx of [-1, 1]) {
+                    for (let sy of [-1, 1]) {
+                        for (let sz of [-1, 1]) {
+                            strutVerts.push(sx * hx, sy * hy, sz * hz);
+                            strutVerts.push(sx * ohx, sy * ohy, sz * ohz);
+                        }
+                    }
+                }
+                const strutGeo = new THREE.BufferGeometry();
+                strutGeo.setAttribute('position', new THREE.Float32BufferAttribute(strutVerts, 3));
+                const strutLines = new THREE.LineSegments(strutGeo, new THREE.LineBasicMaterial({
+                    color: 0xb6e7ff,
+                    transparent: true,
+                    opacity: 0.48
+                }));
+                scene.add(strutLines);
+
+                // 5. Solid dark metallic lab base pedestal
+                const baseHeight = 0.32;
+                const baseGeo = new THREE.BoxGeometry(ox + 0.16, baseHeight, oz + 0.16);
+                const baseMat = new THREE.MeshStandardMaterial({
+                    color: 0x0f172a,
+                    roughness: 0.30,
+                    metalness: 0.75,
+                    polygonOffset: true,
+                    polygonOffsetFactor: 2,
+                    polygonOffsetUnits: 2
+                });
+                const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+                baseMesh.position.y = -ohy - baseHeight / 2 + 0.02;
+                baseMesh.receiveShadow = true;
+                scene.add(baseMesh);
+            }
+
+            function buildChamberPipe() {
+                const wallThickness = 0.28;
+                const topY = boxSize.y / 2 + wallThickness;
+
+                const metalMat = new THREE.MeshStandardMaterial({
+                    color: 0xcfd9e8,
+                    metalness: 0.94,
+                    roughness: 0.18
+                });
+                const collarGeo = new THREE.CylinderGeometry(0.55, 0.75, 0.45, 24);
+
+                // Create 3 Top Lab Ports & Valves matching reference image
+                const valveConfigs = [
+                    { x: -4.2, color: 0x64748b, hasStem: true, handleColor: 0x94a3b8 }, // Left valve (注體閥門)
+                    { x: 0.0, color: 0x0284c7, hasStem: true, handleColor: 0x0ea5e9 },  // Middle valve (Blue)
+                    { x: 4.9, color: 0xe11d48, hasStem: false, handleColor: 0xf43f5e }  // Right valve to pressure gauge
+                ];
+
+                valveConfigs.forEach(cfg => {
+                    const collar = new THREE.Mesh(collarGeo, metalMat);
+                    collar.position.set(cfg.x, topY + 0.16, 0);
+                    scene.add(collar);
+
+                    // Valve Nut Base
+                    const nutGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.30, 6);
+                    const nut = new THREE.Mesh(nutGeo, metalMat);
+                    nut.position.set(cfg.x, topY + 0.48, 0);
+                    scene.add(nut);
+
+                    if (cfg.hasStem) {
+                        // Valve Stem & Handle Bar
+                        const stemGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.65, 12);
+                        const stem = new THREE.Mesh(stemGeo, metalMat);
+                        stem.position.set(cfg.x, topY + 0.85, 0);
+                        scene.add(stem);
+
+                        const handleGeo = new THREE.CylinderGeometry(0.14, 0.14, 1.1, 12);
+                        const handleMat = new THREE.MeshStandardMaterial({ color: cfg.handleColor, metalness: 0.5, roughness: 0.3 });
+                        const handle = new THREE.Mesh(handleGeo, handleMat);
+                        handle.rotation.z = Math.PI / 2;
+                        handle.position.set(cfg.x, topY + 1.15, 0);
+                        scene.add(handle);
+                    }
+                });
+
+                // The connecting pipe is drawn in screen space by updateGaugePipe().
+                // This keeps its far end physically aligned with the fixed gauge HUD,
+                // even when the user rotates the chamber or resizes the browser.
+
+            }
+
+            function toggleCombinedCalc() {
+                showCombinedFormula = !showCombinedFormula;
+                const btnIcon = document.getElementById('combinedBtnIcon');
+                const btnText = document.getElementById('combinedBtnText');
+                if (showCombinedFormula) {
+                    btnIcon.textContent = '➖';
+                    btnText.textContent = '隱藏合併式';
+                } else {
+                    btnIcon.textContent = '➕';
+                    btnText.textContent = '計算總壓 (合併 n)';
+                }
+                updatePressureCalculations();
+            }
+
+            function fitFormula(elem) {
+                if (!elem) return;
+                elem.style.transform = 'scale(1)';
+                const parent = elem.parentElement;
+                if (!parent) return;
+                const pWidth = parent.clientWidth - 20;
+                const eWidth = elem.scrollWidth;
+                if (eWidth > pWidth && pWidth > 50) {
+                    const scale = Math.max(0.55, pWidth / eWidth);
+                    elem.style.transform = `scale(${scale.toFixed(3)})`;
+                }
+            }
+
+            function updatePressureCalculations() {
+                const pH2 = molState.h2 * ATM_PER_MOL;
+                const pHe = molState.he * ATM_PER_MOL;
+                const pO2 = molState.o2 * ATM_PER_MOL;
+                const pTotal = pH2 + pHe + pO2;
+                const totalMol = molState.h2 + molState.he + molState.o2;
+
+                document.getElementById('dialCenterReading').textContent = `${pTotal.toFixed(1)} atm`;
+                document.getElementById('subPH2').textContent = `${pH2.toFixed(1)} atm`;
+                document.getElementById('subPHe').textContent = `${pHe.toFixed(1)} atm`;
+                document.getElementById('subPO2').textContent = `${pO2.toFixed(1)} atm`;
+
+                const activeGasItems = [];
+                if (molState.h2 > 0) {
+                    activeGasItems.push({
+                        key: 'h2',
+                        mol: molState.h2,
+                        p: pH2,
+                        colorLatex: '\\textcolor{#f8fafc}',
+                        textClass: 'text-slate-100',
+                        labelHtml: '<span>P<sub>H₂</sub></span>',
+                        latexTerm: `\\frac{\\textcolor{#f8fafc}{${molState.h2}} \\cdot 0.082 \\cdot 300}{1.0}`
+                    });
+                }
+                if (molState.he > 0) {
+                    activeGasItems.push({
+                        key: 'he',
+                        mol: molState.he,
+                        p: pHe,
+                        colorLatex: '\\textcolor{#38bdf8}',
+                        textClass: 'text-sky-400',
+                        labelHtml: '<span>P<sub>He</sub></span>',
+                        latexTerm: `\\frac{\\textcolor{#38bdf8}{${molState.he}} \\cdot 0.082 \\cdot 300}{1.0}`
+                    });
+                }
+                if (molState.o2 > 0) {
+                    activeGasItems.push({
+                        key: 'o2',
+                        mol: molState.o2,
+                        p: pO2,
+                        colorLatex: '\\textcolor{#fb7185}',
+                        textClass: 'text-rose-400',
+                        labelHtml: '<span>P<sub>O₂</sub></span>',
+                        latexTerm: `\\frac{\\textcolor{#fb7185}{${molState.o2}} \\cdot 0.082 \\cdot 300}{1.0}`
+                    });
+                }
+
+                // 1. Board Card 1: Ideal Gas Formula
+                const latexElem = document.getElementById('latexIdealGasFormula');
+                if (latexElem) {
+                    if (activeGasItems.length > 0) {
+                        const termsLatex = activeGasItems.map(item => item.latexTerm).join(' + ');
+                        
+                        let katexSizeTag = '\\huge';
+                        if (activeGasItems.length === 1) {
+                            katexSizeTag = showCombinedFormula ? '\\LARGE' : '\\huge';
+                        } else if (activeGasItems.length === 2) {
+                            katexSizeTag = showCombinedFormula ? '\\Large' : '\\LARGE';
+                        } else if (activeGasItems.length >= 3) {
+                            katexSizeTag = showCombinedFormula ? '\\Large' : '\\LARGE';
+                        }
+
+                        let latexStr = `${katexSizeTag} P = ${termsLatex} = \\mathbf{${pTotal.toFixed(1)}}\\text{ atm}`;
+                        
+                        if (showCombinedFormula) {
+                            const sumMolFormula = activeGasItems.map(item => `${item.colorLatex}{${item.mol}}`).join(' + ');
+                            latexStr += ` = \\frac{(${sumMolFormula}) \\cdot 0.082 \\cdot 300}{1.0}`;
+                        }
+
+                        if (typeof katex !== 'undefined') {
+                            katex.render(latexStr, latexElem, { displayMode: true, throwOnError: false });
+                        } else {
+                            latexElem.textContent = `P = ${pTotal.toFixed(1)} atm`;
+                        }
+                    } else {
+                        const emptyLatex = `\\Large P = \\frac{0 \\cdot 0.082 \\cdot 300}{1.0} = 0.0\\text{ atm}`;
+                        if (typeof katex !== 'undefined') {
+                            katex.render(emptyLatex, latexElem, { displayMode: true, throwOnError: false });
+                        } else {
+                            latexElem.textContent = 'P = 0.0 atm';
+                        }
+                    }
+                    fitFormula(latexElem);
+                }
+
+                // 2. Board Card 2: Dalton's Law Giant Symbolic & Numerical Decomposition
+                const formulaText = document.getElementById('formulaText');
+                const eqContainer = document.getElementById('equationContainer');
+
+                if (activeGasItems.length > 0) {
+                    const symbolsHtml = activeGasItems.map(item => `<span class="${item.textClass}">${item.labelHtml}</span>`).join(' + ');
+                    formulaText.innerHTML = `<span>P<sub>總</sub></span> = ${symbolsHtml}`;
+
+                    let numbersHtml = `<span class="text-amber-400 font-black">${pTotal.toFixed(1)}</span> = `;
+                    numbersHtml += activeGasItems.map(item => `<span class="${item.textClass} font-black">${item.p.toFixed(1)}</span>`).join(' + ');
+                    numbersHtml += ` <span class="text-slate-400 text-lg sm:text-xl font-bold ml-1">atm</span>`;
+                    eqContainer.innerHTML = numbersHtml;
+                } else {
+                    formulaText.innerHTML = `<span>P<sub>總</sub></span> = 0.0 atm`;
+                    eqContainer.innerHTML = `<span class="text-slate-400 text-lg font-bold tracking-wide">P = 0.0 atm (尚未注入氣體)</span>`;
+                }
+
+                // 3. Board Card 3: Stacked Bar & Single-Row Smart-Spaced Contribution Badges
+                const emptyMsg = document.getElementById('emptyFracMsg');
+                const trackArea = document.getElementById('contribTrackArea');
+                const badgeWrapH2 = document.getElementById('badgeWrapH2');
+                const badgeWrapHe = document.getElementById('badgeWrapHe');
+                const badgeWrapO2 = document.getElementById('badgeWrapO2');
+                const badgeBoxH2 = document.getElementById('badgeBoxH2');
+                const badgeBoxHe = document.getElementById('badgeBoxHe');
+                const badgeBoxO2 = document.getElementById('badgeBoxO2');
+                const badgeTickH2 = document.getElementById('badgeTickH2');
+                const badgeTickHe = document.getElementById('badgeTickHe');
+                const badgeTickO2 = document.getElementById('badgeTickO2');
+
+                if (pTotal > 0.05 && totalMol > 0) {
+                    const pctH2 = (pH2 / pTotal) * 100;
+                    const pctHe = (pHe / pTotal) * 100;
+                    const pctO2 = (pO2 / pTotal) * 100;
+
+                    document.getElementById('barH2').style.width = pctH2 + '%';
+                    document.getElementById('barHe').style.width = pctHe + '%';
+                    document.getElementById('barO2').style.width = pctO2 + '%';
+                    document.getElementById('stackedPercentText').textContent = `全部 = 1`;
+                    if (trackArea) trackArea.style.minHeight = `202px`;
+
+                    if (emptyMsg) emptyMsg.classList.add('hidden');
+
+                    const gasConfigs = [
+                        { key: 'h2', mol: molState.h2, pct: pctH2, wrap: badgeWrapH2, box: badgeBoxH2, tick: badgeTickH2, colorHex: '#f8fafc', label: 'H₂', borderClass: 'border-slate-500/60' },
+                        { key: 'he', mol: molState.he, pct: pctHe, wrap: badgeWrapHe, box: badgeBoxHe, tick: badgeTickHe, colorHex: '#38bdf8', label: 'He', borderClass: 'border-sky-500/60' },
+                        { key: 'o2', mol: molState.o2, pct: pctO2, wrap: badgeWrapO2, box: badgeBoxO2, tick: badgeTickO2, colorHex: '#fb7185', label: 'O₂', borderClass: 'border-rose-500/60' }
+                    ];
+
+                    let currentAccum = 0;
+                    const activeGases = [];
+                    gasConfigs.forEach(g => {
+                        if (g.mol > 0) {
+                            g.centerPct = currentAccum + g.pct / 2;
+                            currentAccum += g.pct;
+                            g.wrap.style.display = 'flex';
+                            g.wrap.style.top = '33px';
+                            g.wrap.style.transform = 'translateX(-50%)';
+                            g.box.className = `px-3 py-2 rounded-xl bg-slate-900/95 border ${g.borderClass} shadow-lg pointer-events-auto`;
+                            g.box.innerHTML = `
+                                <div class="flex flex-col items-center justify-center gap-1.5 sans-tc-bold tracking-wide text-center" style="color: ${g.colorHex}; min-width: 112px;">
+                                    <div class="text-xl sm:text-2xl font-black leading-none">${g.label} 貢獻</div>
+                                    <div class="flex flex-col items-center justify-center leading-none mono-num font-black">
+                                        <span class="text-2xl sm:text-3xl leading-none">${g.mol}</span>
+                                        <span class="w-10 sm:w-12 h-[3px] rounded-full bg-current opacity-95 my-1"></span>
+                                        <span class="text-2xl sm:text-3xl leading-none">${totalMol}</span>
+                                    </div>
+                                </div>
+                            `;
+                            activeGases.push(g);
+                        } else {
+                            if (g.wrap) g.wrap.style.display = 'none';
+                            if (g.box) g.box.innerHTML = '';
+                        }
+                    });
+
+                    const trackWidth = trackArea ? trackArea.clientWidth : 0;
+                    const edgePad = 10;
+                    const gapPx = 20;
+                    const startPositions = [];
+                    activeGases.sort((a, b) => a.centerPct - b.centerPct);
+
+                    activeGases.forEach(g => {
+                        g.boxWidth = Math.max(g.box.offsetWidth || 118, 100);
+                        g.halfW = g.boxWidth / 2;
+                        g.idealX = trackWidth * (g.centerPct / 100);
+                        g.minX = g.halfW + edgePad;
+                        g.maxX = Math.max(g.minX, trackWidth - g.halfW - edgePad);
+                        g.finalX = Math.min(g.maxX, Math.max(g.minX, g.idealX));
+                    });
+
+                    // Forward pass: keep labels on one row and push rightward if overlapping.
+                    for (let i = 1; i < activeGases.length; i++) {
+                        const prev = activeGases[i - 1];
+                        const curr = activeGases[i];
+                        const minAllowed = prev.finalX + prev.halfW + curr.halfW + gapPx;
+                        if (curr.finalX < minAllowed) curr.finalX = minAllowed;
+                    }
+
+                    // Backward pass: if the rightmost badge exceeds bounds, compress all badges leftward.
+                    for (let i = activeGases.length - 1; i >= 0; i--) {
+                        const curr = activeGases[i];
+                        if (curr.finalX > curr.maxX) curr.finalX = curr.maxX;
+                        if (i < activeGases.length - 1) {
+                            const next = activeGases[i + 1];
+                            const maxAllowed = next.finalX - next.halfW - curr.halfW - gapPx;
+                            if (curr.finalX > maxAllowed) curr.finalX = maxAllowed;
+                        }
+                        if (curr.finalX < curr.minX) curr.finalX = curr.minX;
+                    }
+
+                    // One more gentle forward pass to preserve order after compression.
+                    for (let i = 1; i < activeGases.length; i++) {
+                        const prev = activeGases[i - 1];
+                        const curr = activeGases[i];
+                        const minAllowed = prev.finalX + prev.halfW + curr.halfW + gapPx;
+                        if (curr.finalX < minAllowed) curr.finalX = Math.min(curr.maxX, minAllowed);
+                    }
+
+                    // If still crowded, slightly reduce inter-box gap while keeping them in one row.
+                    let hasOverlap = false;
+                    for (let i = 1; i < activeGases.length; i++) {
+                        const prev = activeGases[i - 1];
+                        const curr = activeGases[i];
+                        if (curr.finalX - curr.halfW < prev.finalX + prev.halfW + 8) {
+                            hasOverlap = true;
+                            break;
+                        }
+                    }
+                    if (hasOverlap && activeGases.length >= 2) {
+                        const tighterGap = 10;
+                        activeGases.forEach(g => { g.finalX = Math.min(g.maxX, Math.max(g.minX, g.idealX)); });
+                        for (let i = 1; i < activeGases.length; i++) {
+                            const prev = activeGases[i - 1];
+                            const curr = activeGases[i];
+                            const minAllowed = prev.finalX + prev.halfW + curr.halfW + tighterGap;
+                            if (curr.finalX < minAllowed) curr.finalX = minAllowed;
+                        }
+                        for (let i = activeGases.length - 1; i >= 0; i--) {
+                            const curr = activeGases[i];
+                            if (curr.finalX > curr.maxX) curr.finalX = curr.maxX;
+                            if (i < activeGases.length - 1) {
+                                const next = activeGases[i + 1];
+                                const maxAllowed = next.finalX - next.halfW - curr.halfW - tighterGap;
+                                if (curr.finalX > maxAllowed) curr.finalX = maxAllowed;
+                            }
+                            if (curr.finalX < curr.minX) curr.finalX = curr.minX;
+                        }
+                    }
+
+                    const leaderSvg = document.getElementById('contribLeaders');
+                    if (leaderSvg) {
+                        leaderSvg.setAttribute('viewBox', `0 0 ${Math.max(1,trackWidth)} 202`);
+                        leaderSvg.setAttribute('preserveAspectRatio','none');
+                        // True segment centers stay fixed; badges move independently to prevent collision.
+                        leaderSvg.innerHTML = activeGases.map(g => {
+                            const originX = g.idealX;
+                            const endX = g.finalX;
+                            const shade = g.colorHex;
+                            return `<path d="M ${originX.toFixed(1)} 0 L ${endX.toFixed(1)} 31" fill="none" stroke="${shade}" stroke-width="2.5" stroke-linecap="round" opacity="0.87"/>` +
+                              `<circle cx="${originX.toFixed(1)}" cy="0" r="3.3" fill="${shade}"/>` +
+                              `<circle cx="${endX.toFixed(1)}" cy="31" r="3.3" fill="${shade}"/>`;
+                        }).join('');
+                    }
+                    activeGases.forEach(g => {
+                        if (!g.wrap || !g.box || !g.tick) return;
+                        g.wrap.style.left = `${g.finalX}px`;
+                        g.wrap.style.top = '33px';
+                        g.wrap.style.zIndex = '20';
+                        g.tick.style.display = 'none';
+                    });
+                } else {
+                    document.getElementById('barH2').style.width = '0%';
+                    document.getElementById('barHe').style.width = '0%';
+                    document.getElementById('barO2').style.width = '0%';
+                    document.getElementById('stackedPercentText').textContent = `真空 0.0 atm`;
+                    if (trackArea) trackArea.style.minHeight = `202px`;
+                    const leaderSvg = document.getElementById('contribLeaders');
+                    if (leaderSvg) leaderSvg.innerHTML = '';
+
+                    [badgeWrapH2, badgeWrapHe, badgeWrapO2].forEach(w => {
+                        if (w) w.style.display = 'none';
+                    });
+                    [badgeBoxH2, badgeBoxHe, badgeBoxO2].forEach(b => {
+                        if (b) b.innerHTML = '';
+                    });
+                    if (emptyMsg) emptyMsg.classList.remove('hidden');
+                }
+
+                // Needle angle mapping: 0 - 400 atm (-135deg to +135deg)
+                const clampedP = Math.min(Math.max(pTotal, 0), 400);
+                targetNeedleAngle = -135 + (clampedP / 400) * 270;
+            }
+
+            function initManometerDial() {
+                const group = document.getElementById('dialTicksGroup');
+                if (!group) return;
+                group.innerHTML = '';
+
+                const cx = 130;
+                const cy = 130;
+                const r = 98;
+                const startAngleDeg = -135;
+                const totalSweepDeg = 270;
+                const maxAtm = 400;
+                const divisions = 40;
+
+                for (let i = 0; i <= divisions; i++) {
+                    const frac = i / divisions;
+                    const angleDeg = startAngleDeg + frac * totalSweepDeg;
+                    const angleRad = (angleDeg - 90) * (Math.PI / 180);
+
+                    const isMajor = i % 5 === 0;
+                    const tickLen = isMajor ? 13 : 6;
+                    const strokeColor = isMajor ? '#0f172a' : '#64748b';
+                    const strokeWidth = isMajor ? 2.5 : 1.2;
+
+                    const x1 = cx + Math.cos(angleRad) * r;
+                    const y1 = cy + Math.sin(angleRad) * r;
+                    const x2 = cx + Math.cos(angleRad) * (r - tickLen);
+                    const y2 = cy + Math.sin(angleRad) * (r - tickLen);
+
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', x1.toFixed(2));
+                    line.setAttribute('y1', y1.toFixed(2));
+                    line.setAttribute('x2', x2.toFixed(2));
+                    line.setAttribute('y2', y2.toFixed(2));
+                    line.setAttribute('stroke', strokeColor);
+                    line.setAttribute('stroke-width', strokeWidth);
+                    line.setAttribute('stroke-linecap', 'round');
+                    group.appendChild(line);
+
+                    if (isMajor) {
+                        const textDist = r - tickLen - 12;
+                        const tx = cx + Math.cos(angleRad) * textDist;
+                        const ty = cy + Math.sin(angleRad) * textDist + 4;
+
+                        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        text.setAttribute('x', tx.toFixed(2));
+                        text.setAttribute('y', ty.toFixed(2));
+                        text.setAttribute('text-anchor', 'middle');
+                        text.setAttribute('fill', '#0f172a');
+                        text.setAttribute('font-size', '11.5');
+                        text.setAttribute('font-family', "'JetBrains Mono', monospace");
+                        text.setAttribute('font-weight', '800');
+                        text.textContent = Math.round(frac * maxAtm);
+                        group.appendChild(text);
+                    }
+                }
+            }
+
+            function adjustMol(type, delta) {
+                let newVal = molState[type] + delta;
+                newVal = Math.max(0, Math.min(5, newVal));
+                molState[type] = newVal;
+                
+                const cap = type.charAt(0).toUpperCase() + type.slice(1);
+                const valElem = document.getElementById('val' + cap);
+                if (valElem) valElem.innerText = `${newVal} mol`;
+                syncMolecules();
+            }
+
+            function setStoneCount(count) {
+                stoneCount = Math.max(0, Math.min(5, parseInt(count, 10)));
+                const valElem = document.getElementById('valStone');
+                if (valElem) valElem.innerText = `${stoneCount} 顆`;
+                syncStones();
+                updatePressureCalculations();
+            }
+
+            function adjustStone(delta) {
+                setStoneCount(stoneCount + delta);
+            }
+
+            function resetDefaults() {
+                molState = { h2: 0, he: 0, o2: 0 };
+                ['h2', 'he', 'o2'].forEach(t => {
+                    const cap = t.charAt(0).toUpperCase() + t.slice(1);
+                    const v = document.getElementById('val' + cap);
+                    if (v) v.innerText = `0 mol`;
+                });
+                setStoneCount(0);
+                syncMolecules();
+                clearWallImpacts();
+            }
+
+            function evacuateAll() {
+                ['h2', 'he', 'o2'].forEach(t => {
+                    molState[t] = 0;
+                    const cap = t.charAt(0).toUpperCase() + t.slice(1);
+                    const v = document.getElementById('val' + cap);
+                    if (v) v.innerText = `0 mol`;
+                });
+                syncMolecules();
+                clearWallImpacts();
+            }
+
+            function clearWallImpacts() {
+                wallImpacts.forEach(m => {
+                    scene.remove(m);
+                    if (m.material) m.material.dispose();
+                });
+                wallImpacts = [];
+            }
+
+            function togglePlayPause() {
+                isRunning = !isRunning;
+                const btn = document.getElementById('playPauseBtn');
+                if (isRunning) {
+                    btn.innerHTML = `
+                        <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                        <span>暫停</span>`;
+                } else {
+                    btn.innerHTML = `
+                        <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                        </svg>
+                        <span>播放</span>`;
+                }
+            }
+
+            function initThreeScene() {
+                const container = document.getElementById('threeContainer');
+                container.innerHTML = '';
+
+                scene = new THREE.Scene();
+                scene.background = null;
+
+                const width = container.clientWidth || 400;
+                const height = container.clientHeight || 400;
+
+                camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 1000);
+                
+                // Camera positioned comfortably viewing chamber center
+                camera.position.set(-23.81, 14.52, -21.38);
+                camera.lookAt(new THREE.Vector3(1.1, 1.0, 0));
+
+                renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+                renderer.setSize(width, height);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                renderer.shadowMap.enabled = true;
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                container.appendChild(renderer.domElement);
+
+                // Rich Lab Lighting Setup
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.62);
+                scene.add(ambientLight);
+
+                const dirLight = new THREE.DirectionalLight(0xffffff, 1.72);
+                dirLight.position.set(16, 26, 20);
+                dirLight.castShadow = true;
+                dirLight.shadow.mapSize.width = 1024;
+                dirLight.shadow.mapSize.height = 1024;
+                scene.add(dirLight);
+
+                const rimLight = new THREE.DirectionalLight(0x7dd3fc, 1.25);
+                rimLight.position.set(-18, -12, -18);
+                scene.add(rimLight);
+
+                const pointLight = new THREE.PointLight(0xffffff, 0.9, 50);
+                pointLight.position.set(0, 8, 5);
+                scene.add(pointLight);
+
+                const glossLight = new THREE.PointLight(0xe6f7ff, 1.15, 72);
+                glossLight.position.set(-8, 13, 18);
+                scene.add(glossLight);
+
+                const fillLight = new THREE.HemisphereLight(0xf0f9ff, 0x0f172a, 0.48);
+                scene.add(fillLight);
+
+                // Build Chamber & Piping
+                buildGlassChamber();
+                buildChamberPipe();
+
+                // Subtle, small reusable impact ring geometry (reduced size to stay clean)
+                impactRingGeo = new THREE.RingGeometry(0.05, 0.22, 16);
+
+                setupCameraInteractivity(container);
+                window.addEventListener('resize', onWindowResize);
+                const contributionTrack = document.getElementById('contribTrackArea');
+                if (contributionTrack && typeof ResizeObserver !== 'undefined') {
+                    const observer = new ResizeObserver(() => updatePressureCalculations());
+                    observer.observe(contributionTrack);
+                }
+            }
+
+            function createMoleculeMesh(type) {
+                const spec = SPECIES[type];
+                const group = new THREE.Group();
+
+                // Polished, high-contrast spheres for classroom projection.
+                // White hydrogen needs a slightly shaded base to show curvature;
+                // helium uses a rich blue base so the highlights do not wash out.
+                const mat = (type === 'h2' || type === 'he')
+                    ? new THREE.MeshPhysicalMaterial({
+                        color: type === 'h2' ? 0xe3ebf5 : 0x168fe2,
+                        roughness: type === 'h2' ? 0.075 : 0.055,
+                        metalness: 0.06,
+                        clearcoat: 1.0,
+                        clearcoatRoughness: 0.018,
+                        reflectivity: 1.0,
+                        emissive: type === 'h2' ? 0x242b38 : 0x05375d,
+                        emissiveIntensity: 0.10
+                    })
+                    : new THREE.MeshStandardMaterial({
+                        color: spec.color,
+                        roughness: spec.roughness,
+                        metalness: spec.metalness,
+                        emissive: spec.color,
+                        emissiveIntensity: 0.12
+                    });
+
+                // Small glossy light reflections fixed to each sphere, so they
+                // rotate and move WITH the gas particles (not over the glass).
+                function addAtomGloss(atom) {
+                    if (type !== 'h2' && type !== 'he') return;
+                    const r = spec.radius;
+                    const hotSpot = new THREE.Mesh(
+                        new THREE.SphereGeometry(r * 0.165, 12, 10),
+                        new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: 0.94, depthWrite: false})
+                    );
+                    hotSpot.position.set(-r * 0.38, r * 0.45, r * 0.77);
+                    atom.add(hotSpot);
+                    const softSpot = new THREE.Mesh(
+                        new THREE.SphereGeometry(r * 0.26, 12, 10),
+                        new THREE.MeshBasicMaterial({color: type === 'he' ? 0x9fe9ff : 0xffffff, transparent: true, opacity: 0.24, depthWrite: false})
+                    );
+                    softSpot.position.set(-r * 0.32, r * 0.39, r * 0.78);
+                    atom.add(softSpot);
+                }
+
+                if (spec.isDiatomic) {
+                    const geo = new THREE.SphereGeometry(spec.radius, 32, 24);
+                    const atom1 = new THREE.Mesh(geo, mat);
+                    const atom2 = new THREE.Mesh(geo, mat);
+
+                    atom1.position.x = -spec.bondLen / 2;
+                    atom2.position.x = spec.bondLen / 2;
+                    atom1.castShadow = true;
+                    atom2.castShadow = true;
+                    addAtomGloss(atom1);
+                    addAtomGloss(atom2);
+
+                    // Bond cylinder
+                    const bondGeo = new THREE.CylinderGeometry(spec.radius * 0.45, spec.radius * 0.45, spec.bondLen, 10);
+                    const bondMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.3 });
+                    const bond = new THREE.Mesh(bondGeo, bondMat);
+                    bond.rotation.z = Math.PI / 2;
+
+                    group.add(atom1);
+                    group.add(atom2);
+                    group.add(bond);
+                    group.userData.envelopeRadius = spec.radius + spec.bondLen / 2;
+                } else {
+                    const geo = new THREE.SphereGeometry(spec.radius, 32, 24);
+                    const atom = new THREE.Mesh(geo, mat);
+                    atom.castShadow = true;
+                    addAtomGloss(atom);
+                    group.add(atom);
+                    group.userData.envelopeRadius = spec.radius;
+                }
+
+                // Random Initial Velocity & Angular Momentum
+                const theta = Math.random() * Math.PI * 2;
+                const phi = (Math.random() - 0.5) * Math.PI;
+                const speed = spec.baseSpeed * (0.85 + Math.random() * 0.3);
+
+                group.userData.type = type;
+                group.userData.mass = spec.mass;
+                group.userData.vx = Math.cos(phi) * Math.cos(theta) * speed;
+                group.userData.vy = Math.sin(phi) * speed;
+                group.userData.vz = Math.cos(phi) * Math.sin(theta) * speed;
+                group.userData.rotSpeed = {
+                    x: (Math.random() - 0.5) * 0.05,
+                    y: (Math.random() - 0.5) * 0.05,
+                    z: (Math.random() - 0.5) * 0.05
+                };
+
+                return group;
+            }
+
+            function syncMolecules() {
+                const targetCounts = {
+                    h2: molState.h2 * MOLECULES_PER_MOL,
+                    he: molState.he * MOLECULES_PER_MOL,
+                    o2: molState.o2 * MOLECULES_PER_MOL
+                };
+
+                const currentCounts = { h2: 0, he: 0, o2: 0 };
+                const toKeep = [];
+
+                molecules.forEach(m => {
+                    const t = m.userData.type;
+                    if (currentCounts[t] < targetCounts[t]) {
+                        currentCounts[t]++;
+                        toKeep.push(m);
+                    } else {
+                        scene.remove(m);
+                    }
+                });
+
+                molecules = toKeep;
+
+                ['h2', 'he', 'o2'].forEach(t => {
+                    const needed = targetCounts[t] - currentCounts[t];
+                    for (let i = 0; i < needed; i++) {
+                        const m = createMoleculeMesh(t);
+                        const hx = (boxSize.x / 2) - 1.2;
+                        const hy = (boxSize.y / 2) - 1.2;
+                        const hz = (boxSize.z / 2) - 1.2;
+
+                        m.position.set(
+                            (Math.random() - 0.5) * 2 * hx,
+                            (Math.random() - 0.5) * 2 * hy,
+                            (Math.random() - 0.5) * 2 * hz
+                        );
+                        scene.add(m);
+                        molecules.push(m);
+                    }
+                });
+
+                const totalParticles = molecules.length;
+                const label = document.getElementById('particleCountLabel');
+                const totalMol = molState.h2 + molState.he + molState.o2;
+                if (label) {
+                    label.textContent = `${totalMol} mol (${totalParticles} 顆示意)`;
+                }
+
+                updatePressureCalculations();
+            }
+
+            // Luxury showcase diamonds: refined faceting, pastel fire, and subtle premium sparkle.
+            function createSparkleTexture() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 96;
+                canvas.height = 96;
+                const ctx = canvas.getContext('2d');
+                const cx = 48, cy = 48;
+                const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 22);
+                grad.addColorStop(0, 'rgba(255,255,255,1)');
+                grad.addColorStop(0.20, 'rgba(255,255,255,0.95)');
+                grad.addColorStop(0.55, 'rgba(255,255,255,0.28)');
+                grad.addColorStop(1, 'rgba(255,255,255,0)');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.82)';
+                ctx.lineWidth = 2.2;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(48, 12); ctx.lineTo(48, 84);
+                ctx.moveTo(12, 48); ctx.lineTo(84, 48);
+                ctx.moveTo(24, 24); ctx.lineTo(72, 72);
+                ctx.moveTo(72, 24); ctx.lineTo(24, 72);
+                ctx.stroke();
+                const tex = new THREE.CanvasTexture(canvas);
+                tex.needsUpdate = true;
+                return tex;
+            }
+            const diamondSparkleTexture = createSparkleTexture();
+
+            function createSparkleSprite(size, colorHex, pos, rotation, opacity, scaleMul, speed, phase) {
+                const mat = new THREE.SpriteMaterial({
+                    map: diamondSparkleTexture,
+                    color: colorHex,
+                    transparent: true,
+                    opacity: opacity,
+                    depthWrite: false,
+                    blending: THREE.AdditiveBlending
+                });
+                const sprite = new THREE.Sprite(mat);
+                sprite.position.set(pos[0], pos[1], pos[2]);
+                sprite.scale.set(size * scaleMul, size * scaleMul, 1);
+                sprite.material.rotation = rotation;
+                sprite.userData = { sparkle: true, baseOpacity: opacity, baseScale: size * scaleMul, twinkleSpeed: speed, twinklePhase: phase };
+                return sprite;
+            }
+
+            // ===== Irregular Natural Rocks / Minerals =====
+            // Create 5 distinctly shaped, non-spherical geological rocks with rich textures and varied mineral colors:
+            // 0: 赭紅赤鐵岩 (Red Hematite/Sandstone) - Jagged angular block with sharp fractured cliffs
+            // 1: 青苔深板岩 (Dark Slate/Basalt) - Flat, layered polygonal stepped slab
+            // 2: 綠簾花崗岩 (Mossy Olive Granite) - Asymmetric craggy boulder with rough facets
+            // 3: 灰白石灰岩 (Porous Grey-White Limestone) - Irregular triangular wedge with concave eroded hollows
+            // 4: 煙金砂金岩 (Smoky Sandstone/Gold-flecked Pyrite rock) - Elongated jagged obelisk/crystal-like shard
+
+            function createNoiseTexture(baseColorHex, specColorHex, darkColorHex, noiseType) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 256; canvas.height = 256;
+                const ctx = canvas.getContext('2d');
+                
+                ctx.fillStyle = baseColorHex;
+                ctx.fillRect(0, 0, 256, 256);
+                
+                // Add geological striations, mineral grains, and sediment layers
+                let seed = 42;
+                const rand = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+                
+                if (noiseType === 'layered') {
+                    // Stratified sedimentary layers
+                    for (let y = 0; y < 256; y += 4 + Math.floor(rand() * 8)) {
+                        ctx.fillStyle = rand() > 0.5 ? specColorHex : darkColorHex;
+                        ctx.globalAlpha = 0.18 + rand() * 0.22;
+                        const h = 2 + rand() * 6;
+                        ctx.fillRect(0, y, 256, h);
+                    }
+                } else if (noiseType === 'speckled') {
+                    // Granitic salt-and-pepper mineral flecks
+                    for (let i = 0; i < 900; i++) {
+                        ctx.fillStyle = rand() > 0.4 ? specColorHex : darkColorHex;
+                        ctx.globalAlpha = 0.15 + rand() * 0.35;
+                        const rx = rand() * 256, ry = rand() * 256;
+                        const r = 1 + rand() * 3.5;
+                        ctx.beginPath();
+                        ctx.arc(rx, ry, r, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                } else if (noiseType === 'veined') {
+                    // Fractured mineral veins
+                    ctx.strokeStyle = specColorHex;
+                    ctx.lineWidth = 2.0;
+                    ctx.globalAlpha = 0.45;
+                    for (let v = 0; v < 5; v++) {
+                        ctx.beginPath();
+                        let cx = rand() * 256, cy = 0;
+                        ctx.moveTo(cx, cy);
+                        while (cy < 256) {
+                            cx += (rand() - 0.5) * 35;
+                            cy += 15 + rand() * 30;
+                            ctx.lineTo(cx, cy);
+                        }
+                        ctx.stroke();
+                    }
+                } else {
+                    // Rough earthy mottled patch
+                    for (let i = 0; i < 180; i++) {
+                        ctx.fillStyle = rand() > 0.5 ? specColorHex : darkColorHex;
+                        ctx.globalAlpha = 0.12 + rand() * 0.25;
+                        ctx.beginPath();
+                        ctx.arc(rand() * 256, rand() * 256, 8 + rand() * 22, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+                
+                // Micro-sand grain roughness
+                ctx.globalAlpha = 0.10;
+                for (let i = 0; i < 1200; i++) {
+                    ctx.fillStyle = rand() > 0.5 ? '#ffffff' : '#000000';
+                    ctx.fillRect(rand() * 256, rand() * 256, 1.5, 1.5);
+                }
+                
+                const tex = new THREE.CanvasTexture(canvas);
+                tex.wrapS = THREE.RepeatWrapping;
+                tex.wrapT = THREE.RepeatWrapping;
+                return tex;
+            }
+
+            function createNaturalRock(size, index) {
+                const group = new THREE.Group();
+
+                // 5 distinct non-spherical rock architectures
+                const rockConfigs = [
+                    {
+                        name: '赭紅赤鐵岩 (塊狀斷崖)',
+                        baseColor: 0x9e3d2c, specColor: 0xd97757, darkColor: 0x541d14,
+                        texType: 'layered',
+                        roughness: 0.88,
+                        metalness: 0.12,
+                        geoGen: (sz) => {
+                            // Jagged fractured rectangular block (like broken sandstone/quarry block)
+                            const geo = new THREE.BoxGeometry(sz * 1.6, sz * 0.95, sz * 1.15, 6, 5, 5);
+                            const pos = geo.attributes.position;
+                            for (let i = 0; i < pos.count; i++) {
+                                let x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+                                // Sheared cliff facet on one side
+                                if (x > 0.2 * sz) x += 0.18 * sz * Math.sign(x);
+                                if (y > 0.1 * sz) y += (Math.sin(x * 3.5) + Math.cos(z * 4.2)) * 0.12 * sz;
+                                // Chip and fracture bevels
+                                const fracture = Math.sin(x * 5.0 + y * 4.0) * 0.08 * sz + Math.cos(z * 6.0) * 0.06 * sz;
+                                pos.setXYZ(i, x + fracture, y + fracture * 0.6, z + fracture);
+                            }
+                            return geo;
+                        }
+                    },
+                    {
+                        name: '深青層理板岩 (平片階梯形)',
+                        baseColor: 0x2e3b44, specColor: 0x526573, darkColor: 0x161d22,
+                        texType: 'veined',
+                        roughness: 0.72,
+                        metalness: 0.22,
+                        geoGen: (sz) => {
+                            // Stepped polygonal flat slab (schist/slate)
+                            const geo = new THREE.CylinderGeometry(sz * 1.45, sz * 1.6, sz * 0.45, 7, 3);
+                            const pos = geo.attributes.position;
+                            for (let i = 0; i < pos.count; i++) {
+                                let x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+                                // Asymmetric polygonal elongation
+                                x *= 1.35;
+                                z *= 0.85;
+                                // Cleavage break steps
+                                const step = Math.floor((y / (sz * 0.45) + 0.5) * 3) * 0.08 * sz;
+                                const ridge = (Math.sin(x * 4.0) > 0 ? 0.09 : -0.05) * sz;
+                                pos.setXYZ(i, x + ridge, y + step, z + ridge * 0.5);
+                            }
+                            return geo;
+                        }
+                    },
+                    {
+                        name: '苔綠橄欖花崗岩 (多稜角孤石)',
+                        baseColor: 0x475338, specColor: 0x73835c, darkColor: 0x252c1d,
+                        texType: 'speckled',
+                        roughness: 0.94,
+                        metalness: 0.05,
+                        geoGen: (sz) => {
+                            // Dodecahedron based multi-faceted angular boulder
+                            const geo = new THREE.DodecahedronGeometry(sz * 1.05, 1);
+                            const pos = geo.attributes.position;
+                            for (let i = 0; i < pos.count; i++) {
+                                let x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+                                // Stretch along diagonal to break symmetry
+                                x *= 1.25;
+                                y *= 0.82;
+                                z *= 1.10;
+                                // Craggy impact hollows
+                                const dist = Math.sqrt(x*x + y*y + z*z) || 1;
+                                const crag = (Math.sin(x * 3.8 + z * 2.2) * 0.16 + Math.cos(y * 4.5) * 0.12) * sz;
+                                pos.setXYZ(i, x + (x/dist)*crag, y + (y/dist)*crag, z + (z/dist)*crag);
+                            }
+                            return geo;
+                        }
+                    },
+                    {
+                        name: '灰白溶蝕石灰岩 (三角楔形/凹洞)',
+                        baseColor: 0xd4ceb9, specColor: 0xeee9dc, darkColor: 0x7a7465,
+                        texType: 'mottled',
+                        roughness: 0.96,
+                        metalness: 0.0,
+                        geoGen: (sz) => {
+                            // Triangular prism / wedge shape with eroded hollows
+                            const geo = new THREE.CylinderGeometry(sz * 0.35, sz * 1.35, sz * 1.15, 3, 5);
+                            const pos = geo.attributes.position;
+                            for (let i = 0; i < pos.count; i++) {
+                                let x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+                                // Tilted triangular wedge
+                                x += y * 0.35;
+                                // Erosion depressions
+                                const hollow = Math.sin(x * 6.0) * Math.sin(z * 6.0) * 0.14 * sz;
+                                const bite = (x < 0 && z > 0) ? -0.18 * sz : 0.05 * sz;
+                                pos.setXYZ(i, x + hollow + bite, y * 0.75, z + hollow);
+                            }
+                            return geo;
+                        }
+                    },
+                    {
+                        name: '暗金黃鐵玄武岩 (長條角柱錐晶)',
+                        baseColor: 0x6e583b, specColor: 0xb59963, darkColor: 0x362c1d,
+                        texType: 'veined',
+                        roughness: 0.65,
+                        metalness: 0.40, // slight metallic sheen of pyrite / iron ore
+                        geoGen: (sz) => {
+                            // Elongated irregular hexagonal crystal/obelisk
+                            const geo = new THREE.CylinderGeometry(sz * 0.45, sz * 0.95, sz * 1.85, 5, 4);
+                            const pos = geo.attributes.position;
+                            for (let i = 0; i < pos.count; i++) {
+                                let x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+                                // Crystal bevel top, slanted terminal facet
+                                if (y > 0.4 * sz) {
+                                    x *= 0.55;
+                                    z *= 0.55;
+                                    y += (x - z) * 0.4;
+                                }
+                                // Prismatic column faces
+                                const prismFluting = Math.sin(Math.atan2(z, x) * 5) * 0.09 * sz;
+                                pos.setXYZ(i, x + prismFluting, y, z + prismFluting);
+                            }
+                            return geo;
+                        }
+                    }
+                ];
+
+                const cfg = rockConfigs[index % rockConfigs.length];
+                const rawGeo = cfg.geoGen(size);
+                
+                // Flat shading for distinct geological facet planes
+                rawGeo.computeVertexNormals();
+                const tex = createNoiseTexture(
+                    `#${cfg.baseColor.toString(16).padStart(6, '0')}`,
+                    `#${cfg.specColor.toString(16).padStart(6, '0')}`,
+                    `#${cfg.darkColor.toString(16).padStart(6, '0')}`,
+                    cfg.texType
+                );
+
+                const mat = new THREE.MeshStandardMaterial({
+                    map: tex,
+                    color: 0xffffff,
+                    roughness: cfg.roughness,
+                    metalness: cfg.metalness,
+                    flatShading: true, // Key: authentic faceted, angular rock fractures
+                    bumpMap: tex,
+                    bumpScale: 0.05
+                });
+
+                const mesh = new THREE.Mesh(rawGeo, mat);
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                group.add(mesh);
+                group.userData.coreMesh = mesh;
+
+                // Subtle mineral accent patch / quartz inclusion / lichen crest
+                const veinGeo = new THREE.DodecahedronGeometry(size * 0.26, 0);
+                const veinMat = new THREE.MeshStandardMaterial({
+                    color: cfg.specColor,
+                    roughness: 0.6,
+                    metalness: cfg.metalness > 0.1 ? 0.6 : 0.0,
+                    flatShading: true
+                });
+                const vein = new THREE.Mesh(veinGeo, veinMat);
+                vein.position.set(size * 0.35, size * 0.22, size * 0.25);
+                vein.scale.set(1.4, 0.45, 0.85);
+                group.add(vein);
+
+                return group;
+            }
+
+            function syncStones() {
+                while (stoneMeshes.length > stoneCount) {
+                    const s = stoneMeshes.pop();
+                    scene.remove(s);
+                }
+
+                const hy = boxSize.y / 2;
+                const sizes = [0.85, 0.80, 0.76, 0.74, 0.70];
+                const places = [
+                    [-3.80,  0.55],
+                    [-1.85,  0.10],
+                    [ 0.15,  0.45],
+                    [ 1.95,  0.15],
+                    [ 3.75,  0.50]
+                ];
+
+                while (stoneMeshes.length < stoneCount) {
+                    const idx = stoneMeshes.length;
+                    const sz = sizes[idx];
+                    const mesh = createNaturalRock(sz, idx);
+                    // Distinct realistic geological resting postures
+                    const rockRots = [
+                        [0.15, 0.65, -0.10],   // 0: block laying tilted on wide base
+                        [0.08, 1.45, 0.12],    // 1: flat stepped slate slab
+                        [-0.22, 2.10, 0.35],   // 2: angular granite boulder
+                        [0.32, -0.85, 0.18],   // 3: triangular limestone wedge
+                        [0.65, 0.42, 1.15]     // 4: elongated prismatic obelisk leaning naturally
+                    ];
+                    mesh.rotation.set(rockRots[idx][0], rockRots[idx][1], rockRots[idx][2]);
+
+                    const x = places[idx][0], z = places[idx][1];
+                    mesh.position.set(x, 0, z);
+                    mesh.updateMatrixWorld(true);
+
+                    const core = mesh.userData.coreMesh || mesh;
+                    const bbox = new THREE.Box3().setFromObject(core);
+                    const offsetY = -hy - bbox.min.y + 0.004;
+                    mesh.position.y += offsetY;
+                    mesh.updateMatrixWorld(true);
+
+                    const bbox2 = new THREE.Box3().setFromObject(core);
+                    const sizeVec = new THREE.Vector3();
+                    bbox2.getSize(sizeVec);
+                    const center = new THREE.Vector3();
+                    bbox2.getCenter(center);
+                    const radius = Math.max(sizeVec.x, sizeVec.y, sizeVec.z) * 0.40;
+                    mesh.userData.radius = radius;
+                    mesh.userData.x = x;
+                    mesh.userData.y = center.y;
+                    mesh.userData.z = z;
+
+                    scene.add(mesh);
+                    stoneMeshes.push(mesh);
+                }
+            }
+
+            function updateDiamondSparkles() {
+                // Natural rocks are static geological specimens; no sparkle loop needed.
+            }
+
+            function createWallImpact(x, y, z, axis, sign, type) {
+                if (wallImpacts.length > 14) {
+                    const old = wallImpacts.shift();
+                    scene.remove(old);
+                    if (old.material) old.material.dispose();
+                }
+
+                const spec = SPECIES[type];
+                const mat = new THREE.MeshBasicMaterial({
+                    color: spec.color,
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: 0.65
+                });
+
+                const ring = new THREE.Mesh(impactRingGeo, mat);
+                ring.position.set(x, y, z);
+
+                if (axis === 'x') {
+                    ring.rotation.y = Math.PI / 2;
+                } else if (axis === 'y') {
+                    ring.rotation.x = Math.PI / 2;
+                }
+
+                ring.userData = { life: 1.0 };
+                scene.add(ring);
+                wallImpacts.push(ring);
+            }
+
+            function updateWallImpacts() {
+                for (let i = wallImpacts.length - 1; i >= 0; i--) {
+                    const r = wallImpacts[i];
+                    r.userData.life -= 0.11;
+                    r.scale.addScalar(0.03);
+                    r.material.opacity = r.userData.life * 0.65;
+
+                    if (r.userData.life <= 0) {
+                        scene.remove(r);
+                        if (r.material) r.material.dispose();
+                        wallImpacts.splice(i, 1);
+                    }
+                }
+            }
+
+            function updatePhysics() {
+                const hx = boxSize.x / 2;
+                const hy = boxSize.y / 2;
+                const hz = boxSize.z / 2;
+
+                for (let i = 0; i < molecules.length; i++) {
+                    const m = molecules[i];
+                    const u = m.userData;
+                    const r = u.envelopeRadius;
+
+                    m.position.x += u.vx;
+                    m.position.y += u.vy;
+                    m.position.z += u.vz;
+
+                    m.rotation.x += u.rotSpeed.x;
+                    m.rotation.y += u.rotSpeed.y;
+                    m.rotation.z += u.rotSpeed.z;
+
+                    // Wall Elastic Bounce with subtle impact ping
+                    if (m.position.x - r < -hx) {
+                        m.position.x = -hx + r;
+                        u.vx = Math.abs(u.vx);
+                        createWallImpact(-hx, m.position.y, m.position.z, 'x', -1, u.type);
+                    } else if (m.position.x + r > hx) {
+                        m.position.x = hx - r;
+                        u.vx = -Math.abs(u.vx);
+                        createWallImpact(hx, m.position.y, m.position.z, 'x', 1, u.type);
+                    }
+
+                    if (m.position.y - r < -hy) {
+                        m.position.y = -hy + r;
+                        u.vy = Math.abs(u.vy);
+                        createWallImpact(m.position.x, -hy, m.position.z, 'y', -1, u.type);
+                    } else if (m.position.y + r > hy) {
+                        m.position.y = hy - r;
+                        u.vy = -Math.abs(u.vy);
+                        createWallImpact(m.position.x, hy, m.position.z, 'y', 1, u.type);
+                    }
+
+                    if (m.position.z - r < -hz) {
+                        m.position.z = -hz + r;
+                        u.vz = Math.abs(u.vz);
+                        createWallImpact(m.position.x, m.position.y, -hz, 'z', -1, u.type);
+                    } else if (m.position.z + r > hz) {
+                        m.position.z = hz - r;
+                        u.vz = -Math.abs(u.vz);
+                        createWallImpact(m.position.x, m.position.y, hz, 'z', 1, u.type);
+                    }
+
+                    // Collisions with 3D Stones
+                    for (let s = 0; s < stoneMeshes.length; s++) {
+                        const st = stoneMeshes[s].userData;
+                        const dx = m.position.x - st.x;
+                        const dy = m.position.y - st.y;
+                        const dz = m.position.z - st.z;
+                        const distSq = dx * dx + dy * dy + dz * dz;
+                        const minDist = r + st.radius;
+
+                        if (distSq < minDist * minDist) {
+                            const dist = Math.sqrt(distSq) || 0.001;
+                            const nx = dx / dist;
+                            const ny = dy / dist;
+                            const nz = dz / dist;
+
+                            m.position.x = st.x + nx * minDist;
+                            m.position.y = st.y + ny * minDist;
+                            m.position.z = st.z + nz * minDist;
+
+                            const dot = u.vx * nx + u.vy * ny + u.vz * nz;
+                            u.vx = (u.vx - 2 * dot * nx) * 1.02;
+                            u.vy = (u.vy - 2 * dot * ny) * 1.02;
+                            u.vz = (u.vz - 2 * dot * nz) * 1.02;
+                        }
+                    }
+
+                    // Molecule-Molecule Elastic Collisions
+                    for (let j = i + 1; j < molecules.length; j++) {
+                        const m2 = molecules[j];
+                        const u2 = m2.userData;
+                        const dx = m2.position.x - m.position.x;
+                        const dy = m2.position.y - m.position.y;
+                        const dz = m2.position.z - m.position.z;
+                        const distSq = dx * dx + dy * dy + dz * dz;
+                        const minDist = r + u2.envelopeRadius;
+
+                        if (distSq < minDist * minDist && distSq > 0.0001) {
+                            const dist = Math.sqrt(distSq);
+                            const nx = dx / dist;
+                            const ny = dy / dist;
+                            const nz = dz / dist;
+
+                            const overlap = 0.5 * (minDist - dist);
+                            m.position.x -= nx * overlap;
+                            m.position.y -= ny * overlap;
+                            m.position.z -= nz * overlap;
+                            m2.position.x += nx * overlap;
+                            m2.position.y += ny * overlap;
+                            m2.position.z += nz * overlap;
+
+                            const kx = u.vx - u2.vx;
+                            const ky = u.vy - u2.vy;
+                            const kz = u.vz - u2.vz;
+                            const p = 2 * (nx * kx + ny * ky + nz * kz) / (u.mass + u2.mass);
+
+                            u.vx -= p * u2.mass * nx;
+                            u.vy -= p * u2.mass * ny;
+                            u.vz -= p * u2.mass * nz;
+                            u2.vx += p * u.mass * nx;
+                            u2.vy += p * u.mass * ny;
+                            u2.vz += p * u.mass * nz;
+                        }
+                    }
+                }
+            }
+
+            function updateNeedle() {
+                const diff = targetNeedleAngle - currentNeedleAngle;
+                currentNeedleAngle += diff * 0.12;
+
+                const needle = document.getElementById('manometerNeedle');
+                if (needle) {
+                    needle.setAttribute('style', `transform-origin: 130px 130px; transform: rotate(${currentNeedleAngle}deg);`);
+                }
+            }
+
+            function setupCameraInteractivity(dom) {
+                let isDragging = false;
+                let prevMouseX = 0;
+                let prevMouseY = 0;
+                let spherical = { radius: 35.5, theta: -2.28, phi: 1.18 };
+                const cameraTarget = new THREE.Vector3(1.1, 1.0, 0);
+
+                function updateCameraPos() {
+                    camera.position.x = cameraTarget.x + spherical.radius * Math.sin(spherical.phi) * Math.sin(spherical.theta);
+                    camera.position.y = cameraTarget.y + spherical.radius * Math.cos(spherical.phi);
+                    camera.position.z = cameraTarget.z + spherical.radius * Math.sin(spherical.phi) * Math.cos(spherical.theta);
+                    camera.lookAt(cameraTarget);
+                }
+
+                updateCameraPos();
+
+                dom.addEventListener('mousedown', e => {
+                    isDragging = true;
+                    prevMouseX = e.clientX;
+                    prevMouseY = e.clientY;
+                });
+                window.addEventListener('mouseup', () => isDragging = false);
+                window.addEventListener('mousemove', e => {
+                    if (!isDragging) return;
+                    const dx = e.clientX - prevMouseX;
+                    const dy = e.clientY - prevMouseY;
+                    prevMouseX = e.clientX;
+                    prevMouseY = e.clientY;
+
+                    spherical.theta -= dx * 0.007;
+                    spherical.phi = Math.max(0.40, Math.min(Math.PI / 2 - 0.08, spherical.phi - dy * 0.007));
+                    updateCameraPos();
+                });
+
+                dom.addEventListener('touchstart', e => {
+                    if (e.touches.length === 1) {
+                        isDragging = true;
+                        prevMouseX = e.touches[0].clientX;
+                        prevMouseY = e.touches[0].clientY;
+                    }
+                });
+                window.addEventListener('touchend', () => isDragging = false);
+                window.addEventListener('touchmove', e => {
+                    if (!isDragging || e.touches.length !== 1) return;
+                    const dx = e.touches[0].clientX - prevMouseX;
+                    const dy = e.touches[0].clientY - prevMouseY;
+                    prevMouseX = e.touches[0].clientX;
+                    prevMouseY = e.touches[0].clientY;
+
+                    spherical.theta -= dx * 0.007;
+                    spherical.phi = Math.max(0.40, Math.min(Math.PI / 2 - 0.08, spherical.phi - dy * 0.007));
+                    updateCameraPos();
+                });
+            }
+
+            function updateGaugePipe() {
+                const stage = document.getElementById('threeContainer');
+                const gauge = document.getElementById('fixedGauge');
+                const overlay = document.getElementById('gaugePipeOverlay');
+                if (!stage || !gauge || !overlay || !camera) return;
+                const sr = stage.getBoundingClientRect();
+                const gr = gauge.getBoundingClientRect();
+                if (!sr.width || !sr.height) return;
+                overlay.setAttribute('viewBox', `0 0 ${sr.width} ${sr.height}`);
+                const topY = boxSize.y / 2 + 0.28;
+                const port = new THREE.Vector3(4.9, topY + 0.51, 0).project(camera);
+                const sx = (port.x * 0.5 + 0.5) * sr.width;
+                const sy = (-port.y * 0.5 + 0.5) * sr.height;
+                // Fixed gauge is a 2D UI element: connect to its lower-left bezel.
+                const gx = gr.left - sr.left + gr.width * 0.29;
+                const gy = gr.bottom - sr.top - gr.height * 0.12;
+                // Start upward from the port; route around the gauge, not over its dial.
+                const midY = Math.min(sy - 32, gy + 17);
+                const elbowX = Math.max(sx + 22, gx - 35);
+                const path = `M ${sx.toFixed(1)} ${sy.toFixed(1)} ` +
+                    `L ${sx.toFixed(1)} ${(sy-22).toFixed(1)} ` +
+                    `Q ${sx.toFixed(1)} ${midY.toFixed(1)} ${(sx+22).toFixed(1)} ${midY.toFixed(1)} ` +
+                    `L ${elbowX.toFixed(1)} ${midY.toFixed(1)} ` +
+                    `Q ${gx.toFixed(1)} ${midY.toFixed(1)} ${gx.toFixed(1)} ${(midY-17).toFixed(1)} ` +
+                    `L ${gx.toFixed(1)} ${gy.toFixed(1)}`;
+                ['gaugePipeShadow', 'gaugePipeBody', 'gaugePipeHighlight'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.setAttribute('d', path);
+                });
+            }
+
+            function onWindowResize() {
+                const container = document.getElementById('threeContainer');
+                if (!container || !renderer || !camera) return;
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                if (width === 0 || height === 0) return;
+                
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height);
+                updateGaugePipe();
+
+                const latexElem = document.getElementById('latexIdealGasFormula');
+                if (latexElem) fitFormula(latexElem);
+            }
+
+            function animate() {
+                requestAnimationFrame(animate);
+
+                if (isRunning) {
+                    updatePhysics();
+                    updateWallImpacts();
+                }
+                updateNeedle();
+                updateGaugePipe();
+                updateDiamondSparkles();
+
+                renderer.render(scene, camera);
+            }
+
+            window.onload = function () {
+                initManometerDial();
+                initThreeScene();
+                resetDefaults();
+                animate();
+            };
+        </script>
+    
+</body></html>

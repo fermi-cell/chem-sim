@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>道爾頓分壓定律 互動模擬實驗室</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(circle at 50% 20%, #1e293b, #0f172a 80%);
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .container {
+      max-width: 860px;
+      width: 100%;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 9999px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 40%, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p.subtitle {
+      color: #94a3b8;
+      font-size: 1.05rem;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    .card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: transparent;
+      transition: background 0.3s;
+    }
+    .card.diamond:hover {
+      transform: translateY(-6px);
+      border-color: rgba(56, 189, 248, 0.5);
+      box-shadow: 0 20px 35px -10px rgba(56, 189, 248, 0.25);
+    }
+    .card.diamond:hover::before {
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+    }
+    .card.stone:hover {
+      transform: translateY(-6px);
+      border-color: rgba(251, 191, 36, 0.5);
+      box-shadow: 0 20px 35px -10px rgba(251, 191, 36, 0.2);
+    }
+    .card.stone:hover::before {
+      background: linear-gradient(90deg, #fbbf24, #f97316);
+    }
+    .icon {
+      font-size: 3.5rem;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+    }
+    .card h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .card p {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 24px;
+      flex-grow: 1;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .card.diamond .btn {
+      background: #0284c7;
+      color: #ffffff;
+    }
+    .card.diamond:hover .btn {
+      background: #38bdf8;
+      color: #0f172a;
+    }
+    .card.stone .btn {
+      background: #d97706;
+      color: #ffffff;
+    }
+    .card.stone:hover .btn {
+      background: #fbbf24;
+      color: #0f172a;
+    }
+    footer {
+      color: #64748b;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="badge">化學教學互動模擬</div>
+    <h1>道爾頓分壓定律 (Dalton's Law)</h1>
+    <p class="subtitle">探索氣體分壓、莫耳分率與固體體積佔位的動態實驗模型<br>請選擇欲進入的模擬主題版本：</p>
+
+    <div class="grid">
+      <!-- 鑽石版 -->
+      <a href="partial-pressure-diamond.html" class="card diamond">
+        <div class="icon">💎</div>
+        <h2>閃耀鑽石版</h2>
+        <p>晶瑩剔透的晶體切面風格，搭配折射微光粒子與精緻細節，視覺效果豐富鮮明。</p>
+        <div class="btn">進入實驗模擬 &rarr;</div>
+      </a>
+
+      <!-- 石頭版 -->
+      <a href="partial-pressure-stone.html" class="card stone">
+        <div class="icon">🪨</div>
+        <h2>天然岩石版</h2>
+        <p>擬真不規則礦石質感，自然沉穩的地質風格，真實還原固體佔位的不規則體積概念。</p>
+        <div class="btn">進入實驗模擬 &rarr;</div>
+      </a>
+    </div>
+
+    <footer>
+      國立中壢高級中學化學科 ‧ 互動教學實驗室
+    </footer>
+  </div>
+</body>
+</html>
