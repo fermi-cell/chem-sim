@@ -854,7 +854,7 @@
     }
     .ctrl-group {
       display: grid !important;
-      grid-template-columns: repeat(3, 1fr) !important;
+      grid-template-columns: repeat(4, 1fr) !important;
       gap: 4px !important;
       width: 100% !important;
     }
@@ -1164,8 +1164,6 @@
     </div>
     <div class="header-right">
       <div id="statusBanner" class="status-pill eq">✨ 飽和動態平衡！（R蒸發＝R凝結，P = 23.8 mmHg / 0.031 atm 定值）</div>
-      <button id="btnOpenBoilingModal" class="btn-boiling-feature" title="點擊觀看『蒸發 vs 沸騰』蒸氣壓與外界大氣壓微觀力學動畫">🫧 沸騰動畫</button>
-      <button id="btnDownloadHTML" class="btn-download" title="下載完整單一 HTML 檔案至電腦全螢幕播放">💾 下載</button>
     </div>
   </header>
 
@@ -1175,10 +1173,12 @@
     <div class="ctrl-group">
       <button id="btnPlay" class="btn-play" style="background:#059669; border-color:#34d399; box-shadow:0 0 10px rgba(16,185,129,0.45);">▶️ 開始</button>
       <button id="btnEq" class="btn-eq" title="直接跳至目前體積下的平衡狀態">⚡ 跳至平衡</button>
-      <button id="btnInject" class="btn-inject" title="額外注入 6 顆水蒸氣分子（過量注入氣壓過大會衝爆活塞！）">💨 注入(+6)</button>
-      <button id="btnExtract" class="btn-extract" title="抽出 6 顆氣相水蒸氣分子（降壓演示）" style="background:#0284c7; border:1.5px solid #38bdf8; color:#fff; padding:5px 10px; border-radius:8px; font-weight:800; cursor:pointer; font-size:clamp(0.78rem, 1.05vw, 0.98rem); transition:all 0.15s ease;">🌪️ 抽出(-6)</button>
       <button id="btnReset" title="重置回 0 秒真空與 V=1.80L">🔄 重來(0s)</button>
       <button id="btnToggleLid" style="background:#334155; border:1.5px solid #64748b; color:#fff;" title="在『敞開系統（無蓋逸散）』與『密閉系統（活塞封閉）』之間切換">🪟 拿走蓋子</button>
+      <button id="btnInject" class="btn-inject" title="額外注入 6 顆水蒸氣分子（過量注入氣壓過大會衝爆活塞！）">💨 注入(+6)</button>
+      <button id="btnExtract" class="btn-extract" title="抽出 6 顆氣相水蒸氣分子（降壓演示）" style="background:#0284c7; border:1.5px solid #38bdf8; color:#fff; padding:5px 10px; border-radius:8px; font-weight:800; cursor:pointer; font-size:clamp(0.78rem, 1.05vw, 0.98rem); transition:all 0.15s ease;">🌪️ 抽出(-6)</button>
+      <button id="btnOpenBoilingModal" class="btn-boiling-feature" title="點擊觀看『蒸發 vs 沸騰』蒸氣壓與外界大氣壓微觀力學動畫">🫧 沸騰動畫</button>
+      <button id="btnDownloadHTML" class="btn-download" title="下載完整單一 HTML 檔案至電腦全螢幕播放">💾 下載</button>
     </div>
 
     <!-- 中左：醒目黃框「速度調節滑桿 (支援高達 3x)」 -->
@@ -1523,8 +1523,11 @@
     const rx = cylW / 2;
     const ry = Math.max(9, Math.min(16, rx * 0.075));
 
-    // 水層深度：底部為 vesselBottomY，水面為 surfaceY
-    const maxWaterH = Math.min(95, cylH * 0.22);
+    // 水層深度：等比例降低水面（滿水時約在 0.75L 刻度線處，位於 1.0L 刻度以下）：
+    // 讓 1.0L ~ 1.80L 下的氣相室留有寬敞高度，活塞絕不壓扁速率箭頭！
+    const totalSpanY = vesselBottomY - highestPistonBottomY;
+    const oneLiterPx = totalSpanY / MAX_V;
+    const maxWaterH = oneLiterPx * 0.75;
     const waterH = (liquidCount / INITIAL_TOTAL_H2O) * maxWaterH;
     const surfaceY = vesselBottomY - waterH;
 
@@ -3128,7 +3131,8 @@
     const isAtEq = (st.gasCount === st.achievableEqGas && st.liquidCount > 0);
     const displayRCond = (st.gasCount === 0 || isOpenContainer) ? 0 : (isAtEq ? st.rEvap : (smoothRCond || st.rCond));
 
-    const baseArrowPx = isZoomingSurface ? 28 : 38;
+    const isNarrow = g.w < 520;
+    const baseArrowPx = isZoomingSurface ? 24 : (isNarrow ? 20 : 32);
     const evapArrowLen = getRateArrowLen(st.rEvap, baseArrowPx);
     const condArrowLen = getRateArrowLen(displayRCond, baseArrowPx);
 
