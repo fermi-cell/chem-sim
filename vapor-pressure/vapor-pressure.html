@@ -146,11 +146,29 @@
     border-bottom: 1.5px solid #334155;
     padding: 6px 14px;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     min-width: 0;
+  }
+  .sliders-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+  }
+  .speed-box input[type="range"] {
+    width: 70px;
+  }
+  .vol-box input[type="range"] {
+    width: 75px;
+  }
+  .vol-box input[type="number"] {
+    width: 44px;
+    font-size: 0.8rem;
+    padding: 2px 3px;
   }
   .ctrl-group {
     display: flex;
@@ -853,22 +871,30 @@
       justify-content: center !important;
       border-radius: 6px !important;
     }
-    .speed-box, .slider-pill {
+    .sliders-group {
+      display: flex !important;
+      flex-direction: row !important;
+      gap: 5px !important;
       width: 100% !important;
-      padding: 4px 8px !important;
-      font-size: 0.75rem !important;
-      gap: 6px !important;
+    }
+    .sliders-group .slider-pill {
+      flex: 1 1 0 !important;
+      min-width: 0 !important;
+      width: 50% !important;
+      padding: 3px 6px !important;
+      font-size: 0.72rem !important;
+      gap: 4px !important;
       min-height: 30px !important;
       box-sizing: border-box !important;
     }
     .slider-pill input[type="range"] {
       flex: 1 !important;
-      min-width: 70px !important;
+      min-width: 45px !important;
     }
     .slider-pill input[type="number"] {
-      width: 48px !important;
-      font-size: 0.76rem !important;
-      padding: 2px 3px !important;
+      width: 40px !important;
+      font-size: 0.74rem !important;
+      padding: 1px 2px !important;
     }
 
     /* 主視覺區：加入 safe-area 留白 */
@@ -960,11 +986,13 @@
       flex-shrink: 0 !important;
     }
     .t-btn-vert {
-      flex-shrink: 0 !important;
-      min-width: 60px !important;
+      flex: 0 0 56px !important;
+      width: 56px !important;
+      min-width: 56px !important;
+      max-width: 56px !important;
       height: 28px !important;
-      padding: 2px 8px !important;
-      font-size: 0.78rem !important;
+      padding: 2px 2px !important;
+      font-size: 0.76rem !important;
       font-weight: 800 !important;
       border-radius: 6px !important;
       margin-bottom: 0 !important;
@@ -973,6 +1001,7 @@
       align-items: center !important;
       justify-content: center !important;
       white-space: nowrap !important;
+      box-sizing: border-box !important;
     }
     .sim-floating-tools .btn-zoom-tool {
       flex-shrink: 0 !important;
@@ -1296,20 +1325,23 @@
       <button id="btnDownloadHTML" class="btn-download" title="下載完整單一 HTML 檔案至電腦全螢幕播放">💾 下載</button>
     </div>
 
-    <!-- 中左：醒目黃框「速度調節滑桿 (支援高達 3x)」 -->
-    <div class="slider-pill speed-box">
-      <span id="speedIcon" style="color:#fef08a;">🐢 速度：</span>
-      <input type="range" id="speedSlider" min="0.1" max="3.0" step="0.1" value="0.5">
-      <span id="speedLabel" style="color:#fef08a; min-width:36px; font-family:monospace;">0.5x</span>
-      <button id="btnSpeed3x" type="button" style="padding:2px 7px; font-size:0.75rem; font-weight:900; background:#ca8a04; border:1.5px solid #fde047; border-radius:6px; color:#fff; cursor:pointer;" title="一鍵切換至 3.0x 高速">⚡3x</button>
-    </div>
+    <!-- 右區：滑桿群組容器（桌機單一橫列、手機並排或流式） -->
+    <div class="sliders-group">
+      <!-- 速度調節滑桿 -->
+      <div class="slider-pill speed-box">
+        <span id="speedIcon" style="color:#fef08a;">🐢 速度：</span>
+        <input type="range" id="speedSlider" min="0.1" max="3.0" step="0.1" value="0.5">
+        <span id="speedLabel" style="color:#fef08a; min-width:30px; font-family:monospace;">0.5x</span>
+        <button id="btnSpeed3x" type="button" style="padding:2px 6px; font-size:0.74rem; font-weight:900; background:#ca8a04; border:1.5px solid #fde047; border-radius:6px; color:#fff; cursor:pointer;" title="一鍵切換至 3.0x 高速">⚡3x</button>
+      </div>
 
-    <!-- 中右：活塞體積滑桿與鍵盤輸入 (支援打字輸入) -->
-    <div class="slider-pill">
-      <span style="color:#93c5fd;">↕ 活塞體積 V：</span>
-      <input type="range" id="volSlider" min="1.0" max="6.0" step="0.05" value="1.8">
-      <input type="number" id="volNumInput" min="1.0" max="6.0" step="0.05" value="1.80" title="可直接鍵盤打字輸入體積 (1.00 ~ 6.00 L)">
-      <span style="color:#38bdf8; font-weight:800;">L</span>
+      <!-- 活塞體積滑桿與鍵盤輸入 -->
+      <div class="slider-pill vol-box">
+        <span style="color:#93c5fd;">↕ V：</span>
+        <input type="range" id="volSlider" min="1.0" max="6.0" step="0.05" value="1.8">
+        <input type="number" id="volNumInput" min="1.0" max="6.0" step="0.05" value="1.80" title="可直接鍵盤打字輸入體積 (1.00 ~ 6.00 L)">
+        <span style="color:#38bdf8; font-weight:800;">L</span>
+      </div>
     </div>
   </div>
 
@@ -1353,7 +1385,7 @@
           <div class="card-top">
             <div style="display:flex; align-items:center; gap:8px;">
               <div>📈 蒸發 vs. 凝結速率 <span style="color:#94a3b8; font-size:0.85em;">(0秒起完整趨勢)</span></div>
-              <button id="btnZoomRate" class="btn-zoom-tool" title="獨立放大『蒸發 vs. 凝結速率』圖表">⛶ 放大此區</button>
+              
             </div>
             <div class="legend-row">
               <span class="legend-tag" style="color:#fdba74;"><i class="dot" style="background:var(--evap-color);"></i>蒸發 R<sub>蒸發</sub></span>
@@ -1371,7 +1403,7 @@
             <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
               <div>📊 蒸氣壓對體積 P-V 圖</div>
               <button id="btnScaleToggle" style="padding:2px 8px; font-size:0.75rem; font-weight:800; border-radius:6px; background:#1e293b; border:1px solid #475569; color:#fde047; cursor:pointer;" title="切換『當前溫度最適刻度』或『0~850 mmHg 全域對比』">🔍 最適刻度</button>
-              <button id="btnZoomPV" class="btn-zoom-tool" title="獨立放大『蒸氣壓對體積 P-V 圖』">⛶ 放大此區</button>
+              
             </div>
             <div class="legend-row">
               <span class="legend-tag" style="color:#86efac;"><i class="dot" style="background:#22c55e;"></i>理論線</span>
@@ -1623,7 +1655,7 @@
     const isNarrow = w < 520;
 
     // 頂口位置：手機微調給頂部溫度列留出充足空間
-    const vesselTopRimY = isNarrow ? 72 : 60;
+    const vesselTopRimY = isNarrow ? 84 : 60;
     const vesselBottomY = h - (isNarrow ? 18 : 28);
     const cylH = Math.max(160, vesselBottomY - vesselTopRimY);
 
@@ -2519,10 +2551,13 @@
    * 4. 修長 3D 玻璃圓柱與活塞渲染
    * ===================================================================== */
   function draw3DH2OMolecule(ctx, x, y, angle, scale = 1.0, depthLayer = 1, glowCol = null, isGold = false) {
+    const isNarrow = ctx.canvas.width / window.devicePixelRatio < 520;
+    const molScaleMult = isNarrow ? 0.74 : 1.0;
+    const finalScale = scale * molScaleMult;
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(angle);
-    ctx.scale(scale, scale);
+    ctx.scale(finalScale, finalScale);
 
     if (glowCol) {
       const g = ctx.createRadialGradient(0, 0, 2, 0, 0, 14);
@@ -3333,7 +3368,7 @@
     if (isExploded) {
       simCtx.save();
       const isNarrow = g.w < 520;
-      const py = isNarrow ? 38 : 12;
+      const py = isNarrow ? 48 : 12;
       const pw = Math.min(g.w - 20, 440);
       simCtx.fillStyle = 'rgba(153, 27, 27, 0.95)';
       simCtx.strokeStyle = '#ef4444';
@@ -3353,7 +3388,7 @@
       simCtx.save();
       const isInitialStandby = (simTimeSec === 0 && gasMolecules.length === 0);
       const isNarrow = g.w < 520;
-      const py = isNarrow ? 38 : 12;
+      const py = isNarrow ? 48 : 12;
       const pw = Math.min(g.w - 20, 450);
       simCtx.fillStyle = isInitialStandby ? 'rgba(6, 78, 59, 0.95)' : 'rgba(124, 45, 18, 0.95)';
       simCtx.strokeStyle = isInitialStandby ? '#34d399' : '#fb923c';
@@ -4427,19 +4462,13 @@
       btnZoomCharts.classList.toggle('active-zoom', isChartZoomed);
       btnZoomCharts.textContent = isChartZoomed ? '🗗 恢復並排' : '⛶ 放大圖表';
     }
-    [btnZoomRate, btnZoomPV].forEach(btn => {
-      if (!btn) return;
-      btn.classList.toggle('active-zoom', isChartZoomed);
-      btn.textContent = isChartZoomed ? '🗗 恢復並排' : '⛶ 放大此區';
-    });
+// sub-panel zoom buttons removed
     requestAnimationFrame(() => {
       resizeAllCanvases();
     });
   }
 
   if (btnZoomSim) btnZoomSim.addEventListener('click', () => togglePanelZoom('sim'));
-  if (btnZoomRate) btnZoomRate.addEventListener('click', () => togglePanelZoom('rate'));
-  if (btnZoomPV) btnZoomPV.addEventListener('click', () => togglePanelZoom('pv'));
   if (btnZoomCharts) btnZoomCharts.addEventListener('click', () => togglePanelZoom('charts'));
 
   /* =====================================================================
