@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-TW"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>水蒸發與凝結平衡、飽和蒸氣壓與波以耳定律 (3D 課堂版)</title>
 <style>
   :root {
@@ -145,40 +148,41 @@
     background: linear-gradient(135deg, #047857, #0f766e);
   }
 
-  /* 第二列：講台核心控制列 */
+  /* 第二列：講台核心控制列（桌機保證絕對同一列不折行） */
   .top-control-bar {
     background: rgba(15, 23, 42, 0.95);
     border-bottom: 1.5px solid #334155;
-    padding: 6px 14px;
+    padding: 6px 12px;
     display: flex;
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center;
     gap: 8px;
     min-width: 0;
+    overflow-x: auto;
   }
   .sliders-group {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: nowrap;
     flex-shrink: 0;
   }
   .speed-box input[type="range"] {
-    width: 70px;
+    width: 65px;
   }
   .vol-box input[type="range"] {
-    width: 75px;
+    width: 70px;
   }
   .vol-box input[type="number"] {
-    width: 44px;
-    font-size: 0.8rem;
+    width: 42px;
+    font-size: 0.78rem;
     padding: 2px 3px;
   }
   .ctrl-group {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
     flex-wrap: nowrap;
     flex-shrink: 0;
   }
@@ -186,15 +190,15 @@
     background: #1e293b;
     color: #ffffff;
     border: 1.5px solid #475569;
-    padding: 5px 10px;
-    border-radius: 8px;
-    font-size: clamp(0.76rem, 1.02vw, 0.95rem);
+    padding: 4px 8px;
+    border-radius: 7px;
+    font-size: clamp(0.74rem, 0.95vw, 0.88rem);
     font-weight: 800;
     cursor: pointer;
     transition: all 0.15s ease;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 3px;
     white-space: nowrap;
   }
   button:hover { background: #334155; border-color: #94a3b8; }
