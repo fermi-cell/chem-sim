@@ -798,103 +798,182 @@
       background: #090e1c !important;
     }
 
-    /* 頂部列：彈性換行，標題與橫幅清晰展開 */
+    /* 頂部列：緊湊排版，避免吃過多垂直高度 */
     header {
-      padding: 8px 12px !important;
+      padding: 6px 10px !important;
       flex-wrap: wrap !important;
-      gap: 8px !important;
+      gap: 6px !important;
     }
     .brand-group {
       gap: 6px !important;
     }
     header h1 {
-      font-size: 1.15rem !important;
+      font-size: 1.05rem !important;
     }
     .header-right {
       width: 100% !important;
-      justify-content: flex-start !important;
-      flex-wrap: wrap !important;
-      gap: 6px !important;
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      gap: 5px !important;
+      align-items: center !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: none !important;
+    }
+    .header-right::-webkit-scrollbar {
+      display: none !important;
     }
     .status-pill {
-      width: 100% !important;
-      font-size: 0.8rem !important;
+      flex: 1 1 auto !important;
+      font-size: 0.74rem !important;
       white-space: normal !important;
-      line-height: 1.4 !important;
+      line-height: 1.35 !important;
       text-align: left !important;
-      padding: 6px 10px !important;
-      border-radius: 8px !important;
+      padding: 5px 8px !important;
+      border-radius: 6px !important;
+      min-width: 150px !important;
+    }
+    .btn-boiling-feature, .btn-download {
+      flex-shrink: 0 !important;
+      padding: 4px 8px !important;
+      font-size: 0.74rem !important;
+      height: 28px !important;
     }
 
-    /* 控制列：直立堆疊流式換行 */
+    /* 控制列：精簡格狀與滑桿，省下大約 80px 垂直高度 */
     .top-control-bar {
-      padding: 8px 12px !important;
-      gap: 8px !important;
+      padding: 6px 10px !important;
+      gap: 6px !important;
       flex-direction: column !important;
       align-items: stretch !important;
     }
     .ctrl-group {
-      display: flex !important;
-      flex-wrap: wrap !important;
-      gap: 6px !important;
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 4px !important;
       width: 100% !important;
     }
     .ctrl-group button {
-      flex: 1 1 auto !important;
-      min-width: 75px !important;
-      min-height: 36px !important;
-      padding: 6px 8px !important;
-      font-size: 0.82rem !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 32px !important;
+      padding: 4px 2px !important;
+      font-size: 0.76rem !important;
+      font-weight: 800 !important;
       justify-content: center !important;
+      border-radius: 6px !important;
     }
-    .speed-box {
+    .speed-box, .slider-pill {
       width: 100% !important;
-      justify-content: space-between !important;
-    }
-    .slider-pill {
-      width: 100% !important;
-      padding: 6px 10px !important;
-      justify-content: space-between !important;
+      padding: 4px 8px !important;
+      font-size: 0.75rem !important;
+      gap: 6px !important;
+      min-height: 30px !important;
+      box-sizing: border-box !important;
     }
     .slider-pill input[type="range"] {
       flex: 1 !important;
-      min-width: 100px !important;
+      min-width: 70px !important;
+    }
+    .slider-pill input[type="number"] {
+      width: 48px !important;
+      font-size: 0.76rem !important;
+      padding: 2px 3px !important;
     }
 
-    /* 主視覺區：從左右雙欄改為「上下堆疊」 */
+    /* 主視覺區：垂直堆疊，底部加入 safe-area-inset 留白，防止 Safari 網址列遮擋 */
     main {
       display: flex !important;
       flex-direction: column !important;
-      gap: 14px !important;
-      padding: 8px 12px 32px 12px !important;
+      gap: 10px !important;
+      padding: 6px 10px calc(45px + env(safe-area-inset-bottom, 20px)) 10px !important;
       height: auto !important;
       min-height: 0 !important;
       overflow: visible !important;
     }
 
-    /* 上方：3D 活塞量筒卡片滿版 */
+    /* 3D 活塞量筒卡片：溫度列改為橫向頂部排列，圓筒居中放大 */
     #panelSim {
       width: 100% !important;
-      height: 440px !important;
-      min-height: 420px !important;
+      height: auto !important;
+      min-height: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      padding: 6px !important;
       flex-shrink: 0 !important;
     }
-    .sim-floating-tools {
-      top: 10px !important;
-      left: 6px !important;
-      gap: 4px !important;
-      width: 62px !important;
-    }
-    .sim-floating-tools .btn-zoom-tool,
-    .temp-control-pod {
-      width: 62px !important;
-    }
-    .t-btn-vert {
-      font-size: 0.75rem !important;
-      padding: 4px 1px !important;
+    .canvas-box {
+      width: 100% !important;
+      height: 380px !important;
+      min-height: 360px !important;
+      position: relative !important;
     }
 
-    /* 下方：圖表區滿版依次往下排列 */
+    /* 浮動工具與溫度控制器：改為在量筒上方橫向整齊展開 */
+    .sim-floating-tools {
+      position: static !important;
+      width: 100% !important;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 5px !important;
+      margin-bottom: 6px !important;
+      padding: 0 !important;
+      z-index: 5 !important;
+    }
+    .temp-control-pod {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 3px !important;
+      flex: 1 !important;
+      width: auto !important;
+      margin: 0 !important;
+      padding: 2px 4px !important;
+      background: rgba(15, 23, 42, 0.92) !important;
+      border: 1px solid #334155 !important;
+      border-radius: 8px !important;
+    }
+    .temp-pod-title {
+      font-size: 0.72rem !important;
+      font-weight: 800 !important;
+      white-space: nowrap !important;
+      padding-right: 2px !important;
+      margin-bottom: 0 !important;
+    }
+    .t-btn-vert {
+      flex: 1 1 0 !important;
+      height: 28px !important;
+      padding: 2px 1px !important;
+      font-size: 0.76rem !important;
+      font-weight: 800 !important;
+      border-radius: 6px !important;
+      margin-bottom: 0 !important;
+      line-height: 1 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      white-space: nowrap !important;
+    }
+    .sim-floating-tools .btn-zoom-tool {
+      width: auto !important;
+      height: 28px !important;
+      padding: 3px 6px !important;
+      font-size: 0.74rem !important;
+      font-weight: 800 !important;
+      border-radius: 6px !important;
+      white-space: nowrap !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-shrink: 0 !important;
+    }
+    .sim-floating-tools .btn-zoom-tool br {
+      display: none !important;
+    }
+
+    /* 下方：圖表檢視工具列支援「水平左右滑動」膠囊排版 */
     .right-stack {
       width: 100% !important;
       height: auto !important;
@@ -903,6 +982,70 @@
       flex-direction: column !important;
       gap: 8px !important;
     }
+    .right-view-toolbar {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      padding: 6px 8px !important;
+      gap: 6px !important;
+      scrollbar-width: none !important;
+      align-items: center !important;
+      background: rgba(15, 23, 42, 0.85) !important;
+      border-radius: 8px !important;
+    }
+    .right-view-toolbar::-webkit-scrollbar {
+      display: none !important;
+    }
+    .right-view-toolbar .tb-label {
+      flex-shrink: 0 !important;
+      font-size: 0.78rem !important;
+      font-weight: 800 !important;
+    }
+    .right-view-toolbar button {
+      flex-shrink: 0 !important;
+      font-size: 0.76rem !important;
+      padding: 4px 9px !important;
+      white-space: nowrap !important;
+      border-radius: 6px !important;
+    }
+
+    /* 圖表頂部標籤與圖例：支援水平左右滑動 */
+    .card-top {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: none !important;
+      gap: 8px !important;
+      padding: 6px 8px !important;
+      align-items: center !important;
+    }
+    .card-top::-webkit-scrollbar {
+      display: none !important;
+    }
+    .card-top > div {
+      flex-shrink: 0 !important;
+      white-space: nowrap !important;
+    }
+    .legend-row {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      gap: 5px !important;
+      flex-shrink: 0 !important;
+      overflow-x: auto !important;
+      scrollbar-width: none !important;
+    }
+    .legend-row::-webkit-scrollbar {
+      display: none !important;
+    }
+    .legend-tag {
+      flex-shrink: 0 !important;
+      white-space: nowrap !important;
+      font-size: 0.74rem !important;
+      padding: 2px 5px !important;
+    }
+
     .charts-container {
       display: flex !important;
       flex-direction: column !important;
@@ -935,6 +1078,7 @@
     }
   }
 
+  
   /* 📲 手機橫放模式 (高度 <= 520px，寬度寬) */
   @media (max-height: 520px) and (orientation: landscape) {
     html, body {
@@ -1333,14 +1477,15 @@
   function getCylinderGeometry() {
     const w = simCanvas.width / window.devicePixelRatio;
     const h = simCanvas.height / window.devicePixelRatio;
+    const isNarrow = w < 520;
 
-    // 頂口由 12 下移至 60（降低約 2 個刻度格高度，給瓶口上方與頂部橫幅留出寬裕天空空間）
-    const vesselTopRimY = 60;
-    const vesselBottomY = h - 28;
-    const cylH = Math.max(200, vesselBottomY - vesselTopRimY);
+    // 頂口位置：手機微調給頂部更多餘裕
+    const vesselTopRimY = isNarrow ? 48 : 60;
+    const vesselBottomY = h - (isNarrow ? 20 : 28);
+    const cylH = Math.max(180, vesselBottomY - vesselTopRimY);
 
-    // 圓柱體玻璃寬度適應左側 1:1 寬闊面板：兩側各保留 88px 給速率標籤卡片，確保兩側大字卡片絕不出框！
-    const maxAllowedW = Math.max(180, w - 176);
+    // 圓柱體玻璃寬度：手機版自適應比例，確保兩側速率小卡與中央圓筒比例完美平衡
+    const maxAllowedW = isNarrow ? Math.max(170, Math.min(w * 0.64, 270)) : Math.max(180, w - 176);
     const maxCap = zoomedPanel === 'sim' ? 620 : 380;
     const cylW = Math.min(maxAllowedW, maxCap);
     const cx = w * 0.5;
@@ -2360,15 +2505,16 @@
   // 瓶外獨立標籤卡片（置於玻璃量筒兩側邊緣外側，直排文字，絕不出框）
   function drawOutsideRateBadge(ctx, cylinderEdgeX, baseY, isLeft, colorHex, rateVal, isDry = false) {
     ctx.save();
-    const bw = 64;
-    const bh = 120;
     const canvasW = ctx.canvas.width / window.devicePixelRatio;
     const canvasH = ctx.canvas.height / window.devicePixelRatio;
-    const gap = 10;
+    const isNarrow = canvasW < 520;
+    const bw = isNarrow ? 52 : 64;
+    const bh = isNarrow ? 98 : 120;
+    const gap = isNarrow ? 5 : 10;
     const rawBx = isLeft ? (cylinderEdgeX - bw - gap) : (cylinderEdgeX + gap);
-    const bx = isLeft ? Math.max(8, Math.min(cylinderEdgeX - bw - 4, rawBx)) : Math.min(canvasW - bw - 8, Math.max(cylinderEdgeX + 4, rawBx));
-    // 垂直嚴格限制在畫布安全範圍內（上下至少預留 12px），絕不出框！
-    const by = Math.max(12, Math.min(canvasH - bh - 12, baseY - bh * 0.5));
+    const bx = isLeft ? Math.max(4, Math.min(cylinderEdgeX - bw - 2, rawBx)) : Math.min(canvasW - bw - 4, Math.max(cylinderEdgeX + 2, rawBx));
+    // 垂直嚴格限制在畫布安全範圍內（上下至少預留 8px），絕不出框！
+    const by = Math.max(8, Math.min(canvasH - bh - 8, baseY - bh * 0.5));
 
     // 外置卡片半透明深色玻璃背景
     ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
@@ -2399,80 +2545,80 @@
     // 🌟 蒸發、凝結、速率字體統一放大至 900 15px，與下方「定值/平衡」等大醒目且絕不出框！
     ctx.textAlign = 'center';
     ctx.fillStyle = colorHex;
-    ctx.font = '900 15px "PingFang TC", sans-serif';
-    ctx.fillText(isLeft ? '↑ 蒸發' : '↓ 凝結', bx + bw / 2, by + 21);
-    ctx.fillText('速率', bx + bw / 2, by + 39);
+    ctx.font = isNarrow ? '900 13px "PingFang TC", sans-serif' : '900 15px "PingFang TC", sans-serif';
+    ctx.fillText(isLeft ? '↑ 蒸發' : '↓ 凝結', bx + bw / 2, by + (isNarrow ? 18 : 21));
+    ctx.fillText('速率', bx + bw / 2, by + (isNarrow ? 33 : 39));
 
     // 小分隔線
     ctx.strokeStyle = 'rgba(255,255,255,0.2)';
     ctx.lineWidth = 1.0;
     ctx.beginPath();
-    ctx.moveTo(bx + 8, by + 47);
-    ctx.lineTo(bx + bw - 8, by + 47);
+    ctx.moveTo(bx + 6, by + (isNarrow ? 40 : 47));
+    ctx.lineTo(bx + bw - 6, by + (isNarrow ? 40 : 47));
     ctx.stroke();
 
-    // 數值與狀態直排文字（大字體 15~16px，各行留白充裕，絕不出框）
+    // 數值與狀態直排文字
     if (isLeft) {
       if (isDry) {
         ctx.fillStyle = '#fda4af';
-        ctx.font = '900 15px "PingFang TC", sans-serif';
-        ctx.fillText('已蒸乾', bx + bw / 2, by + 72);
-        ctx.font = '900 18px monospace';
-        ctx.fillText('0', bx + bw / 2, by + 98);
+        ctx.font = isNarrow ? '900 13px "PingFang TC", sans-serif' : '900 15px "PingFang TC", sans-serif';
+        ctx.fillText('已蒸乾', bx + bw / 2, by + (isNarrow ? 60 : 72));
+        ctx.font = isNarrow ? '900 15px monospace' : '900 18px monospace';
+        ctx.fillText('0', bx + bw / 2, by + (isNarrow ? 82 : 98));
       } else {
         ctx.fillStyle = '#fde047';
-        ctx.font = '900 16px "PingFang TC", sans-serif';
-        ctx.fillText(`${currentTemp}°C`, bx + bw / 2, by + 72);
+        ctx.font = isNarrow ? '900 13.5px "PingFang TC", sans-serif' : '900 16px "PingFang TC", sans-serif';
+        ctx.fillText(`${currentTemp}°C`, bx + bw / 2, by + (isNarrow ? 60 : 72));
         ctx.fillStyle = '#fed7aa';
-        ctx.font = '900 15px "PingFang TC", sans-serif';
-        ctx.fillText('定值', bx + bw / 2, by + 98);
+        ctx.font = isNarrow ? '900 13px "PingFang TC", sans-serif' : '900 15px "PingFang TC", sans-serif';
+        ctx.fillText('定值', bx + bw / 2, by + (isNarrow ? 82 : 98));
       }
     } else {
       const st = getThermodynamicState();
       const isAtEq = (st.gasCount === st.achievableEqGas && st.liquidCount > 0);
       if (isDry || st.isDry) {
         ctx.fillStyle = '#fda4af';
-        ctx.font = '900 15px "PingFang TC", sans-serif';
-        ctx.fillText('無相變', bx + bw / 2, by + 72);
-        ctx.font = '900 14px "PingFang TC", sans-serif';
-        ctx.fillText('純氣相', bx + bw / 2, by + 98);
+        ctx.font = isNarrow ? '900 13px "PingFang TC", sans-serif' : '900 15px "PingFang TC", sans-serif';
+        ctx.fillText('無相變', bx + bw / 2, by + (isNarrow ? 60 : 72));
+        ctx.font = isNarrow ? '900 12px "PingFang TC", sans-serif' : '900 14px "PingFang TC", sans-serif';
+        ctx.fillText('純氣相', bx + bw / 2, by + (isNarrow ? 82 : 98));
       } else if (isOpenContainer) {
         ctx.fillStyle = '#7dd3fc';
-        ctx.font = '900 17px monospace';
-        ctx.fillText('0', bx + bw / 2, by + 70);
+        ctx.font = isNarrow ? '900 15px monospace' : '900 17px monospace';
+        ctx.fillText('0', bx + bw / 2, by + (isNarrow ? 58 : 70));
         ctx.fillStyle = '#94a3b8';
-        ctx.font = 'bold 12px "PingFang TC", sans-serif';
-        ctx.fillText('敞開逸散', bx + bw / 2, by + 90);
-        ctx.font = 'bold 11px "PingFang TC", sans-serif';
-        ctx.fillText('無凝結', bx + bw / 2, by + 107);
+        ctx.font = isNarrow ? 'bold 11px "PingFang TC", sans-serif' : 'bold 12px "PingFang TC", sans-serif';
+        ctx.fillText('敞開逸散', bx + bw / 2, by + (isNarrow ? 76 : 90));
+        ctx.font = isNarrow ? 'bold 10px "PingFang TC", sans-serif' : 'bold 11px "PingFang TC", sans-serif';
+        ctx.fillText('無凝結', bx + bw / 2, by + (isNarrow ? 90 : 107));
       } else if (isAtEq) {
         ctx.fillStyle = '#4ade80';
-        ctx.font = '900 16px "PingFang TC", sans-serif';
-        ctx.fillText('＝蒸發', bx + bw / 2, by + 72);
+        ctx.font = isNarrow ? '900 13.5px "PingFang TC", sans-serif' : '900 16px "PingFang TC", sans-serif';
+        ctx.fillText('＝蒸發', bx + bw / 2, by + (isNarrow ? 60 : 72));
         ctx.fillStyle = '#86efac';
-        ctx.font = '900 15px "PingFang TC", sans-serif';
-        ctx.fillText('平衡', bx + bw / 2, by + 98);
+        ctx.font = isNarrow ? '900 13px "PingFang TC", sans-serif' : '900 15px "PingFang TC", sans-serif';
+        ctx.fillText('平衡', bx + bw / 2, by + (isNarrow ? 82 : 98));
       } else if (st.gasCount === 0) {
         ctx.fillStyle = '#7dd3fc';
-        ctx.font = '900 17px monospace';
-        ctx.fillText('0', bx + bw / 2, by + 72);
+        ctx.font = isNarrow ? '900 15px monospace' : '900 17px monospace';
+        ctx.fillText('0', bx + bw / 2, by + (isNarrow ? 60 : 72));
         ctx.fillStyle = '#94a3b8';
-        ctx.font = '900 15px "PingFang TC", sans-serif';
-        ctx.fillText('初真空', bx + bw / 2, by + 98);
+        ctx.font = isNarrow ? '900 13px "PingFang TC", sans-serif' : '900 15px "PingFang TC", sans-serif';
+        ctx.fillText('初真空', bx + bw / 2, by + (isNarrow ? 82 : 98));
       } else if (st.gasCount < st.achievableEqGas) {
         ctx.fillStyle = '#38bdf8';
-        ctx.font = '900 16px "PingFang TC", sans-serif';
-        ctx.fillText('＜蒸發', bx + bw / 2, by + 72);
+        ctx.font = isNarrow ? '900 13.5px "PingFang TC", sans-serif' : '900 16px "PingFang TC", sans-serif';
+        ctx.fillText('＜蒸發', bx + bw / 2, by + (isNarrow ? 60 : 72));
         ctx.fillStyle = '#bae6fd';
-        ctx.font = '900 15px "PingFang TC", sans-serif';
-        ctx.fillText('未飽和', bx + bw / 2, by + 98);
+        ctx.font = isNarrow ? '900 13px "PingFang TC", sans-serif' : '900 15px "PingFang TC", sans-serif';
+        ctx.fillText('未飽和', bx + bw / 2, by + (isNarrow ? 82 : 98));
       } else {
         ctx.fillStyle = '#f43f5e';
-        ctx.font = '900 16px "PingFang TC", sans-serif';
-        ctx.fillText('＞蒸發', bx + bw / 2, by + 72);
+        ctx.font = isNarrow ? '900 13.5px "PingFang TC", sans-serif' : '900 16px "PingFang TC", sans-serif';
+        ctx.fillText('＞蒸發', bx + bw / 2, by + (isNarrow ? 60 : 72));
         ctx.fillStyle = '#fecdd3';
-        ctx.font = '900 15px "PingFang TC", sans-serif';
-        ctx.fillText('過飽和', bx + bw / 2, by + 98);
+        ctx.font = isNarrow ? '900 13px "PingFang TC", sans-serif' : '900 15px "PingFang TC", sans-serif';
+        ctx.fillText('過飽和', bx + bw / 2, by + (isNarrow ? 82 : 98));
       }
     }
 
@@ -3039,42 +3185,43 @@
     // 若處於「💥 活塞爆炸衝脫」狀態，在中央上方顯示醒目紅字警告與一鍵復原提示
     if (isExploded) {
       simCtx.save();
-      const py = 12;
-      const pw = Math.min(g.w - 40, 440);
+      const isNarrow = g.w < 520;
+      const py = isNarrow ? 8 : 12;
+      const pw = Math.min(g.w - 20, 440);
       simCtx.fillStyle = 'rgba(153, 27, 27, 0.95)';
       simCtx.strokeStyle = '#ef4444';
       simCtx.lineWidth = 2.2;
       simCtx.shadowColor = '#ef4444';
       simCtx.shadowBlur = 10;
       simCtx.beginPath();
-      simCtx.roundRect(g.cx - pw / 2, py, pw, 32, 8);
+      simCtx.roundRect(g.cx - pw / 2, py, pw, isNarrow ? 26 : 32, 8);
       simCtx.fill();
       simCtx.stroke();
       simCtx.fillStyle = '#fef08a';
-      simCtx.font = 'bold 12.5px "PingFang TC", sans-serif';
+      simCtx.font = isNarrow ? 'bold 11px "PingFang TC", sans-serif' : 'bold 12.5px "PingFang TC", sans-serif';
       simCtx.textAlign = 'center';
-      simCtx.fillText('💥 蒸氣過載！活塞被衝破爆開！點擊畫面或點「🔧 裝回活塞」可復原', g.cx, py + 21);
+      simCtx.fillText(isNarrow ? '💥 活塞衝脫！請點擊上方「裝回活塞」' : '💥 蒸氣過載！活塞被衝破爆開！點擊畫面或點「🔧 裝回活塞」可復原', g.cx, py + (isNarrow ? 17 : 21));
       simCtx.restore();
     } else if (!isPlaying) {
-      // 若處於「待機未開始」或「⏸ 暫停講解模式」，在上方留出的頂部空間通欄獨立顯示醒目提示（左按鈕下移至75px，此處絕對不遮擋！）
       simCtx.save();
       const isInitialStandby = (simTimeSec === 0 && gasMolecules.length === 0);
-      const py = 12;
-      const pw = Math.min(g.w - 40, 450);
+      const isNarrow = g.w < 520;
+      const py = isNarrow ? 8 : 12;
+      const pw = Math.min(g.w - 20, 450);
       simCtx.fillStyle = isInitialStandby ? 'rgba(6, 78, 59, 0.95)' : 'rgba(124, 45, 18, 0.95)';
       simCtx.strokeStyle = isInitialStandby ? '#34d399' : '#fb923c';
       simCtx.lineWidth = 1.8;
       simCtx.beginPath();
-      simCtx.roundRect(g.cx - pw / 2, py, pw, 28, 7);
+      simCtx.roundRect(g.cx - pw / 2, py, pw, isNarrow ? 25 : 28, 7);
       simCtx.fill();
       simCtx.stroke();
       simCtx.fillStyle = isInitialStandby ? '#a7f3d0' : '#fed7aa';
-      simCtx.font = 'bold 12.5px "PingFang TC", sans-serif';
+      simCtx.font = isNarrow ? 'bold 11px "PingFang TC", sans-serif' : 'bold 12.5px "PingFang TC", sans-serif';
       simCtx.textAlign = 'center';
       const msg = isInitialStandby
-        ? '▶️ 準備就緒：請點擊左上角「開始」按鈕啟動蒸發與凝結實驗！'
-        : '⏸ 已暫停：水分子數凍結，拉動活塞或變溫可觀察箭頭與瞬間壓變！';
-      simCtx.fillText(msg, g.cx, py + 18);
+        ? (isNarrow ? '▶️ 請點擊上方「開始」啟動實驗！' : '▶️ 準備就緒：請點擊左上角「開始」按鈕啟動蒸發與凝結實驗！')
+        : (isNarrow ? '⏸ 已暫停（拉動活塞或變溫可觀察壓變）' : '⏸ 已暫停：水分子數凍結，拉動活塞或變溫可觀察箭頭與瞬間壓變！');
+      simCtx.fillText(msg, g.cx, py + (isNarrow ? 17 : 18));
       simCtx.restore();
     }
   }
@@ -3088,8 +3235,8 @@
     rateCtx.clearRect(0, 0, w, h);
     const st = getThermodynamicState();
 
-    // 圖表整體右移：左邊加大至 125px，右邊縮至 36px，讓左邊 Y 軸溫度刻度與標題有充裕空間顯著放大
-    const padL = 125, padR = 36, padT = 24, padB = 34;
+    const isNarrow = w < 520;
+    const padL = isNarrow ? 68 : 125, padR = isNarrow ? 18 : 36, padT = 24, padB = 34;
     const pw = w - padL - padR;
     const ph = h - padT - padB;
     const maxR = 210; // R蒸發 最大刻度對應 100°C (190)
@@ -3101,9 +3248,9 @@
 
     // Y 軸標籤名稱（大字體、高對比）
     rateCtx.fillStyle = '#f8fafc';
-    rateCtx.font = 'bold 15px "PingFang TC", sans-serif';
+    rateCtx.font = isNarrow ? 'bold 12px "PingFang TC", sans-serif' : 'bold 15px "PingFang TC", sans-serif';
     rateCtx.textAlign = 'left';
-    rateCtx.fillText('反應速率 R', padL - 110, padT - 8);
+    rateCtx.fillText('反應速率 R', isNarrow ? padL - 58 : padL - 110, padT - 8);
 
     // 水平格線與各溫度蒸發速率刻度（不寫%，只標清晰溫度標籤，字體放大至 16px 粗體）
     const rateTicks = [
@@ -3123,9 +3270,9 @@
       rateCtx.stroke();
 
       rateCtx.fillStyle = isCur ? '#fde047' : '#e2e8f0';
-      rateCtx.font = 'bold 16px "JetBrains Mono", monospace';
+      rateCtx.font = isNarrow ? 'bold 13px "JetBrains Mono", monospace' : 'bold 16px "JetBrains Mono", monospace';
       rateCtx.textAlign = 'right';
-      rateCtx.fillText(tk.label, padL - 12, y + 5);
+      rateCtx.fillText(tk.label, isNarrow ? padL - 8 : padL - 12, y + 5);
     });
 
     // 時間軸垂直格線與秒數刻度（0s、中點、當前總秒數）
@@ -3195,30 +3342,28 @@
     rateCtx.arc(cx, yc, 6, 0, Math.PI * 2);
     rateCtx.fill();
 
-    // 動態狀態標籤：位置充裕，不換行單行大字清晰顯示，不寫%數
+    // 動態狀態標籤：手機版縮短字串防止裁切
     rateCtx.textAlign = 'left';
+    rateCtx.font = isNarrow ? '900 12px "PingFang TC", sans-serif' : '900 15px "PingFang TC", sans-serif';
+    const tagX = isNarrow ? padL + 8 : padL + 16;
     if (last.rEvap > 0 && Math.abs(last.rEvap - last.rCond) < 2.0) {
       rateCtx.fillStyle = '#4ade80';
-      rateCtx.font = '900 15px "PingFang TC", sans-serif';
-      rateCtx.fillText('✨ R蒸發 ＝ R凝結 ➔ 飽和動態平衡', padL + 16, padT + 22);
+      rateCtx.fillText(isNarrow ? '✨ 飽和動態平衡' : '✨ R蒸發 ＝ R凝結 ➔ 飽和動態平衡', tagX, padT + 22);
     } else if (last.rEvap === 0) {
       rateCtx.fillStyle = '#fda4af';
-      rateCtx.font = '900 15px "PingFang TC", sans-serif';
       if (isOpenContainer) {
-        rateCtx.fillText('⚠️ 敞開系統水已全數蒸乾（逸散大氣）', padL + 16, padT + 22);
+        rateCtx.fillText(isNarrow ? '⚠️ 水已全蒸乾(逸散大氣)' : '⚠️ 敞開系統水已全數蒸乾（逸散大氣）', tagX, padT + 22);
       } else if (volumeL > st.vDry + 0.05) {
-        rateCtx.fillText('⚠️ 水已全數蒸乾 ➔ 進入波以耳定律區', padL + 16, padT + 22);
+        rateCtx.fillText(isNarrow ? '⚠️ 水已蒸乾(波以耳區)' : '⚠️ 水已全數蒸乾 ➔ 進入波以耳定律區', tagX, padT + 22);
       } else {
-        rateCtx.fillText('✨ 水已全數蒸乾 ➔ 達飽和狀態', padL + 16, padT + 22);
+        rateCtx.fillText(isNarrow ? '✨ 水已全蒸乾(飽和)' : '✨ 水已全數蒸乾 ➔ 達飽和狀態', tagX, padT + 22);
       }
     } else if (last.rEvap > last.rCond + 2.0) {
       rateCtx.fillStyle = '#fdba74';
-      rateCtx.font = '900 15px "PingFang TC", sans-serif';
-      rateCtx.fillText('🔥 R蒸發 ＞ R凝結 ➔ 淨蒸發補償中', padL + 16, padT + 22);
+      rateCtx.fillText(isNarrow ? '🔥 淨蒸發進行中' : '🔥 R蒸發 ＞ R凝結 ➔ 淨蒸發補償中', tagX, padT + 22);
     } else if (last.rCond > last.rEvap + 2.0) {
       rateCtx.fillStyle = '#7dd3fc';
-      rateCtx.font = '900 15px "PingFang TC", sans-serif';
-      rateCtx.fillText('💧 R凝結 ＞ R蒸發 ➔ 淨凝結回水中', padL + 16, padT + 22);
+      rateCtx.fillText(isNarrow ? '💧 淨凝結回水中' : '💧 R凝結 ＞ R蒸發 ➔ 淨凝結回水中', tagX, padT + 22);
     }
   }
 
@@ -3230,8 +3375,8 @@
     const h = pvCanvas.height / window.devicePixelRatio;
     pvCtx.clearRect(0, 0, w, h);
 
-    // 圖表整體右移：左邊加大至 125px，右邊縮至 36px，讓左邊 mmHg 數值與標題有充裕空間顯著放大
-    const padL = 125, padR = 36, padT = 24, padB = 34;
+    const isNarrow = w < 520;
+    const padL = isNarrow ? 68 : 125, padR = isNarrow ? 18 : 36, padT = 24, padB = 34;
     const pw = w - padL - padR;
     const ph = h - padT - padB;
 
@@ -3272,16 +3417,16 @@
       pvCtx.stroke();
 
       pvCtx.fillStyle = isSat ? '#4ade80' : '#e2e8f0';
-      pvCtx.font = isSat ? 'bold 16px "JetBrains Mono", monospace' : 'bold 14px "JetBrains Mono", monospace';
+      pvCtx.font = isSat ? (isNarrow ? 'bold 13px "JetBrains Mono", monospace' : 'bold 16px "JetBrains Mono", monospace') : (isNarrow ? 'bold 12px "JetBrains Mono", monospace' : 'bold 14px "JetBrains Mono", monospace');
       pvCtx.textAlign = 'right';
-      pvCtx.fillText(`${pVal}`, padL - 10, y + 5);
+      pvCtx.fillText(`${pVal}`, isNarrow ? padL - 8 : padL - 10, y + 5);
     });
 
-    // 標籤：壓力單位 (mmHg)（字體放大至 15px 粗體）
+    // 標籤：壓力單位 (mmHg)
     pvCtx.fillStyle = '#f8fafc';
-    pvCtx.font = 'bold 15px "PingFang TC", sans-serif';
+    pvCtx.font = isNarrow ? 'bold 12px "PingFang TC", sans-serif' : 'bold 15px "PingFang TC", sans-serif';
     pvCtx.textAlign = 'left';
-    pvCtx.fillText('P (mmHg)', padL - 110, padT - 8);
+    pvCtx.fillText('P (mmHg)', isNarrow ? padL - 58 : padL - 110, padT - 8);
 
     // 垂直體積格線 (1L ~ 6L)
     pvCtx.textAlign = 'center';
@@ -3347,8 +3492,8 @@
       // 🌟 波以耳區文字：等到體積真的拉大超過蒸乾點時 (V > V_乾) 才出現！
       const isBeyondDry = (volumeL > vDry + 0.05);
       const dryText = isBeyondDry
-        ? `蒸乾點 V乾 = ${vDry.toFixed(2)}L (波以耳區 P×V=${boyleConst})`
-        : `蒸乾點 V乾 = ${vDry.toFixed(2)}L`;
+        ? (isNarrow ? `V乾=${vDry.toFixed(2)}L (P×V=${boyleConst})` : `蒸乾點 V乾 = ${vDry.toFixed(2)}L (波以耳區 P×V=${boyleConst})`)
+        : (isNarrow ? `V乾 = ${vDry.toFixed(2)}L` : `蒸乾點 V乾 = ${vDry.toFixed(2)}L`);
       pvCtx.fillText(dryText, tagDryX, tagDryY);
     }
 
