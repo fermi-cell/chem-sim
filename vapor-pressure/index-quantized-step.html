@@ -1,0 +1,4420 @@
+<!DOCTYPE html>
+<html lang="zh-TW"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>水蒸發與凝結平衡、飽和蒸氣壓與波以耳定律 (3D 課堂版)</title>
+<style>
+  :root {
+    --bg-dark: #030712;
+    --panel-bg: #0f172a;
+    --border-col: #334155;
+    --text-main: #f8fafc;
+    --evap-color: #fb923c; /* 亮橘紅：向上蒸發 */
+    --cond-color: #38bdf8; /* 亮天藍：向下凝結 */
+    --eq-color: #22c55e;   /* 翠綠：動態平衡 */
+    --dry-color: #f43f5e;  /* 玫紅：完全乾涸 (波以耳定律區) */
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  html, body {
+    width: 100%;
+    height: 100%;
+    background-color: #02040a;
+    color: var(--text-main);
+    font-family: 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  /* 嚴格控制在視窗內部 16:9 不切邊容器 */
+  .stage-16-9 {
+    width: min(96vw, calc(95vh * 16 / 9));
+    height: min(95vh, calc(96vw * 9 / 16));
+    max-width: 100%;
+    max-height: 100%;
+    background: radial-gradient(circle at 25% 25%, #111c35 0%, #090e1c 75%, #050811 100%);
+    border: 2px solid #475569;
+    border-radius: 14px;
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.95);
+    overflow: hidden;
+  }
+
+  /* 第一列：標題、動態階段橫幅與「下載 HTML」按鈕 */
+  header {
+    background: rgba(9, 13, 26, 0.96);
+    border-bottom: 1.5px solid var(--border-col);
+    padding: 7px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+  .brand-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .badge-3d {
+    font-size: clamp(0.75rem, 1.05vw, 0.95rem);
+    font-weight: 900;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(56, 189, 248, 0.22);
+    border: 1.5px solid #38bdf8;
+    color: #bae6fd;
+    white-space: nowrap;
+  }
+  header h1 {
+    font-size: clamp(0.95rem, 1.35vw, 1.3rem);
+    font-weight: 900;
+    color: #ffffff;
+    white-space: nowrap;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    justify-content: flex-end;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .status-pill {
+    font-size: clamp(0.72rem, 0.9vw, 0.88rem);
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #1e293b;
+    border: 1.5px solid #64748b;
+    color: #ffffff;
+    white-space: nowrap;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  .status-pill.eq {
+    background: rgba(34, 197, 94, 0.25);
+    border-color: #4ade80;
+    color: #86efac;
+  }
+  .status-pill.dry {
+    background: rgba(244, 63, 94, 0.28);
+    border-color: #fb7185;
+    color: #fecdd3;
+  }
+  .status-pill.over {
+    background: rgba(192, 132, 252, 0.28);
+    border-color: #c084fc;
+    color: #f3e8ff;
+  }
+  .btn-download {
+    background: linear-gradient(135deg, #059669, #0d9488);
+    border: 1.5px solid #34d399;
+    color: #ffffff;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 850;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.35);
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+  .btn-download:hover {
+    background: linear-gradient(135deg, #047857, #0f766e);
+  }
+
+  /* 第二列：講台核心控制列 */
+  .top-control-bar {
+    background: rgba(15, 23, 42, 0.95);
+    border-bottom: 1.5px solid #334155;
+    padding: 6px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+  .ctrl-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  button {
+    background: #1e293b;
+    color: #ffffff;
+    border: 1.5px solid #475569;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: clamp(0.76rem, 1.02vw, 0.95rem);
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  button:hover { background: #334155; border-color: #94a3b8; }
+  button:active { transform: translateY(1px); }
+  button.btn-play { background: #2563eb; border-color: #60a5fa; }
+  button.btn-step { background: #ea580c; border-color: #fb923c; }
+  button.btn-eq { background: #059669; border-color: #34d399; }
+  button.btn-inject { background: #7e22ce; border-color: #c084fc; }
+
+  .slider-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #090d1a;
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1.5px solid #475569;
+    font-size: clamp(0.78rem, 1.05vw, 0.98rem);
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .slider-pill.speed-box {
+    background: rgba(234, 179, 8, 0.16);
+    border: 2px solid #facc15;
+    box-shadow: 0 0 10px rgba(250, 204, 21, 0.25);
+  }
+  .slider-pill input[type="range"] {
+    cursor: pointer;
+    accent-color: #38bdf8;
+    width: clamp(65px, 8vw, 110px);
+    height: 6px;
+  }
+  .slider-pill input[type="number"] {
+    background: #020617;
+    border: 1.5px solid #38bdf8;
+    color: #38bdf8;
+    border-radius: 6px;
+    padding: 2px 4px;
+    font-size: 0.88rem;
+    font-weight: 900;
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    width: 62px;
+    text-align: center;
+    outline: none;
+  }
+  .slider-pill input[type="number"]:focus {
+    border-color: #facc15;
+    box-shadow: 0 0 6px rgba(250, 204, 21, 0.5);
+  }
+
+  /* 左側懸浮儀表板：溫度控制卡片（直立排列於全景放大正下方，寬度 68px 與放大按鈕完美對齊） */
+  .sim-floating-tools .btn-zoom-tool {
+    width: 68px;
+    box-sizing: border-box;
+    padding: 6px 2px;
+    font-size: 0.84rem;
+    font-weight: 900;
+    line-height: 1.25;
+    border-radius: 8px;
+    text-align: center;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    margin: 0;
+  }
+  .temp-control-pod {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: rgba(15, 23, 42, 0.94);
+    border: 1.5px solid #334155;
+    border-radius: 9px;
+    padding: 5px 3px;
+    width: 68px;
+    box-sizing: border-box;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+    margin: 0;
+  }
+  .temp-pod-title {
+    font-size: 0.74rem;
+    font-weight: 900;
+    color: #94a3b8;
+    text-align: center;
+    padding-bottom: 2px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 2px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .t-btn-vert {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 2px;
+    border: 1.5px solid transparent;
+    border-radius: 6px;
+    background: #1e293b;
+    color: #cbd5e1;
+    font-size: 0.82rem;
+    font-weight: 850;
+    cursor: pointer;
+    text-align: center;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .t-btn-vert:hover {
+    background: #334155;
+    color: #ffffff;
+    border-color: #64748b;
+  }
+  .t-btn-vert.active-25, .t-btn.active-25 {
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    border-color: #38bdf8;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+  }
+  .t-btn-vert.active-55, .t-btn.active-55 {
+    background: linear-gradient(135deg, #ea580c, #c2410c);
+    border-color: #fb923c;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(251, 146, 60, 0.5);
+  }
+  .t-btn-vert.active-80, .t-btn.active-80 {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    border-color: #f87171;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+  }
+  .t-btn-vert.active-100, .t-btn.active-100 {
+    background: linear-gradient(135deg, #7c3aed, #d97706);
+    border-color: #fde047;
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(250, 204, 21, 0.55);
+  }
+
+  /* 第三列：主視覺區 (左右 1:1 完美對半分配) */
+  main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 8px 12px;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .panel-card {
+    background: rgba(15, 23, 42, 0.84);
+    border: 1.5px solid #334155;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+  }
+  .card-top {
+    padding: 6px 12px;
+    background: rgba(2, 6, 23, 0.88);
+    border-bottom: 1.5px solid #1e293b;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    font-size: clamp(0.8rem, 1.08vw, 1.02rem);
+    font-weight: 800;
+    color: #f8fafc;
+    flex-shrink: 0;
+    min-width: 0;
+  }
+  .telemetry-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    font-size: clamp(0.76rem, 1.02vw, 0.95rem);
+    font-weight: 800;
+  }
+  .telemetry-item span.val {
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-weight: 900;
+    font-size: clamp(0.86rem, 1.15vw, 1.1rem);
+  }
+  /* 乾涸體積計算公式提示列 */
+  .formula-strip {
+    background: rgba(30, 41, 59, 0.85);
+    border-bottom: 1px solid #334155;
+    padding: 4px 12px;
+    font-size: clamp(0.74rem, 0.98vw, 0.92rem);
+    font-weight: 800;
+    color: #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .canvas-box {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+  }
+  canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  #simCanvas { cursor: grab; }
+  #simCanvas:active { cursor: grabbing; }
+
+  .right-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+  }
+  .right-view-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 6px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid #334155;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+  .right-view-toolbar .tb-label {
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: #94a3b8;
+  }
+  .btn-view-toggle {
+    padding: 3px 9px;
+    font-size: 0.76rem;
+    font-weight: 800;
+    border-radius: 6px;
+    background: #1e293b;
+    border: 1.5px solid #475569;
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-view-toggle:hover {
+    background: #334155;
+    color: #ffffff;
+  }
+  .btn-view-toggle.active {
+    background: #0284c7;
+    border-color: #38bdf8;
+    color: #ffffff;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.45);
+  }
+
+  .charts-container {
+    flex: 1;
+    display: grid;
+    grid-template-rows: 1fr 1.15fr;
+    gap: 8px;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+  }
+  .right-stack.mode-rate #panelPV {
+    display: none !important;
+  }
+  .right-stack.mode-rate .charts-container {
+    grid-template-rows: 1fr;
+  }
+  .right-stack.mode-pv #panelRate {
+    display: none !important;
+  }
+  .right-stack.mode-pv .charts-container {
+    grid-template-rows: 1fr;
+  }
+  .legend-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    font-size: clamp(0.72rem, 0.94vw, 0.88rem);
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .legend-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.08);
+    white-space: nowrap;
+  }
+  .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* 獨立區塊放大與液面微觀特寫按鈕樣式 */
+  .btn-zoom-tool {
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    border-radius: 6px;
+    background: #1e293b;
+    border: 1.5px solid #475569;
+    color: #e2e8f0;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-zoom-tool:hover {
+    background: #334155;
+    border-color: #38bdf8;
+    color: #ffffff;
+  }
+  .btn-zoom-tool.active-zoom {
+    background: #0284c7;
+    border-color: #7dd3fc;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.45);
+  }
+  .btn-zoom-tool.surface-zoom-btn {
+    background: rgba(14, 165, 233, 0.18);
+    border-color: #38bdf8;
+    color: #7dd3fc;
+  }
+  .btn-zoom-tool.surface-zoom-btn.active-zoom {
+    background: linear-gradient(135deg, #ea580c, #d97706);
+    border-color: #fde047;
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(250, 204, 21, 0.5);
+  }
+
+  /* 獨立放大各區塊 Grid 切換 */
+  main.zoom-sim {
+    grid-template-columns: 100%;
+  }
+  main.zoom-sim .right-stack {
+    display: none;
+  }
+  main.zoom-charts,
+  main.zoom-rate,
+  main.zoom-pv {
+    grid-template-columns: 100%;
+  }
+  main.zoom-charts #panelSim,
+  main.zoom-rate #panelSim,
+  main.zoom-pv #panelSim {
+    display: none;
+  }
+
+  /* 蒸發 vs 沸騰 微觀氣泡力學動畫專屬樣式 */
+  .btn-boiling-feature {
+    background: linear-gradient(135deg, #b45309, #d97706);
+    border: 1.5px solid #f59e0b;
+    color: #ffffff;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 850;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+  .btn-boiling-feature:hover {
+    background: linear-gradient(135deg, #d97706, #f59e0b);
+    transform: translateY(-1px);
+    box-shadow: 0 0 14px rgba(245, 158, 11, 0.65);
+  }
+
+  .boiling-modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(2, 6, 23, 0.90);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    animation: fadeInModal 0.25s ease-out;
+  }
+  @keyframes fadeInModal {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .boiling-modal-content {
+    width: 100%;
+    max-width: 1100px;
+    height: 100%;
+    max-height: 96%;
+    background: #090e1c;
+    border: 2px solid #f59e0b;
+    border-radius: 14px;
+    box-shadow: 0 25px 65px rgba(0, 0, 0, 0.95);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .bm-header {
+    background: rgba(15, 23, 42, 0.96);
+    border-bottom: 1.5px solid #334155;
+    padding: 7px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .bm-title-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .bm-badge {
+    font-size: 0.8rem;
+    font-weight: 900;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(245, 158, 11, 0.22);
+    border: 1.5px solid #f59e0b;
+    color: #fde047;
+    white-space: nowrap;
+  }
+  .bm-header h2 {
+    font-size: clamp(0.95rem, 1.35vw, 1.25rem);
+    font-weight: 900;
+    color: #ffffff;
+    white-space: nowrap;
+  }
+  .bm-btn-close {
+    background: #1e293b;
+    border: 1.5px solid #64748b;
+    color: #f1f5f9;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .bm-btn-close:hover {
+    background: #dc2626;
+    border-color: #f87171;
+    color: #ffffff;
+  }
+
+  .bm-body {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 10px 14px;
+    min-height: 0;
+  }
+  .bm-card {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1.5px solid #334155;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+  }
+  .bm-card-header {
+    padding: 6px 12px;
+    border-bottom: 1.5px solid #1e293b;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .bm-card-header.left-header {
+    background: rgba(2, 6, 23, 0.9);
+    border-bottom: 2px solid #38bdf8;
+  }
+  .bm-card-header.right-header {
+    background: rgba(2, 6, 23, 0.9);
+    border-bottom: 2px solid #f59e0b;
+  }
+  .bm-status-tag {
+    font-size: 0.88rem;
+    font-weight: 900;
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  .bm-status-tag.tag-evap {
+    background: rgba(56, 189, 248, 0.2);
+    border: 1px solid #38bdf8;
+    color: #7dd3fc;
+  }
+  .bm-status-tag.tag-boil {
+    background: rgba(245, 158, 11, 0.25);
+    border: 1px solid #f59e0b;
+    color: #fef08a;
+  }
+  .bm-pressure-compare {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-size: 0.88rem;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+  .p-val-inner { color: #fb923c; }
+  .p-symbol { color: #ffffff; font-weight: 900; }
+  .p-val-outer { color: #38bdf8; }
+
+  .bm-canvas-box {
+    flex: 1;
+    position: relative;
+    width: 100%;
+    min-height: 160px;
+    background: #040814;
+  }
+  .bm-canvas-box canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .bm-explanation {
+    background: rgba(15, 23, 42, 0.95);
+    border-top: 1px solid #1e293b;
+    padding: 8px 12px;
+    font-size: clamp(0.74rem, 0.95vw, 0.88rem);
+    line-height: 1.45;
+    color: #cbd5e1;
+    flex-shrink: 0;
+  }
+  .bm-step-title {
+    font-weight: 900;
+    margin-bottom: 3px;
+  }
+
+  .bm-footer {
+    background: rgba(15, 23, 42, 0.96);
+    border-top: 1.5px solid #334155;
+    padding: 8px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .bm-summary-text {
+    font-size: clamp(0.76rem, 0.95vw, 0.9rem);
+    color: #e2e8f0;
+    line-height: 1.4;
+  }
+  .btn-decompress {
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    border: 1.5px solid #38bdf8;
+    color: #ffffff;
+    font-weight: 900;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.86rem;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+    transition: all 0.2s;
+  }
+  .btn-decompress:hover {
+    background: linear-gradient(135deg, #0369a1, #075985);
+  }
+</style>
+</head>
+<body>
+
+<div class="stage-16-9">
+  <!-- 第一列：標題、動態階段橫幅與操作按鈕 -->
+  <header>
+    <div class="brand-group">
+      <a href="../" class="btn-home" title="返回總目錄" style="text-decoration:none; color:#94a3b8; font-size:1.05rem; padding:3px 7px; border-radius:6px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); margin-right:8px; display:inline-flex; align-items:center; justify-content:center; transition:0.2s;" onmouseover="this.style.color='#fff';this.style.background='rgba(255,255,255,0.18)'" onmouseout="this.style.color='#94a3b8';this.style.background='rgba(255,255,255,0.08)'">🏠</a>
+      <h1>💧 蒸氣壓</h1>
+    </div>
+    <div class="header-right">
+      <div id="statusBanner" class="status-pill eq">✨ 飽和動態平衡！（R蒸發＝R凝結，P = 23.8 mmHg / 0.031 atm 定值）</div>
+      <button id="btnOpenBoilingModal" class="btn-boiling-feature" title="點擊觀看『蒸發 vs 沸騰』蒸氣壓與外界大氣壓微觀力學動畫">🫧 沸騰動畫</button>
+      <button id="btnDownloadHTML" class="btn-download" title="下載完整單一 HTML 檔案至電腦全螢幕播放">💾 下載</button>
+    </div>
+  </header>
+
+  <!-- 第二列：講台頂部控制列 -->
+  <div class="top-control-bar">
+    <!-- 左區：播放與微觀操作按鈕 -->
+    <div class="ctrl-group">
+      <button id="btnPlay" class="btn-play" style="background:#059669; border-color:#34d399; box-shadow:0 0 10px rgba(16,185,129,0.45);">▶️ 開始</button>
+      <button id="btnEq" class="btn-eq" title="直接跳至目前體積下的平衡狀態">⚡ 跳至平衡</button>
+      <button id="btnInject" class="btn-inject" title="額外注入 6 顆水蒸氣分子（過量注入氣壓過大會衝爆活塞！）">💨 注入(+6)</button>
+      <button id="btnExtract" class="btn-extract" title="抽出 6 顆氣相水蒸氣分子（降壓演示）" style="background:#0284c7; border:1.5px solid #38bdf8; color:#fff; padding:5px 10px; border-radius:8px; font-weight:800; cursor:pointer; font-size:clamp(0.78rem, 1.05vw, 0.98rem); transition:all 0.15s ease;">🌪️ 抽出(-6)</button>
+      <button id="btnReset" title="重置回 0 秒真空與 V=1.80L">🔄 重來(0s)</button>
+      <button id="btnToggleLid" style="background:#334155; border:1.5px solid #64748b; color:#fff;" title="在『敞開系統（無蓋逸散）』與『密閉系統（活塞封閉）』之間切換">🪟 拿走蓋子</button>
+    </div>
+
+    <!-- 中左：醒目黃框「速度調節滑桿 (支援高達 3x)」 -->
+    <div class="slider-pill speed-box">
+      <span id="speedIcon" style="color:#fef08a;">🐢 速度：</span>
+      <input type="range" id="speedSlider" min="0.1" max="3.0" step="0.1" value="1.0">
+      <span id="speedLabel" style="color:#fef08a; min-width:36px; font-family:monospace;">1.0x</span>
+      <button id="btnSpeed3x" type="button" style="padding:2px 7px; font-size:0.75rem; font-weight:900; background:#ca8a04; border:1.5px solid #fde047; border-radius:6px; color:#fff; cursor:pointer;" title="一鍵切換至 3.0x 高速">⚡3x</button>
+    </div>
+
+    <!-- 中右：活塞體積滑桿與鍵盤輸入 (支援打字輸入) -->
+    <div class="slider-pill">
+      <span style="color:#93c5fd;">↕ 活塞體積 V：</span>
+      <input type="range" id="volSlider" min="1.0" max="6.0" step="0.05" value="1.8">
+      <input type="number" id="volNumInput" min="1.0" max="6.0" step="0.05" value="1.80" title="可直接鍵盤打字輸入體積 (1.00 ~ 6.00 L)">
+      <span style="color:#38bdf8; font-weight:800;">L</span>
+    </div>
+  </div>
+
+  <!-- 第三列：左右主視窗 -->
+  <main id="mainGrid">
+    <!-- 左側：寬闊 3D 玻璃圓柱與可拖曳活塞（按鈕直排靠左，絕不遮擋量筒） -->
+    <div id="panelSim" class="panel-card">
+      <div class="canvas-box">
+        <div class="sim-floating-tools" style="position:absolute; top:36px; left:8px; z-index:10; display:flex; flex-direction:column; gap:6px; pointer-events:auto; align-items:flex-start; width:68px;">
+          <button id="btnSurfaceZoom" class="btn-zoom-tool surface-zoom-btn" title="放大特寫液面，清楚觀察水分子蒸發躍起與凝結落水動畫">液面<br>特寫</button>
+          <button id="btnZoomSim" class="btn-zoom-tool" title="獨立放大此 3D 活塞量筒區">全景<br>放大</button>
+          <button id="btnRepair" class="btn-zoom-tool" style="display:none; background:#ea580c; border:1.5px solid #fde047; color:#fff; font-weight:900; box-shadow:0 0 10px rgba(251,146,60,0.6);" title="將衝飛的活塞重新裝回並洩壓">裝回<br>活塞</button>
+
+          <!-- 🌟 恆溫控制面板（直立排列於全景放大正下方，寬度 68px 與上方完全對齊） -->
+          <div class="temp-control-pod">
+            <div class="temp-pod-title">🌡️ 溫度</div>
+            <button id="tBtn25" class="t-btn-vert active-25" title="常溫 25°C：飽和蒸氣壓 23.8 mmHg (0.031 atm)">🌿 25°C</button>
+            <button id="tBtn55" class="t-btn-vert" title="升溫 55°C：飽和蒸氣壓 118.0 mmHg (0.155 atm)">🔥 55°C</button>
+            <button id="tBtn80" class="t-btn-vert" title="高溫 80°C：飽和蒸氣壓 355.1 mmHg (0.467 atm)">🔥 80°C</button>
+            <button id="tBtn100" class="t-btn-vert" title="沸點 100°C：飽和蒸氣壓 760.0 mmHg (1.000 atm)">♨️ 100°C</button>
+          </div>
+        </div>
+        <canvas id="simCanvas" width="805" height="521"></canvas>
+      </div>
+    </div>
+
+    <!-- 右側：雙圖表區與切換工具列 -->
+    <div id="rightStack" class="right-stack">
+      <!-- 圖表切換按鈕工具列 -->
+      <div class="right-view-toolbar">
+        <span class="tb-label">圖表檢視：</span>
+        <button id="btnViewDual" class="btn-view-toggle active" title="同時顯示速率圖與 P-V 圖">📊 雙圖對照</button>
+        <button id="btnViewRate" class="btn-view-toggle" title="僅顯示蒸發 vs 凝結速率圖">📈 僅速率圖</button>
+        <button id="btnViewPV" class="btn-view-toggle" title="僅顯示蒸氣壓 P-V 圖">📉 僅 P-V 圖</button>
+        <button id="btnZoomCharts" class="btn-zoom-tool" style="margin-left:auto;" title="放大圖表區（隱藏左側量筒，滿版呈現圖表）">⛶ 放大圖表</button>
+      </div>
+
+      <div class="charts-container">
+        <!-- 右上：蒸發 vs 凝結速率圖（永遠從 0 秒開始完整呈現，等比例壓縮時間軸） -->
+        <div id="panelRate" class="panel-card">
+          <div class="card-top">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div>📈 蒸發 vs. 凝結速率 <span style="color:#94a3b8; font-size:0.85em;">(0秒起完整趨勢)</span></div>
+              <button id="btnZoomRate" class="btn-zoom-tool" title="獨立放大『蒸發 vs. 凝結速率』圖表">⛶ 放大此區</button>
+            </div>
+            <div class="legend-row">
+              <span class="legend-tag" style="color:#fdba74;"><i class="dot" style="background:var(--evap-color);"></i>蒸發 R<sub>蒸發</sub></span>
+              <span class="legend-tag" style="color:#7dd3fc;"><i class="dot" style="background:var(--cond-color);"></i>凝結 R<sub>凝結</sub></span>
+            </div>
+          </div>
+          <div class="canvas-box">
+            <canvas id="rateCanvas" width="946" height="227"></canvas>
+          </div>
+        </div>
+
+        <!-- 右下：巨觀 P-V 圖 (1~3L 有水水平線、拉動瞬間垂直變化、3~6L 乾涸波以耳曲線) -->
+        <div id="panelPV" class="panel-card">
+          <div class="card-top">
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+              <div>📊 蒸氣壓對體積 P-V 圖</div>
+              <button id="btnScaleToggle" style="padding:2px 8px; font-size:0.75rem; font-weight:800; border-radius:6px; background:#1e293b; border:1px solid #475569; color:#fde047; cursor:pointer;" title="切換『當前溫度最適刻度』或『0~850 mmHg 全域對比』">🔍 最適刻度</button>
+              <button id="btnZoomPV" class="btn-zoom-tool" title="獨立放大『蒸氣壓對體積 P-V 圖』">⛶ 放大此區</button>
+            </div>
+            <div class="legend-row">
+              <span class="legend-tag" style="color:#86efac;"><i class="dot" style="background:#22c55e;"></i>理論線</span>
+              <span class="legend-tag" style="color:#fde047;"><i class="dot" style="background:#facc15;"></i>平衡實測</span>
+              <span class="legend-tag" style="color:#67e8f9;"><i class="dot" style="background:#00f5d4;"></i>瞬間壓變(垂直)</span>
+            </div>
+          </div>
+          <div class="canvas-box">
+            <canvas id="pvCanvas" width="946" height="277"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 蒸發 vs. 沸騰 微觀氣泡力學動態剖析彈窗 (蒸氣壓 vs. 外界大氣壓) -->
+  <div id="boilingModal" class="boiling-modal" style="display:none;">
+    <div class="boiling-modal-content">
+      <div class="bm-header">
+        <div class="bm-title-group">
+          <span class="bm-badge">高中化學 ‧ 相平衡核心機制</span>
+          <h2>🫧 蒸發 vs. 沸騰：蒸氣壓與外界大氣壓的微觀對抗</h2>
+        </div>
+        <button id="btnCloseBoilingModal" class="bm-btn-close">✖ 關閉返回實驗</button>
+      </div>
+
+      <div class="bm-body">
+        <!-- 左欄：未達沸點 (蒸發) -->
+        <div class="bm-card">
+          <div class="bm-card-header left-header">
+            <span class="bm-status-tag tag-evap">未達沸點（例如 80°C）</span>
+            <div class="bm-pressure-compare">
+              <span class="p-val-inner">P<sub>蒸氣</sub> (355 mmHg)</span>
+              <span class="p-symbol">&lt;</span>
+              <span id="evapExtPText" class="p-val-outer">P<sub>外壓</sub> (760 mmHg)</span>
+            </div>
+          </div>
+          <div class="bm-canvas-box">
+            <canvas id="evapCanvas"></canvas>
+          </div>
+          <div class="bm-explanation">
+            <div class="bm-step-title" style="color:#7dd3fc;">⚠️ 微觀現象：氣泡被外壓壓扁瓦解</div>
+            <p id="evapExplanationText">液體內部偶發生成的小蒸氣泡，內部向外的蒸氣壓（355 mmHg）小於外界大氣壓（760 mmHg），<strong>氣泡立刻被四周外壓擠扁破壞</strong>！因此內部無法產生氣泡，氣化僅能在沒有液體壓力的「<strong>液體表面</strong>」發生（蒸發）。</p>
+          </div>
+        </div>
+
+        <!-- 右欄：達到沸點 (沸騰) -->
+        <div class="bm-card">
+          <div class="bm-card-header right-header">
+            <span class="bm-status-tag tag-boil">達到沸點（100°C 沸點）</span>
+            <div class="bm-pressure-compare">
+              <span class="p-val-inner">P<sub>蒸氣</sub> (760 mmHg)</span>
+              <span class="p-symbol">＝</span>
+              <span class="p-val-outer">P<sub>外壓</sub> (760 mmHg)</span>
+            </div>
+          </div>
+          <div class="bm-canvas-box">
+            <canvas id="boilCanvas"></canvas>
+          </div>
+          <div class="bm-explanation">
+            <div class="bm-step-title" style="color:#fde047;">✨ 微觀現象：氣泡抗衡外壓、膨脹浮起破裂！</div>
+            <p>當液體蒸氣壓達到外界大氣壓（<strong>P<sub>蒸氣</sub> ＝ P<sub>外壓</sub></strong>），內部氣泡向外推力足以撐開四周液體！氣泡<strong>穩定存在、不斷吸納蒸氣膨脹變大並浮上水面破裂</strong>，全液體內部與表面同時劇烈氣化（沸騰）！</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部總結列與互動減壓演示 -->
+      <div class="bm-footer">
+        <div class="bm-summary-text">
+          💡 <strong>課堂結論</strong>：沸點的科學定義即為「<strong>飽和蒸氣壓等於外界大氣壓力時的溫度</strong>」。在 1 大氣壓下水沸點為 100°C；若以針筒抽氣減壓使外壓降至 23.8 mmHg，水在 25°C 常溫即可劇烈沸騰！
+        </div>
+        <button id="btnTriggerDecompression" class="btn-decompress">💨 演示針筒抽氣減壓沸騰（常溫25°C沸騰）</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  /* =====================================================================
+   * 1. 定量物理化學模型（3.00 L 蒸乾，波以耳曲線區 3.0L ~ 6.0L 佔 P-V 圖 1/2 寬度）
+   * =====================================================================
+   * - 設容器內水分子總數 INITIAL_TOTAL_H2O = 36 顆
+   * - 體積範圍：MIN_V = 0.80 L 至 MAX_V = 6.00 L（初始體積 V = 1.50 L）
+   * - 1. 【25°C 常溫】：
+   *      飽和蒸氣壓 P_sat = 23.8 mmHg (0.0313 atm)，飽和濃度 cSat = 12.0 顆/L
+   *      --> 蒸乾臨界體積 V_乾 = 36 顆 ÷ 12.0 顆/L = 3.00 L！
+   *      --> V = 0.80 L ~ 3.00 L：底部有豐沛液態水，飽和蒸氣壓維持 23.8 mmHg 水平定值
+   *      --> V = 3.00 L ~ 6.00 L（波以耳定律區）：36 顆水全數蒸乾為氣體，
+   *          拉動活塞時 P = 23.8 × (3.00 / V)，從 23.8 mmHg 平滑下降至 11.9 mmHg！
+   * - 2. 【55°C 升溫】：
+   *      飽和蒸氣壓 P_sat = 118.0 mmHg (0.1553 atm)，飽和濃度 cSat = 16.0 顆/L
+   *      --> 蒸乾臨界體積 V_乾 = 36 顆 ÷ 16.0 顆/L = 2.25 L！
+   * - 3. 【80°C 高溫】：
+   *      飽和蒸氣壓 P_sat = 355.1 mmHg (0.4672 atm)，飽和濃度 cSat = 22.0 顆/L
+   *      --> 蒸乾臨界體積 V_乾 = 36 顆 ÷ 22.0 顆/L = 1.64 L！
+   * - 4. 【100°C 沸點】：
+   *      飽和蒸氣壓 P_sat = 760.0 mmHg (1.0000 atm)，達到外界大氣壓開始劇烈沸騰！
+   */
+  const INITIAL_TOTAL_H2O = 70; // 總水量固定 70 顆（25°C 時 70/20 = 3.50L 恰蒸乾）
+  const MIN_V = 1.00;
+  const MAX_V = 6.00;
+  const INITIAL_VOLUME = 1.80;
+  // 恰蒸乾體積 V_dry 由 totalH2O / cfg.cSat 動態求得（25°C 時恰為 42 / 12 = 3.50 L）
+
+  // 真實物理化學數據與定時定量教學模型
+  // 【充裕觀察時間（24 秒）與豐沛蒸氣分子模型】：
+  //   25°C：每 2.0 秒躍起 3 顆，飽和濃度 cSat = 20.0 (3.5L 平衡達 70 顆)，約 24 秒達平衡
+  //   55°C：每 2.0 秒躍起 5 顆，飽和濃度 cSat = 28.0，約 24 秒達平衡
+  //   80°C：每 2.0 秒躍起 7 顆，飽和濃度 cSat = 36.0，約 24 秒達平衡
+  //   100°C：每 2.0 秒躍起 9 顆，飽和濃度 cSat = 46.0，約 24 秒達平衡
+  const TEMP_CONFIG = {
+    25: { temp: 25, pSat_mmHg: 23.8, pSat_atm: 0.0313, cSat: 20.0, rEvapBase: 100, batchEvap: 3, arrowLenMult: 1.0, speedMult: 1.0, chartMaxP: 38 },
+    55: { temp: 55, pSat_mmHg: 118.0, pSat_atm: 0.1553, cSat: 28.0, rEvapBase: 125, batchEvap: 5, arrowLenMult: 1.45, speedMult: 1.38, chartMaxP: 175 },
+    80: { temp: 80, pSat_mmHg: 355.1, pSat_atm: 0.4672, cSat: 36.0, rEvapBase: 155, batchEvap: 7, arrowLenMult: 1.95, speedMult: 1.75, chartMaxP: 480 },
+    100: { temp: 100, pSat_mmHg: 760.0, pSat_atm: 1.0000, cSat: 46.0, rEvapBase: 190, batchEvap: 9, arrowLenMult: 2.50, speedMult: 2.10, chartMaxP: 980 }
+  };
+  const COND_K_REF_CONC = 20.0; // 參考基準
+
+  let currentTemp = 25;
+  let volumeL = INITIAL_VOLUME;
+  let totalH2O = INITIAL_TOTAL_H2O;
+  let liquidCount = INITIAL_TOTAL_H2O;
+  let hasReachedEquilibriumOnce = false;
+
+  let simSpeed = 1.0;
+  let isPlaying = false; // 預設待機未開始，按「▶️ 開始」才起跑
+  let simTimeSec = 0;
+  let simTick = 0;
+
+  // 各溫度動態平衡過渡狀態
+  let tempTransStartTime = 0; // 記錄本次升溫起點時間
+  let tempTransStartRCond = 0; // 記錄升溫瞬間的凝結速率起點值
+  const TEMP_BAL_TRANS_SEC = 20.0; // 升溫後需充裕的 20 秒時間差，凝結線才平滑追上蒸發線！
+
+  // 定拍計時器：每 2.0 秒（真實時間 120 幀）觸發一拍「同時跳起 / 同時凝結」！
+  // 60 fps 下，2.0 秒 = 120 ticks
+  const STEP_PERIOD_TICKS = 120;
+  let stepBeatTimer = 0;
+  let quantCondRate = 0; // 當前凝結顆數 (0, 1, 2, 3...)
+  let volumeChangeCooldown = 0; // 拉動活塞期間短暫延遲相變，完整呈現瞬間壓變
+
+  let visualLiquidPool = [];
+  let gasMolecules = [];
+  let condensingMolecules = []; // 正在俯衝凝結回水中的水分子專屬動畫佇列
+  let splashParticles = [];     // 凝結落水瞬間激起的水花微粒
+  let ripples = [];
+  let localArrows = [];
+
+  let fullRateHistory = [];
+  let pvMeasuredTrace = [];
+  let eqVisitedMinV = INITIAL_VOLUME;
+  let eqVisitedMaxV = INITIAL_VOLUME;
+  let pvTransient = null; // 記錄拉動活塞造成的瞬間垂直壓變 { v, pEq, pPeak, type: 'drop'|'spike' }
+  let smoothRCond = 0;    // 巨觀凝結速率平滑值，平滑漸近上升至平衡線，消除微觀分子跳動造成的鋸齒
+  let pvDisplayV = INITIAL_VOLUME; // 追蹤 P-V 圖目前顯示體積（暫停且 V>3.0L 時固定在 3.0L 恰蒸乾點，按開始後跑反比線）
+
+  // 💥 蒸氣過載活塞衝飛爆炸與抽出蒸氣狀態
+  let isExploded = false;
+  let isOpenContainer = false; // 🪟 方案A：敞開系統（拿走蓋子）vs 密閉系統（活塞封閉）切換狀態
+  let pistonExplodeY = 0;
+  let pistonExplodeVy = 0;
+  let pistonExplodeRot = 0;
+  let explosionParticles = [];
+  let extractParticles = [];
+  let shakeMagnitude = 0;
+  let shakeOffset = { x: 0, y: 0 };
+
+  let isDraggingPiston = false;
+  let pvScaleMode = 'auto'; // 'auto': 當前溫度最適放大 | 'global': 0~850 mmHg 全域對比
+
+  // 獨立放大檢視與液面微觀特寫狀態
+  let zoomedPanel = null; // null | 'sim' | 'rate' | 'pv'
+  let isSurfaceZoomed = false;
+  let surfaceZoomCurrent = 1.0;
+
+  // 蒸發 vs 沸騰 微觀氣泡動力學彈窗元素與狀態
+  const boilingModal = document.getElementById('boilingModal');
+  const btnOpenBoilingModal = document.getElementById('btnOpenBoilingModal');
+  const btnCloseBoilingModal = document.getElementById('btnCloseBoilingModal');
+  const btnTriggerDecompression = document.getElementById('btnTriggerDecompression');
+  const evapCanvas = document.getElementById('evapCanvas');
+  const evapCtx = evapCanvas.getContext('2d');
+  const boilCanvas = document.getElementById('boilCanvas');
+  const boilCtx = boilCanvas.getContext('2d');
+  const evapExtPText = document.getElementById('evapExtPText');
+  const evapExplanationText = document.getElementById('evapExplanationText');
+
+  let isBoilingModalOpen = false;
+  let isDecompressed = false;
+  let decompressTimer = 0;
+  let bmAnimTime = 0;
+  let mainBoilBubbles = []; // 主 3D 量筒 100°C 沸騰氣泡
+
+  // Canvas 與 Context
+  const simCanvas = document.getElementById('simCanvas');
+  const simCtx = simCanvas.getContext('2d');
+  const rateCanvas = document.getElementById('rateCanvas');
+  const rateCtx = rateCanvas.getContext('2d');
+  const pvCanvas = document.getElementById('pvCanvas');
+  const pvCtx = pvCanvas.getContext('2d');
+
+  // UI 元件
+  const mainGrid = document.getElementById('mainGrid');
+  const btnSurfaceZoom = document.getElementById('btnSurfaceZoom');
+  const btnZoomSim = document.getElementById('btnZoomSim');
+  const btnZoomRate = document.getElementById('btnZoomRate');
+  const btnZoomPV = document.getElementById('btnZoomPV');
+  const btnZoomCharts = document.getElementById('btnZoomCharts');
+  const volValText = document.getElementById('volValText');
+  const presValText = document.getElementById('presValText');
+  const presAtmText = document.getElementById('presAtmText');
+  const gasValText = document.getElementById('gasValText');
+  const liqValText = document.getElementById('liqValText');
+  const statusBanner = document.getElementById('statusBanner');
+  const dryFormulaText = document.getElementById('dryFormulaText');
+  const satTargetBadge = document.getElementById('satTargetBadge');
+  const volSlider = document.getElementById('volSlider');
+  const volNumInput = document.getElementById('volNumInput');
+  const volSliderLabel = document.getElementById('volSliderLabel');
+  const speedSlider = document.getElementById('speedSlider');
+  const speedLabel = document.getElementById('speedLabel');
+
+  const rightStack = document.getElementById('rightStack');
+  const btnViewDual = document.getElementById('btnViewDual');
+  const btnViewRate = document.getElementById('btnViewRate');
+  const btnViewPV = document.getElementById('btnViewPV');
+
+  /* =====================================================================
+   * 2. 寬闊擬真 3D 玻璃圓柱量筒幾何計算（圓柱體玻璃寬度加倍，兩側留空置放標籤）
+   * ===================================================================== */
+  function resizeAllCanvases() {
+    [simCanvas, rateCanvas, pvCanvas, evapCanvas, boilCanvas].forEach(c => {
+      if (!c) return;
+      const rect = c.parentElement.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        c.width = rect.width * window.devicePixelRatio;
+        c.height = rect.height * window.devicePixelRatio;
+        const ctx = c.getContext('2d');
+        ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+      }
+    });
+    rebuildVisualLiquidBed();
+  }
+  window.addEventListener('resize', resizeAllCanvases);
+
+  function getCylinderGeometry() {
+    const w = simCanvas.width / window.devicePixelRatio;
+    const h = simCanvas.height / window.devicePixelRatio;
+
+    // 頂口由 12 下移至 60（降低約 2 個刻度格高度，給瓶口上方與頂部橫幅留出寬裕天空空間）
+    const vesselTopRimY = 60;
+    const vesselBottomY = h - 28;
+    const cylH = Math.max(200, vesselBottomY - vesselTopRimY);
+
+    // 圓柱體玻璃寬度適應左側 1:1 寬闊面板：兩側各保留 88px 給速率標籤卡片，確保兩側大字卡片絕不出框！
+    const maxAllowedW = Math.max(180, w - 176);
+    const maxCap = zoomedPanel === 'sim' ? 620 : 380;
+    const cylW = Math.min(maxAllowedW, maxCap);
+    const cx = w * 0.5;
+    const left = cx - cylW / 2;
+    const right = cx + cylW / 2;
+    const rx = cylW / 2;
+    const ry = Math.max(9, Math.min(16, rx * 0.075));
+
+    // 水層深度：底部為 vesselBottomY，水面為 surfaceY
+    const maxWaterH = Math.min(95, cylH * 0.22);
+    const waterH = (liquidCount / INITIAL_TOTAL_H2O) * maxWaterH;
+    const surfaceY = vesselBottomY - waterH;
+
+    // 🌟 量筒物理刻度（絕對刻度，不隨水量變動）：
+    // 0L 位於容器物理底部 vesselBottomY，6L 位於最高活塞位置 highestPistonBottomY
+    const highestPistonBottomY = vesselTopRimY + 22;
+    const lowestPistonBottomY = vesselBottomY; // 0L 基準線固定在容器底部！
+
+    // 活塞底面位置依當前 volumeL 精確對齊 1.0L ~ 6.0L 的固定物理刻度線！
+    // 刻度關係：vMark 公升 對應之 y 座標為: vesselBottomY - (vMark / MAX_V) * (vesselBottomY - highestPistonBottomY)
+    const pistonBottomY = vesselBottomY - (volumeL / MAX_V) * (vesselBottomY - highestPistonBottomY);
+    const pistonThickness = 22;
+    const pistonTopY = pistonBottomY - pistonThickness;
+
+    return {
+      w, h, cx, left, right, rx, ry, cylH,
+      vesselTopRimY, vesselBottomY,
+      maxWaterH, waterH, surfaceY,
+      highestPistonBottomY, lowestPistonBottomY,
+      pistonBottomY, pistonTopY, pistonThickness
+    };
+  }
+
+  function rebuildVisualLiquidBed() {
+    const g = getCylinderGeometry();
+    visualLiquidPool = [];
+    if (liquidCount <= 0) return;
+
+    const visualCount = Math.max(0, Math.round(liquidCount * 5.2));
+    const cols = 20;
+    const rows = Math.max(1, Math.ceil(visualCount / cols));
+    const usableW = (g.right - g.left) - 30;
+    const usableH = Math.max(8, g.waterH - 8);
+
+    for (let i = 0; i < visualCount; i++) {
+      const r = Math.floor(i / cols);
+      const c = i % cols;
+      const isBack = (i % 2 === 1);
+      const colNorm = (c + (r % 2) * 0.5) / cols;
+      const rowNorm = rows === 1 ? 0.5 : (r / (rows - 1));
+
+      const xRel = (colNorm - 0.5) * 2;
+      const arcOffsetMult = isBack ? -0.35 : 0.35;
+      const arcOffset = Math.sqrt(Math.max(0, 1 - xRel * xRel)) * (g.ry * 0.65) * arcOffsetMult;
+
+      const bx = g.left + 15 + colNorm * usableW;
+      const by = g.surfaceY - 2 + rowNorm * usableH + arcOffset;
+
+      visualLiquidPool.push({
+        colNorm,
+        rowNorm,
+        arcOffsetMult,
+        baseX: bx,
+        baseY: by,
+        depthLayer: isBack ? 0 : 1,
+        angle: (i * 1.9) % (Math.PI * 2),
+        phase: (i * 2.7) % (Math.PI * 2),
+        isActivating: false
+      });
+    }
+    visualLiquidPool.sort((a, b) => a.depthLayer - b.depthLayer);
+  }
+
+  // 🌟 動態同步水面分子數量與實時液面高度，確保水分子均勻佈滿整個水層深度，絕不浮空或擠在表面！
+  function syncVisualLiquidPoolCount() {
+    if (liquidCount <= 0) {
+      visualLiquidPool = [];
+      return;
+    }
+    // 🌟 若當前有水分子正在蓄力活化準備起跳，嚴禁重構打斷！讓該分子在其原生的 (x, y) 座標完成起跳升空！
+    if (visualLiquidPool.some(m => m.isActivating)) {
+      return;
+    }
+
+    const targetVisualCount = Math.max(0, Math.round(liquidCount * 5.2));
+    if (visualLiquidPool.length === targetVisualCount) return;
+
+    rebuildVisualLiquidBed();
+  }
+
+  /* =====================================================================
+   * 3. 熱力學與波以耳定律狀態計算（支援真實蒸氣壓 mmHg 與 atm）
+   * ===================================================================== */
+  function getThermodynamicState() {
+    const cfg = TEMP_CONFIG[currentTemp];
+
+    // 理論飽和所需氣相水分子數
+    const exactSatGasNeeded = cfg.cSat * volumeL;
+    const idealSatGasCount = Math.round(exactSatGasNeeded);
+    const achievableEqGas = Math.min(totalH2O, idealSatGasCount);
+    const vDry = totalH2O / cfg.cSat;
+
+    // 🌟 計算有效氣體分子數（含正在凝結過渡與活化準備起跳的分子，避免動態平衡交換瞬間出現短暫顆數下探）
+    const activatingCount = visualLiquidPool.filter(m => m.isActivating).length;
+    let effectiveGas = gasMolecules.length + condensingMolecules.length + activatingCount;
+    // 若處於動態平衡（有足夠液態水，且體積未達蒸乾點，且分子數在飽和顆數附近），穩定鎖定為飽和平衡值
+    // 注意：當體積達到或超過蒸乾點時 (volumeL >= FIXED_V_DRY - 0.05)，必須允許最後幾顆水分子順暢完全蒸發乾涸，不可提前鎖死！
+    if (liquidCount > 1 && volumeL < vDry - 0.05 && Math.abs(effectiveGas - achievableEqGas) <= 2 && hasReachedEquilibriumOnce) {
+      effectiveGas = achievableEqGas;
+    }
+    const gasCount = effectiveGas;
+
+    const rEvap = liquidCount > 0 ? cfg.rEvapBase : 0;
+
+    // 🪟 若處於「敞開系統（拿走蓋子）」：水蒸氣自由逸散大氣中，R凝結 恆為 0，容器內不累積蒸氣壓
+    if (isOpenContainer) {
+      return {
+        cfg,
+        gasCount,
+        liquidCount,
+        idealSatGasCount,
+        achievableEqGas,
+        vDry,
+        rEvap,
+        rCond: 0,
+        pressureMmHg: 0,
+        pressureAtm: 0,
+        eqPressureMmHg: 0,
+        isDry: liquidCount === 0
+      };
+    }
+
+    // 計算即時氣體濃度與凝結速率、蒸氣壓
+    let currentConc = gasCount / volumeL;
+
+    // 當氣相分子個數達到當前溫度下的飽和平衡目標時：
+    const isAtEquilibriumCount = (gasCount === achievableEqGas && gasCount > 0);
+    if (isAtEquilibriumCount) {
+      if (volumeL <= vDry) {
+        currentConc = cfg.cSat; // 有水且達飽和時，濃度恆等於飽和濃度 cSat
+      } else {
+        currentConc = (cfg.cSat * vDry) / volumeL; // 乾涸區 (V > 3.0L)：遵守波以耳定律 C = C_sat × (V_乾 / V)
+      }
+    }
+
+    // 凝結速率 R凝結 = (濃度 / cSat) × R蒸發基準；未達飽和時依濃度線性爬升，達飽和時恰等於該溫度之 R蒸發
+    const rCond = (currentConc / cfg.cSat) * cfg.rEvapBase;
+    const ratio = currentConc / cfg.cSat;
+    const pressureMmHg = ratio * cfg.pSat_mmHg;
+    const pressureAtm = ratio * cfg.pSat_atm;
+    const eqPressureMmHg = (volumeL <= vDry) ? cfg.pSat_mmHg : cfg.pSat_mmHg * (vDry / volumeL);
+
+    if (gasCount >= achievableEqGas && gasCount > 0 && !hasReachedEquilibriumOnce) {
+      hasReachedEquilibriumOnce = true;
+      eqVisitedMinV = Math.min(eqVisitedMinV, volumeL);
+      eqVisitedMaxV = Math.max(eqVisitedMaxV, volumeL);
+    }
+
+    if (hasReachedEquilibriumOnce && gasCount === achievableEqGas) {
+      eqVisitedMinV = Math.min(eqVisitedMinV, volumeL);
+      eqVisitedMaxV = Math.max(eqVisitedMaxV, volumeL);
+    }
+
+    return {
+      cfg,
+      gasCount,
+      liquidCount,
+      idealSatGasCount,
+      achievableEqGas,
+      vDry,
+      rEvap,
+      rCond,
+      pressureMmHg,
+      pressureAtm,
+      eqPressureMmHg,
+      isDry: liquidCount === 0
+    };
+  }
+
+  function recordHistoryPoint(forceRecord = false) {
+    const st = getThermodynamicState();
+
+    // 🌟 平滑連續漸近曲線模型：
+    // 升溫瞬間：橘色 R蒸發 垂直跳高！
+    // 藍色 R凝結 從舊平衡點出發，帶著 20 秒充裕觀察時間差，以平滑 S 曲線緩慢爬升追上蒸發線！
+    if (simTimeSec === 0 && gasMolecules.length === 0) {
+      smoothRCond = 0;
+    } else {
+      const elapsedSinceChange = Math.max(0, simTimeSec - tempTransStartTime);
+      if (elapsedSinceChange >= TEMP_BAL_TRANS_SEC) {
+        smoothRCond = st.rEvap;
+      } else {
+        const tNorm = Math.min(1, Math.max(0, elapsedSinceChange / TEMP_BAL_TRANS_SEC));
+        const sCurve = tNorm * tNorm * (3 - 2 * tNorm); // 完美平滑 Ease-in-out Smoothstep
+        smoothRCond = tempTransStartRCond + (st.rEvap - tempTransStartRCond) * sCurve;
+      }
+    }
+
+    const last = fullRateHistory[fullRateHistory.length - 1];
+    if (forceRecord || !last || (simTimeSec - last.t >= 0.25)) {
+      fullRateHistory.push({
+        t: simTimeSec,
+        rEvap: st.rEvap,
+        rCond: Math.round(smoothRCond * 10) / 10
+      });
+    }
+
+    const lastPV = pvMeasuredTrace[pvMeasuredTrace.length - 1];
+    if (
+      forceRecord ||
+      !lastPV ||
+      Math.abs(lastPV.v - volumeL) >= 0.02 ||
+      Math.abs(lastPV.pMmHg - st.pressureMmHg) >= 0.2
+    ) {
+      pvMeasuredTrace.push({
+        v: volumeL,
+        pMmHg: st.pressureMmHg,
+        pAtm: st.pressureAtm
+      });
+      if (pvMeasuredTrace.length > 600) {
+        pvMeasuredTrace = pvMeasuredTrace.filter((_, idx) => idx % 2 === 0 || idx === pvMeasuredTrace.length - 1);
+      }
+    }
+  }
+
+  let lastEvapColNorm = -1;
+
+  // 挑選水面最表層、尚未活化的水分子進行「真·表層實體蒸發」（均勻遍佈全水面，絕不偏聚左側）
+  function pickSurfaceLiquidMolecule(preferLeft = false) {
+    const g = getCylinderGeometry();
+    if (visualLiquidPool.length === 0) return null;
+
+    // 優先挑選：表層 (depthLayer === 1)、靠近水面 (rowNorm <= 0.25)、尚未處於活化狀態
+    let candidates = visualLiquidPool.filter(m => !m.isActivating && m.depthLayer === 1 && (m.rowNorm !== undefined ? m.rowNorm <= 0.25 : m.baseY <= g.surfaceY + 16));
+    if (preferLeft) {
+      const leftCandidates = candidates.filter(m => (m.colNorm !== undefined ? m.colNorm < 0.45 : m.baseX < g.cx - 10));
+      if (leftCandidates.length > 0) candidates = leftCandidates;
+    }
+    // 次佳挑選：任意靠近水面且尚未活化的分子
+    if (candidates.length === 0) {
+      candidates = visualLiquidPool.filter(m => !m.isActivating && (m.rowNorm !== undefined ? m.rowNorm <= 0.45 : m.baseY <= g.surfaceY + 28));
+    }
+    // 保底：任意尚未活化的分子
+    if (candidates.length === 0) {
+      candidates = visualLiquidPool.filter(m => !m.isActivating);
+    }
+    if (candidates.length === 0) return null;
+
+    // 🌟 全水面均勻隨機挑選：優先選擇與上次蒸發位置間隔開的分子，確保左、中、右自然輪流均勻蒸發！
+    let pool = candidates;
+    if (lastEvapColNorm >= 0 && candidates.length > 3) {
+      const distant = candidates.filter(m => Math.abs((m.colNorm ?? 0.5) - lastEvapColNorm) > 0.22);
+      if (distant.length > 0) pool = distant;
+    }
+    const chosen = pool[Math.floor(Math.random() * pool.length)];
+    lastEvapColNorm = chosen.colNorm ?? 0.5;
+    return chosen;
+  }
+
+  // 真正脫離水面、起跳升空的氣相水分子（從水面實體座標連根拔起，均勻擴散升空）
+  function launchEvaporatingGasMolecule(sx, sy, customRot = null) {
+    const g = getCylinderGeometry();
+    const cfg = TEMP_CONFIG[currentTemp];
+    const spd = 1.45 * cfg.speedMult;
+    const ang = -Math.PI / 2 + (Math.random() - 0.5) * 0.7;
+
+    const targetY = Math.max(
+      g.pistonBottomY + 28,
+      sy - Math.min(76, Math.max(38, (sy - g.pistonBottomY) * 0.54))
+    );
+    const targetX = Math.max(g.left + 24, Math.min(g.right - 24, sx + (Math.random() - 0.5) * 44));
+    const initialVx = (Math.random() - 0.5) * 0.7 * cfg.speedMult;
+    const initialVy = -Math.abs(Math.sin(ang) * spd);
+
+    gasMolecules.push({
+      x: sx,
+      y: sy,
+      vx: initialVx,
+      vy: initialVy,
+      rot: customRot !== null ? customRot : (Math.random() * Math.PI * 2),
+      vRot: (Math.random() - 0.5) * 0.04,
+      bornGlow: 60,
+      isInjected: false,
+      age: 0,
+      evapAnim: {
+        active: true,
+        startX: sx,
+        startY: sy,
+        targetX: targetX,
+        targetY: targetY,
+        prog: 0,
+        trail: [{ x: sx, y: sy }]
+      }
+    });
+
+    ripples.push({ x: sx, y: g.surfaceY, rx: 3, maxRx: 22, alpha: 0.95, color: '#fb923c' });
+    localArrows.push({ type: 'evap', x: sx, y: g.surfaceY - 4, dy: 0, alpha: 1.0 });
+  }
+
+  // 單顆保底/靜態生成水分子
+  function spawnOneGasMolecule(customX = null, withEffect = true) {
+    const g = getCylinderGeometry();
+    const cfg = TEMP_CONFIG[currentTemp];
+    const sx = customX !== null ? customX : (g.left + 32 + Math.random() * (g.right - g.left - 64));
+
+    if (!withEffect) {
+      const spd = 1.45 * cfg.speedMult;
+      const ang = Math.random() * Math.PI * 2;
+      gasMolecules.push({
+        x: sx,
+        y: g.pistonBottomY + 18 + Math.random() * Math.max(16, g.surfaceY - g.pistonBottomY - 32),
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd,
+        rot: Math.random() * Math.PI * 2,
+        vRot: (Math.random() - 0.5) * 0.04,
+        bornGlow: 0,
+        isInjected: false,
+        age: 80,
+        evapAnim: null
+      });
+      return;
+    }
+    const cand = pickSurfaceLiquidMolecule(false);
+    if (cand) {
+      cand.isActivating = true;
+      cand.actFrames = 12;
+      cand.actMax = 12;
+    } else {
+      launchEvaporatingGasMolecule(sx, g.surfaceY + 2);
+    }
+  }
+
+  // 同時生成多顆水分子（均勻遍佈全水面蒸發升空）
+  function spawnBatchGasMolecules(count) {
+    if (count <= 0 || liquidCount <= 0) return;
+    const actualCount = Math.min(count, liquidCount);
+    liquidCount -= actualCount;
+
+    const g = getCylinderGeometry();
+    const surfL = g.left + 28;
+    const surfR = g.right - 28;
+    const surfW = Math.max(30, surfR - surfL);
+
+    for (let k = 0; k < actualCount; k++) {
+      const cand = pickSurfaceLiquidMolecule(false);
+      if (cand) {
+        cand.isActivating = true;
+        cand.actFrames = 12 + k * 2; // 交錯 2 幀，更富自然層次感
+        cand.actMax = 12 + k * 2;
+      } else {
+        const slotNorm = actualCount === 1 ? 0.5 : (k / (actualCount - 1));
+        const jitter = (Math.random() - 0.5) * 12;
+        const sx = surfL + slotNorm * surfW + jitter;
+        launchEvaporatingGasMolecule(sx, g.surfaceY + 2);
+      }
+    }
+  }
+
+  // 同時挑選多顆水分子俯衝落水凝結（🌟 課堂刻意教學模式：全部集中在【右半邊】水面俯衝落水！）
+  function condenseBatchGasMolecules(count) {
+    if (count <= 0 || gasMolecules.length === 0) return;
+    const actualCount = Math.min(count, gasMolecules.length);
+    const g = getCylinderGeometry();
+
+    // 挑選偏右半邊的水蒸氣分子進行凝結（包含高處靠近活塞分子均勻挑選，確保各高度均能被正常消除入水）
+    const candidates = gasMolecules
+      .map((m, idx) => ({ m, idx }))
+      .filter(item => !(item.m.evapAnim && item.m.evapAnim.active))
+      .sort((a, b) => {
+        const scoreA = (a.m.x > g.cx ? 100 : 0) + Math.random() * 80;
+        const scoreB = (b.m.x > g.cx ? 100 : 0) + Math.random() * 80;
+        return scoreB - scoreA;
+      });
+
+    const chosenIndices = [];
+    for (let k = 0; k < actualCount && k < candidates.length; k++) {
+      chosenIndices.push(candidates[k].idx);
+    }
+    chosenIndices.sort((a, b) => b - a); // 倒序刪除
+
+    // 右半邊落水區域：從 g.cx + 14 到 g.right - 28
+    const rightZoneL = g.cx + 14;
+    const rightZoneR = g.right - 28;
+    const rightZoneW = Math.max(20, rightZoneR - rightZoneL);
+
+    chosenIndices.forEach((idx, k) => {
+      const m = gasMolecules[idx];
+      gasMolecules.splice(idx, 1);
+      liquidCount++;
+
+      const slotNorm = actualCount === 1 ? 0.5 : (k / (actualCount - 1));
+      const targetX = rightZoneL + slotNorm * rightZoneW + (Math.random() - 0.5) * 8;
+      const targetY = g.surfaceY + (Math.random() - 0.5) * (g.ry * 0.3);
+      const startX = m.x;
+      const startY = m.y;
+
+      condensingMolecules.push({
+        startX,
+        startY,
+        targetX,
+        targetY,
+        x: startX,
+        y: startY,
+        rot: m.rot,
+        prog: 0,
+        trail: [{ x: startX, y: startY }]
+      });
+      localArrows.push({ type: 'cond', x: targetX, y: targetY - 32, dy: 0, alpha: 1.0 });
+    });
+  }
+
+  function stepEvaporationAndBalance() {
+    const st = getThermodynamicState();
+    if (liquidCount <= 0) return;
+
+    if (st.gasCount < st.achievableEqGas) {
+      liquidCount--;
+      spawnOneGasMolecule(null, true);
+    } else if (st.gasCount === st.achievableEqGas && st.achievableEqGas === st.idealSatGasCount) {
+      // 動態平衡時：蒸發與凝結同時等速進行！1顆凝結入水、1顆蒸發升空
+      condenseBatchGasMolecules(1);
+      spawnOneGasMolecule(null, true);
+    } else if (st.gasCount > st.idealSatGasCount) {
+      condenseBatchGasMolecules(1);
+      spawnOneGasMolecule(null, true);
+    }
+    recordHistoryPoint(true);
+  }
+
+  // 視覺過場動畫（液面鏡頭縮放、已觸發之蒸發/凝結分子過場、漣漪與彈窗動畫）
+  function updateVisualTransitions() {
+    const g = getCylinderGeometry();
+
+    // 🌟 動態同步水中分子數量，確保分子數量與實時液面高度同步下降
+    syncVisualLiquidPoolCount();
+
+    // 1. 液面放大特寫鏡頭平滑縮放
+    const targetZoom = isSurfaceZoomed ? 2.35 : 1.0;
+    surfaceZoomCurrent += (targetZoom - surfaceZoomCurrent) * 0.14;
+    if (Math.abs(surfaceZoomCurrent - targetZoom) < 0.004) {
+      surfaceZoomCurrent = targetZoom;
+    }
+
+    const animStep = Math.max(0.2, simSpeed);
+
+    // 1B. 🌟 更新水面正在活化蓄力的水分子（時間到則實體脫離水面起跳！）
+    for (let i = visualLiquidPool.length - 1; i >= 0; i--) {
+      const lm = visualLiquidPool[i];
+      if (lm.isActivating) {
+        lm.actFrames -= animStep;
+        if (lm.actFrames <= 0) {
+          const sx = lm.lastX || lm.baseX;
+          const sy = lm.lastY || lm.baseY;
+          const rot = lm.angle;
+          visualLiquidPool.splice(i, 1);
+          launchEvaporatingGasMolecule(sx, sy, rot);
+        }
+      } else if (lm.bornGlow && lm.bornGlow > 0) {
+        lm.bornGlow -= 1.0 * animStep;
+      }
+    }
+
+    // 2. 更新正在凝結俯衝入水的水分子動畫（慢動作清晰軌跡）
+    for (let i = condensingMolecules.length - 1; i >= 0; i--) {
+      const cm = condensingMolecules[i];
+      cm.prog += 0.028 * animStep;
+      const ease = Math.pow(Math.min(1, cm.prog), 1.65);
+      cm.x = cm.startX + (cm.targetX - cm.startX) * ease;
+      cm.y = cm.startY + (cm.targetY - cm.startY) * ease;
+      cm.rot += 0.05;
+      cm.trail.push({ x: cm.x, y: cm.y });
+      if (cm.trail.length > 9) cm.trail.shift();
+
+      if (cm.prog >= 1) {
+        // 抵達水面：激起雙圈藍色漣漪與水花微粒！
+        ripples.push({ x: cm.targetX, y: g.surfaceY, rx: 3, maxRx: 25, alpha: 1.0, color: '#38bdf8' });
+        ripples.push({ x: cm.targetX, y: g.surfaceY, rx: 8, maxRx: 34, alpha: 0.75, color: '#7dd3fc' });
+        for (let k = 0; k < 5; k++) {
+          const ang = -Math.PI * (0.18 + 0.64 * (k / 4));
+          const spd = 1.6 + Math.random() * 1.3;
+          splashParticles.push({
+            x: cm.targetX,
+            y: g.surfaceY,
+            vx: Math.cos(ang) * spd,
+            vy: Math.sin(ang) * spd - 0.6,
+            alpha: 1.0,
+            r: 2.2
+          });
+        }
+
+        condensingMolecules.splice(i, 1);
+      }
+    }
+
+    // 3. 更新落水水花微粒
+    for (let i = splashParticles.length - 1; i >= 0; i--) {
+      const sp = splashParticles[i];
+      sp.x += sp.vx * animStep;
+      sp.y += sp.vy * animStep;
+      sp.vy += 0.18 * animStep;
+      sp.alpha -= 0.042 * animStep;
+      if (sp.alpha <= 0 || sp.y > g.surfaceY + 6) {
+        splashParticles.splice(i, 1);
+      }
+    }
+
+    // 4. 更新蒸發躍起分子的專屬起跳軌跡（完全流暢無停頓：採用線性過渡＋微加減速）
+    gasMolecules.forEach(m => {
+      if (m.evapAnim && m.evapAnim.active) {
+        m.evapAnim.prog += 0.048 * animStep; // 加快過渡速度，一氣呵成升空
+        const p = Math.min(1, m.evapAnim.prog);
+        m.x = m.evapAnim.startX + (m.evapAnim.targetX - m.evapAnim.startX) * p;
+        m.y = m.evapAnim.startY + (m.evapAnim.targetY - m.evapAnim.startY) * p;
+        m.evapAnim.trail.push({ x: m.x, y: m.y });
+        if (m.evapAnim.trail.length > 7) m.evapAnim.trail.shift();
+        if (m.evapAnim.prog >= 1) {
+          // 到達目標高度瞬間直接無縫銜接正常熱運動，絕不停頓！
+          m.evapAnim.active = false;
+        }
+      }
+    });
+
+    // 5. 漣漪與局部箭頭淡出
+    for (let i = ripples.length - 1; i >= 0; i--) {
+      const rp = ripples[i];
+      rp.rx += 0.42 * animStep;
+      rp.alpha -= 0.018 * animStep;
+      if (rp.alpha <= 0 || rp.rx >= rp.maxRx) ripples.splice(i, 1);
+    }
+    for (let i = localArrows.length - 1; i >= 0; i--) {
+      const ar = localArrows[i];
+      ar.dy += (ar.type === 'evap' ? -0.52 : 0.52) * animStep;
+      ar.alpha -= 0.015 * animStep;
+      if (ar.alpha <= 0) localArrows.splice(i, 1);
+    }
+
+    // 6. 抽出氣體煙霧與爆炸火花特效
+    for (let i = extractParticles.length - 1; i >= 0; i--) {
+      const p = extractParticles[i];
+      p.x += p.vx * animStep;
+      p.y += p.vy * animStep;
+      p.vy *= 0.96;
+      p.alpha -= 0.024 * animStep;
+      p.r += 0.15 * animStep;
+      if (p.alpha <= 0) extractParticles.splice(i, 1);
+    }
+
+    for (let i = explosionParticles.length - 1; i >= 0; i--) {
+      const ep = explosionParticles[i];
+      ep.x += ep.vx * animStep;
+      ep.y += ep.vy * animStep;
+      ep.vy += 0.35 * animStep;
+      ep.rot += ep.vRot * animStep;
+      ep.alpha -= 0.016 * animStep;
+      if (ep.alpha <= 0 || ep.y > g.h + 50) explosionParticles.splice(i, 1);
+    }
+
+    // 7. 活塞爆炸衝飛物理與震動衰減
+    if (isExploded) {
+      pistonExplodeVy += 0.55 * animStep; // 重力加速度
+      pistonExplodeY += pistonExplodeVy * animStep;
+      // 活塞飛到上方並傾斜卡在或懸浮在量筒口上方
+      const maxFlyUpY = -(g.h * 0.42);
+      if (pistonExplodeY < maxFlyUpY) {
+        pistonExplodeY = maxFlyUpY;
+        pistonExplodeVy = Math.max(0, pistonExplodeVy);
+      }
+    }
+
+    if (shakeMagnitude > 0) {
+      shakeOffset.x = (Math.random() - 0.5) * shakeMagnitude;
+      shakeOffset.y = (Math.random() - 0.5) * shakeMagnitude;
+      shakeMagnitude = Math.max(0, shakeMagnitude - 0.8 * animStep);
+    } else {
+      shakeOffset.x = 0;
+      shakeOffset.y = 0;
+    }
+
+    // 8. 微觀彈窗動畫時間推進與減壓演示倒數
+    if (isBoilingModalOpen) {
+      bmAnimTime += 0.035;
+      if (isDecompressed) {
+        decompressTimer -= 1;
+        if (decompressTimer <= 0) {
+          isDecompressed = false;
+          if (evapExtPText) evapExtPText.innerHTML = 'P<sub>外壓</sub> (760 mmHg)';
+          if (evapExplanationText) {
+            evapExplanationText.innerHTML = '液體內部偶發生成的小蒸氣泡，內部向外的蒸氣壓（355 mmHg）小於外界大氣壓（760 mmHg），<strong>氣泡立刻被四周外壓擠扁破壞</strong>！因此內部無法產生氣泡，氣化僅能在沒有液體壓力的「<strong>液體表面</strong>」發生（蒸發）。';
+          }
+          if (btnTriggerDecompression) {
+            btnTriggerDecompression.textContent = '💨 演示針筒抽氣減壓沸騰（常溫25°C沸騰）';
+            btnTriggerDecompression.style.background = 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)';
+          }
+        }
+      }
+    }
+  }
+
+  function updatePhysics() {
+    updateVisualTransitions();
+
+    // 暫停狀態下：若活塞被拉到 > 3.0L，P-V 圖保持在 3.00L 恰蒸乾點！
+    if (!isPlaying) {
+      if (volumeL > st.vDry) {
+        pvDisplayV = st.vDry;
+      } else {
+        pvDisplayV = volumeL;
+      }
+      return;
+    }
+
+    const g = getCylinderGeometry();
+    const st = getThermodynamicState();
+
+    // 動態播放中：當體積大於或等於 FIXED_V_DRY (3.50L) 時，由 3.50L 恰蒸乾點沿波以耳反比線平滑滑動至活塞體積！
+    if (volumeL >= st.vDry) {
+      if (pvDisplayV < volumeL) {
+        pvDisplayV = Math.min(volumeL, pvDisplayV + 0.035 * Math.max(0.4, simSpeed));
+        eqVisitedMaxV = Math.max(eqVisitedMaxV, pvDisplayV);
+      } else if (pvDisplayV > volumeL) {
+        pvDisplayV = Math.max(volumeL, pvDisplayV - 0.035 * Math.max(0.4, simSpeed));
+      }
+      // 達到或超過 3.50L 恰蒸乾點且處於動態運轉時，液態水全數蒸發為氣體
+      if (liquidCount > 0 && pvDisplayV >= st.vDry) {
+        while (liquidCount > 0) {
+          liquidCount--;
+          spawnOneGasMolecule(null, false);
+        }
+        visualLiquidPool = [];
+        rebuildVisualLiquidBed();
+      }
+    } else {
+      pvDisplayV = volumeL;
+    }
+
+    simTick += simSpeed;
+    simTimeSec += (simSpeed / 60);
+
+    if (volumeChangeCooldown > 0) {
+      volumeChangeCooldown = Math.max(0, volumeChangeCooldown - 1);
+    }
+
+    // 若不在拖曳活塞中，執行【定時定量階梯式定拍】相變
+    // 升溫後：給予充裕的 TEMP_BAL_TRANS_SEC（20秒）時間差，讓凝結顆數逐拍平緩增加至新平衡顆數！
+    if (!isDraggingPiston && volumeChangeCooldown === 0) {
+      stepBeatTimer += simSpeed;
+
+      const batchE = st.cfg.batchEvap;
+      const elapsedSinceChange = Math.max(0, simTimeSec - tempTransStartTime);
+
+      if (isOpenContainer) {
+        // 🪟 敞開系統：水蒸氣自由散逸，凝結顆數恆為 0，無法平衡
+        quantCondRate = 0;
+      } else if (elapsedSinceChange >= TEMP_BAL_TRANS_SEC) {
+        quantCondRate = batchE; // 達動態平衡！
+        if (!hasReachedEquilibriumOnce) {
+          hasReachedEquilibriumOnce = true;
+          eqVisitedMinV = Math.min(eqVisitedMinV, volumeL);
+          eqVisitedMaxV = Math.max(eqVisitedMaxV, volumeL);
+        }
+      } else if (elapsedSinceChange < 3.0 && tempTransStartRCond === 0) {
+        quantCondRate = 0; // 初次從0開始時，前3秒純蒸發
+      } else {
+        // 隨時間差平滑階梯增加凝結顆數
+        const baseK = tempTransStartRCond > 0 ? Math.round((tempTransStartRCond / st.rEvap) * batchE) : 0;
+        const progress = elapsedSinceChange / TEMP_BAL_TRANS_SEC;
+        quantCondRate = Math.min(batchE, baseK + Math.floor(progress * (batchE - baseK)));
+      }
+
+      if (stepBeatTimer >= STEP_PERIOD_TICKS) {
+        stepBeatTimer -= STEP_PERIOD_TICKS;
+
+        // 1. 蒸發：每 2 秒整批 batchE 顆同時躍起！
+        if (liquidCount > 0) {
+          spawnBatchGasMolecules(batchE);
+        }
+
+        // 2. 凝結：依指定時間點整批 quantCondRate 顆同時俯衝落水（敞開時無凝結）！
+        if (!isOpenContainer && quantCondRate > 0 && gasMolecules.length > 0) {
+          condenseBatchGasMolecules(quantCondRate);
+        }
+
+        recordHistoryPoint(true);
+      }
+    }
+
+    // 5. 氣相水分子熱運動與器壁碰撞
+    const wallL = g.left + 14;
+    const wallR = g.right - 14;
+    const wallT = g.pistonBottomY + 16; // 確保水分子外圍絕不穿透或被活塞底邊切割！
+    const wallB = g.surfaceY - 2; // 🌟 貼近液面反彈，讓水分子自然接觸水面，不再懸空漂浮！
+
+    for (let i = 0; i < gasMolecules.length; i++) {
+      const m = gasMolecules[i];
+      if (m.evapAnim && m.evapAnim.active) continue; // 起跳動畫期間由 updateVisualTransitions 控制軌跡
+
+      // 若分子尚在左半邊（x < g.cx），賦予極輕柔的向右微漂移（0.0055），讓分子柔和順暢地漫延過中線，絕不堆積在左側！
+      if (m.x < g.cx + 10) {
+        m.vx += 0.0055 * simSpeed;
+      }
+
+      m.x += m.vx * simSpeed;
+      m.y += m.vy * simSpeed;
+      m.rot += m.vRot * simSpeed;
+      m.age += simSpeed;
+      if (m.bornGlow > 0) m.bornGlow -= simSpeed;
+
+      if (m.x < wallL) { m.x = wallL; m.vx = Math.abs(m.vx); }
+      if (m.x > wallR) { m.x = wallR; m.vx = -Math.abs(m.vx); }
+      if (isOpenContainer) {
+        // 🪟 敞開系統：活塞拿走，水蒸氣分子飛越杯口後自由散逸至大氣中！
+        if (m.y < g.vesselTopRimY - 35) {
+          gasMolecules.splice(i, 1);
+          i--;
+          continue;
+        } else if (m.y < g.vesselTopRimY) {
+          m.alpha = Math.max(0.1, (m.y - (g.vesselTopRimY - 35)) / 35);
+        }
+      } else if (isExploded) {
+        // 爆炸爆開後，活塞飛脫，水分子可自由向上逸散到大氣中
+        if (m.y < -40) {
+          // 飛出畫布頂部後，從量筒上方重新循環或自由飄散
+          m.y = g.vesselTopRimY + Math.random() * 30;
+          m.vy = -(0.5 + Math.random() * 2.0);
+        }
+      } else {
+        if (m.y < wallT) { m.y = wallT; m.vy = Math.abs(m.vy); }
+      }
+      if (m.y > wallB) {
+        m.y = wallB;
+        m.vy = -Math.abs(m.vy);
+        if (liquidCount > 0 && Math.random() < 0.14) {
+          ripples.push({ x: m.x, y: g.surfaceY, rx: 3, maxRx: 14, alpha: 0.35, color: '#7dd3fc' });
+        }
+      }
+
+      for (let j = i + 1; j < gasMolecules.length; j++) {
+        const m2 = gasMolecules[j];
+        if (m2.evapAnim && m2.evapAnim.active) continue;
+        const dx = m2.x - m.x;
+        const dy = m2.y - m.y;
+        const d = Math.hypot(dx, dy);
+        if (d < 22 && d > 0) {
+          const tvx = m.vx, tvy = m.vy;
+          m.vx = m2.vx; m.vy = m2.vy;
+          m2.vx = tvx; m2.vy = tvy;
+          const ov = (22 - d) * 0.5;
+          m.x -= (dx / d) * ov; m.y -= (dy / d) * ov;
+          m2.x += (dx / d) * ov; m2.y += (dy / d) * ov;
+        }
+      }
+      // 確保分子間碰撞後不會被推擠穿透活塞底面
+      if (m.y < wallT && !isOpenContainer && !isExploded) {
+        m.y = wallT;
+        m.vy = Math.abs(m.vy);
+      }
+    }
+
+    // 凝結俯衝中的分子若靠近氣相分子，輕微推開氣相分子避免穿透重疊
+    condensingMolecules.forEach(cm => {
+      gasMolecules.forEach(gm => {
+        const d = Math.hypot(gm.x - cm.x, gm.y - cm.y);
+        if (d < 22 && d > 0) {
+          const push = (22 - d);
+          gm.x += ((gm.x - cm.x) / d) * push;
+          gm.y += ((gm.y - cm.y) / d) * push;
+        }
+      });
+    });
+
+    // 6. 100°C 沸點劇烈沸騰氣泡動力學（僅在未飽和、劇烈建立蒸氣壓時沸騰冒泡；達飽和動態平衡時停止冒泡）
+    const is100UnderSat = currentTemp === 100 && liquidCount > 0 && st.gasCount < st.achievableEqGas;
+    if (is100UnderSat) {
+      if (Math.random() < 0.28 * simSpeed) {
+        mainBoilBubbles.push({
+          x: g.cx + (Math.random() - 0.5) * (g.rx * 1.55),
+          y: g.vesselBottomY - 6 - Math.random() * Math.max(10, (g.vesselBottomY - g.surfaceY) * 0.75),
+          r: 2.2 + Math.random() * 2.8,
+          speed: (1.2 + Math.random() * 1.6) * simSpeed,
+          wobble: Math.random() * Math.PI * 2,
+          wobbleSpeed: 0.12 + Math.random() * 0.08
+        });
+      }
+    }
+    for (let i = mainBoilBubbles.length - 1; i >= 0; i--) {
+      const b = mainBoilBubbles[i];
+      b.y -= b.speed;
+      b.wobble += b.wobbleSpeed;
+      b.x += Math.sin(b.wobble) * 0.7;
+      b.r = Math.min(8.5, b.r + 0.035 * simSpeed);
+      if (b.y <= g.surfaceY + 3) {
+        ripples.push({ x: b.x, y: g.surfaceY, rx: 4, maxRx: 18, alpha: 0.7, color: '#fef08a' });
+        mainBoilBubbles.splice(i, 1);
+      }
+    }
+
+    // 7. 當垂直跳變已經平息恢復平衡時，延遲約 1.5 秒自動淡出清除 pvTransient，保持圖表整潔
+    if (pvTransient) {
+      const isBackToEq = Math.abs(st.pressureMmHg - pvTransient.pEq) <= 0.35;
+      if (isBackToEq && Math.abs(pvTransient.v - volumeL) < 0.02) {
+        pvTransient.settleFrames = (pvTransient.settleFrames || 0) + 1;
+        if (pvTransient.settleFrames > 90) {
+          pvTransient = null;
+        }
+      } else {
+        pvTransient.settleFrames = 0;
+      }
+    }
+
+    recordHistoryPoint(false);
+    updateUIAndBanner();
+  }
+
+  function updateUIAndBanner() {
+    const st = getThermodynamicState();
+    const isPausedHoldingAtDry = !isPlaying && (volumeL > st.vDry);
+    if (isPausedHoldingAtDry) {
+      if (presValText) presValText.textContent = st.cfg.pSat_mmHg.toFixed(1);
+      if (presAtmText) presAtmText.textContent = `(${st.cfg.pSat_atm.toFixed(3)} atm)`;
+    } else {
+      const activeDisplayP = (pvDisplayV > st.vDry) ? (st.cfg.pSat_mmHg * (st.vDry / pvDisplayV)) : st.pressureMmHg;
+      const activeDisplayAtm = (pvDisplayV > st.vDry) ? (st.cfg.pSat_atm * (st.vDry / pvDisplayV)) : st.pressureAtm;
+      if (presValText) presValText.textContent = activeDisplayP.toFixed(1);
+      if (presAtmText) presAtmText.textContent = `(${activeDisplayAtm.toFixed(3)} atm)`;
+    }
+    if (gasValText) gasValText.textContent = st.gasCount;
+    if (liqValText) liqValText.textContent = st.liquidCount;
+
+    if (dryFormulaText) {
+      dryFormulaText.innerHTML =
+        `📐 蒸乾體積：總水數 <b style="color:#38bdf8;">${totalH2O}顆</b> ÷ ${currentTemp}°C飽和濃度 <b style="color:#4ade80;">${st.cfg.cSat}顆/L</b> ＝ <b style="color:#fb7185;">V<sub>乾</sub> = ${st.vDry.toFixed(2)} L</b>（飽和蒸氣壓 P<sub>sat</sub> = <b style="color:#facc15;">${st.cfg.pSat_mmHg} mmHg</b> / <b style="color:#cbd5e1;">${st.cfg.pSat_atm} atm</b>）`;
+    }
+
+    if (satTargetBadge) {
+      if (isPausedHoldingAtDry) {
+        satTargetBadge.innerHTML = `<span style="color:#fde047;">⏸ 暫停中：停在 ${st.vDry.toFixed(2)}L 恰蒸乾點</span>`;
+      } else if (Math.abs(volumeL - st.vDry) < 0.01) {
+        satTargetBadge.innerHTML = `<span style="color:#38bdf8;">✨ 恰蒸乾點 (${st.vDry.toFixed(2)}L)：液態水全數轉為飽和蒸氣</span>`;
+      } else if (volumeL > st.vDry) {
+        satTargetBadge.innerHTML = `<span style="color:#fda4af;">⚠️ V(${volumeL.toFixed(2)}L) ＞ V<sub>乾</sub>(${st.vDry.toFixed(2)}L)：波以耳曲線區</span>`;
+      } else {
+        satTargetBadge.innerHTML = `<span style="color:#fde047;">當前飽和需：${st.idealSatGasCount} 顆氣體</span>`;
+      }
+    }
+
+    const pStr = `${st.pressureMmHg.toFixed(1)} mmHg (${st.pressureAtm.toFixed(3)} atm)`;
+    const pSatStr = `${st.cfg.pSat_mmHg} mmHg (${st.cfg.pSat_atm} atm)`;
+
+    if (isOpenContainer) {
+      if (st.isDry) {
+        statusBanner.textContent = '⚠️ 敞開系統已全數蒸乾！因無蓋蒸氣持續逸散（R凝結＝0），液態水完全乾涸！';
+        statusBanner.className = 'status-pill dry';
+      } else {
+        statusBanner.textContent = `🪟 敞開系統（無蓋）：蒸氣自由逸散，R凝結＝0無法平衡（水持續蒸發：剩 ${st.liquidCount} 顆）`;
+        statusBanner.className = 'status-pill over';
+      }
+    } else if (isExploded) {
+      statusBanner.textContent = `💥 蒸氣過載！活塞被衝破爆開！(已達 ${st.gasCount} 顆氣體，衝破安全上限，點擊「🔧 裝回活塞」修復)`;
+      statusBanner.className = 'status-pill over';
+    } else if (isPausedHoldingAtDry) {
+      statusBanner.textContent = `⏸ 暫停中：活塞已拉至 ${volumeL.toFixed(2)}L，狀態先留在 ${st.vDry.toFixed(2)}L 恰蒸乾點；點擊「▶️ 開始」跑波以耳反比線！`;
+      statusBanner.className = 'status-pill eq';
+    } else if (st.gasCount === 0 && st.liquidCount > 0) {
+      statusBanner.textContent = '階段一：初始真空（水分子一顆顆蒸發，凝結 = 0）';
+      statusBanner.className = 'status-pill';
+    } else if (st.isDry && volumeL > st.vDry + 0.02) {
+      statusBanner.textContent = `⚠️ 液態水已全數蒸乾！(V > ${st.vDry.toFixed(2)}L 遵守波以耳定律 P∝1/V，P = ${pStr})`;
+      statusBanner.className = 'status-pill dry';
+    } else if (st.isDry && Math.abs(volumeL - st.vDry) <= 0.02) {
+      statusBanner.textContent = `✨ 恰好全數蒸乾！（最後一滴水消失，氣相恰達飽和 P = ${pSatStr} 定值）`;
+      statusBanner.className = 'status-pill eq';
+    } else if (st.gasCount < st.idealSatGasCount) {
+      if (currentTemp === 100) {
+        statusBanner.textContent = `🔥 100°C 劇烈氣化沸騰中（蒸氣壓快速累積中：${pStr} ➜ 目標 760 mmHg）`;
+        statusBanner.className = 'status-pill over';
+      } else {
+        statusBanner.textContent = `階段二：未飽和（R蒸發 ＞ R凝結，P = ${pStr} ➜ 蒸氣壓持續上升）`;
+        statusBanner.className = 'status-pill';
+      }
+    } else if (st.gasCount === st.idealSatGasCount) {
+      if (currentTemp === 100) {
+        statusBanner.textContent = `✨ 100°C 飽和動態平衡（P = 1.000 atm = 760 mmHg，沸騰停止，表面蒸發＝凝結）`;
+        statusBanner.className = 'status-pill eq';
+      } else {
+        statusBanner.textContent = `✨ 飽和動態平衡！（R蒸發＝R凝結，P = ${pSatStr} 定值）`;
+        statusBanner.className = 'status-pill eq';
+      }
+    } else {
+      statusBanner.textContent = `💨 過飽和！（R凝結 ＞ R蒸發，P = ${pStr}，多餘蒸氣淨凝結回水中）`;
+      statusBanner.className = 'status-pill over';
+    }
+  }
+
+  /* =====================================================================
+   * 4. 修長 3D 玻璃圓柱與活塞渲染
+   * ===================================================================== */
+  function draw3DH2OMolecule(ctx, x, y, angle, scale = 1.0, depthLayer = 1, glowCol = null, isGold = false) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.scale(scale, scale);
+
+    if (glowCol) {
+      const g = ctx.createRadialGradient(0, 0, 2, 0, 0, 14);
+      g.addColorStop(0, glowCol);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(0, 0, 14, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    const hDist = 7.5;
+    [-0.91 - Math.PI / 2, 0.91 - Math.PI / 2].forEach(ha => {
+      const hx = Math.cos(ha) * hDist;
+      const hy = Math.sin(ha) * hDist;
+      const hg = ctx.createRadialGradient(hx - 1.2, hy - 1.2, 0.5, hx, hy, 4.5);
+      if (depthLayer === 1) {
+        hg.addColorStop(0, '#ffffff');
+        hg.addColorStop(0.6, '#cbd5e1');
+        hg.addColorStop(1, '#475569');
+      } else {
+        hg.addColorStop(0, '#94a3b8');
+        hg.addColorStop(1, '#1e293b');
+      }
+      ctx.beginPath();
+      ctx.arc(hx, hy, 4.4, 0, Math.PI * 2);
+      ctx.fillStyle = hg;
+      ctx.fill();
+    });
+
+    // 氧原子球體渲染：標準化學國際 CPK 配色（鮮豔紅色光澤球體，與藍色水槽及藍色箭頭形成高對比！）
+    const og = ctx.createRadialGradient(-2.4, -2.4, 0.8, 0, 0, 8.4);
+    if (isGold) {
+      og.addColorStop(0, '#fef08a');
+      og.addColorStop(0.35, '#f59e0b');
+      og.addColorStop(0.8, '#b45309');
+      og.addColorStop(1, '#451a03');
+    } else if (depthLayer === 1) {
+      og.addColorStop(0, '#fecaca');
+      og.addColorStop(0.28, '#f87171');
+      og.addColorStop(0.72, '#dc2626');
+      og.addColorStop(1, '#7f1d1d');
+    } else {
+      og.addColorStop(0, '#f87171');
+      og.addColorStop(0.55, '#b91c1c');
+      og.addColorStop(1, '#450a0a');
+    }
+    ctx.beginPath();
+    ctx.arc(0, 0, 7.8 * (depthLayer === 0 ? 0.9 : 1), 0, Math.PI * 2);
+    ctx.fillStyle = og;
+    ctx.fill();
+
+    if (depthLayer === 1) {
+      ctx.fillStyle = 'rgba(255,255,255,0.88)';
+      ctx.beginPath();
+      ctx.ellipse(-2.0, -2.0, 1.8, 1.0, -Math.PI / 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // 瓶內流暢立體箭頭（純箭頭、無底框與文字，完全不遮擋瓶內水分子熱運動，自帶清晰白色高光邊框）
+  function drawSleekInBottleArrow(ctx, x, baseY, lenPx, isUp, colorHex, pistonBottomY) {
+    if (lenPx <= 2) return;
+    ctx.save();
+
+    // 限制箭頭長度，避免穿透活塞
+    const maxAvailableH = Math.max(8, baseY - pistonBottomY - 16);
+    const clampedLen = Math.min(lenPx, maxAvailableH);
+    if (clampedLen < 5) { ctx.restore(); return; }
+
+    const startY = isUp ? baseY - 4 : (baseY - 4 - clampedLen);
+    const endY = isUp ? (baseY - 4 - clampedLen) : baseY - 4;
+    const dir = isUp ? -1 : 1;
+    const headH = Math.min(14, Math.max(8, clampedLen * 0.32));
+    const shaftEnd = endY - dir * headH;
+
+    ctx.shadowColor = colorHex;
+    ctx.shadowBlur = 8;
+
+    // 🌟 1. 先畫白色高對比外邊框（包含箭身與箭頭三角）
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2.4;
+    ctx.lineJoin = 'round';
+
+    if (Math.abs(shaftEnd - startY) > 2) {
+      ctx.beginPath();
+      ctx.roundRect(x - 4.5, Math.min(startY, shaftEnd), 9, Math.abs(shaftEnd - startY), 3);
+      ctx.stroke();
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(x, endY);
+    ctx.lineTo(x - 9.5, endY - dir * headH);
+    ctx.lineTo(x + 9.5, endY - dir * headH);
+    ctx.closePath();
+    ctx.stroke();
+
+    // 🌟 2. 填充箭身主幹（立體漸層）
+    const sg = ctx.createLinearGradient(x - 3.5, 0, x + 3.5, 0);
+    sg.addColorStop(0, colorHex);
+    sg.addColorStop(0.5, '#ffffff');
+    sg.addColorStop(1, colorHex);
+    ctx.fillStyle = sg;
+    ctx.globalAlpha = 0.95;
+
+    if (Math.abs(shaftEnd - startY) > 2) {
+      ctx.beginPath();
+      ctx.roundRect(x - 3.5, Math.min(startY, shaftEnd), 7, Math.abs(shaftEnd - startY), 3);
+      ctx.fill();
+    }
+
+    // 🌟 3. 填充箭頭頂端三角
+    ctx.fillStyle = colorHex;
+    ctx.globalAlpha = 1.0;
+    ctx.beginPath();
+    ctx.moveTo(x, endY);
+    ctx.lineTo(x - 8, endY - dir * headH);
+    ctx.lineTo(x + 8, endY - dir * headH);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // 瓶外獨立標籤卡片（置於玻璃量筒兩側邊緣外側，直排文字，絕不出框）
+  function drawOutsideRateBadge(ctx, cylinderEdgeX, baseY, isLeft, colorHex, rateVal, isDry = false) {
+    ctx.save();
+    const bw = 64;
+    const bh = 126;
+    const canvasW = ctx.canvas.width / window.devicePixelRatio;
+    const canvasH = ctx.canvas.height / window.devicePixelRatio;
+    const gap = 10;
+    const rawBx = isLeft ? (cylinderEdgeX - bw - gap) : (cylinderEdgeX + gap);
+    const bx = isLeft ? Math.max(8, Math.min(cylinderEdgeX - bw - 4, rawBx)) : Math.min(canvasW - bw - 8, Math.max(cylinderEdgeX + 4, rawBx));
+    // 垂直嚴格限制在畫布安全範圍內（上下至少預留 12px），絕不出框！
+    const by = Math.max(12, Math.min(canvasH - bh - 12, baseY - bh * 0.5));
+
+    // 外置卡片半透明深色玻璃背景
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
+    ctx.strokeStyle = colorHex;
+    ctx.lineWidth = 2.0;
+    ctx.shadowColor = colorHex;
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bw, bh, 8);
+    ctx.fill();
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // 指向瓶內的微型導引箭頭/線段
+    ctx.strokeStyle = colorHex;
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    if (isLeft) {
+      ctx.moveTo(bx + bw, by + bh * 0.5);
+      ctx.lineTo(cylinderEdgeX - 1, by + bh * 0.5);
+    } else {
+      ctx.moveTo(bx, by + bh * 0.5);
+      ctx.lineTo(cylinderEdgeX + 1, by + bh * 0.5);
+    }
+    ctx.stroke();
+
+    // 垂直排版：頂部方向標題、中間分隔線、底部大字狀態/數值
+    // 🌟 蒸發、凝結、速率字體統一放大至 900 15px，與下方「定值/平衡」等大醒目且絕不出框！
+    ctx.textAlign = 'center';
+    ctx.fillStyle = colorHex;
+    ctx.font = '900 15px "PingFang TC", sans-serif';
+    ctx.fillText(isLeft ? '↑ 蒸發' : '↓ 凝結', bx + bw / 2, by + 21);
+    ctx.fillText('速率', bx + bw / 2, by + 39);
+
+    // 小分隔線
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+    ctx.lineWidth = 1.0;
+    ctx.beginPath();
+    ctx.moveTo(bx + 8, by + 47);
+    ctx.lineTo(bx + bw - 8, by + 47);
+    ctx.stroke();
+
+    // 數值與狀態直排文字（大字體 15~16px，各行留白充裕，絕不出框）
+    if (isLeft) {
+      if (isDry) {
+        ctx.fillStyle = '#fda4af';
+        ctx.font = '900 15px "PingFang TC", sans-serif';
+        ctx.fillText('已蒸乾', bx + bw / 2, by + 72);
+        ctx.font = '900 18px monospace';
+        ctx.fillText('0', bx + bw / 2, by + 98);
+      } else {
+        const batchE = TEMP_CONFIG[currentTemp].batchEvap;
+        ctx.fillStyle = '#fde047';
+        ctx.font = '900 16px "PingFang TC", sans-serif';
+        ctx.fillText(`${batchE}顆`, bx + bw / 2, by + 68);
+        ctx.font = 'bold 12.5px "PingFang TC", sans-serif';
+        ctx.fillText('/2秒', bx + bw / 2, by + 85);
+        ctx.fillStyle = '#fed7aa';
+        ctx.font = '900 15px "PingFang TC", sans-serif';
+        ctx.fillText('定值', bx + bw / 2, by + 108);
+      }
+    } else {
+      const st = getThermodynamicState();
+      const isAtEq = (st.gasCount === st.achievableEqGas && st.liquidCount > 0);
+      if (isDry || st.isDry) {
+        ctx.fillStyle = '#fda4af';
+        ctx.font = '900 15px "PingFang TC", sans-serif';
+        ctx.fillText('無相變', bx + bw / 2, by + 72);
+        ctx.font = '900 14px "PingFang TC", sans-serif';
+        ctx.fillText('純氣相', bx + bw / 2, by + 98);
+      } else if (isOpenContainer) {
+        ctx.fillStyle = '#7dd3fc';
+        ctx.font = '900 16px "PingFang TC", sans-serif';
+        ctx.fillText('0顆', bx + bw / 2, by + 68);
+        ctx.font = 'bold 12px "PingFang TC", sans-serif';
+        ctx.fillText('/2秒', bx + bw / 2, by + 84);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = 'bold 12px "PingFang TC", sans-serif';
+        ctx.fillText('敞開逸散', bx + bw / 2, by + 101);
+        ctx.fillText('無凝結', bx + bw / 2, by + 117);
+      } else if (isAtEq) {
+        const batchE = TEMP_CONFIG[currentTemp].batchEvap;
+        ctx.fillStyle = '#4ade80';
+        ctx.font = '900 16px "PingFang TC", sans-serif';
+        ctx.fillText(`${batchE}顆`, bx + bw / 2, by + 68);
+        ctx.font = 'bold 12.5px "PingFang TC", sans-serif';
+        ctx.fillText('/2秒', bx + bw / 2, by + 85);
+        ctx.fillStyle = '#86efac';
+        ctx.font = '900 15px "PingFang TC", sans-serif';
+        ctx.fillText('平衡', bx + bw / 2, by + 108);
+      } else if (st.gasCount === 0) {
+        ctx.fillStyle = '#7dd3fc';
+        ctx.font = '900 16px "PingFang TC", sans-serif';
+        ctx.fillText('0顆', bx + bw / 2, by + 68);
+        ctx.font = 'bold 12.5px "PingFang TC", sans-serif';
+        ctx.fillText('/2秒', bx + bw / 2, by + 85);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '900 15px "PingFang TC", sans-serif';
+        ctx.fillText('初真空', bx + bw / 2, by + 108);
+      } else {
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = '900 16px "PingFang TC", sans-serif';
+        ctx.fillText(`${quantCondRate}顆`, bx + bw / 2, by + 68);
+        ctx.font = 'bold 12.5px "PingFang TC", sans-serif';
+        ctx.fillText('/2秒', bx + bw / 2, by + 85);
+        ctx.fillStyle = '#bae6fd';
+        ctx.font = '900 15px "PingFang TC", sans-serif';
+        ctx.fillText('爬升中', bx + bw / 2, by + 108);
+      }
+    }
+
+    ctx.restore();
+  }
+
+  function draw3DMetallicPiston(ctx, g) {
+    if (isOpenContainer) {
+      // 🪟 敞開系統：活塞已被拿走，在頂口繪製開放標示
+      ctx.save();
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = 'bold 12.5px "PingFang TC", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🪟 敞開系統（無蓋／水蒸氣自由逸散）', g.cx, Math.max(24, g.vesselTopRimY - 10));
+      ctx.restore();
+      return;
+    }
+    const { cx, left, right, rx, ry, pistonTopY, pistonBottomY } = g;
+    ctx.save();
+    if (isExploded) {
+      // 爆炸狀態下活塞衝脫，傾斜飛懸在量筒口上方
+      ctx.translate(cx, pistonTopY + pistonExplodeY);
+      ctx.rotate(pistonExplodeRot);
+      ctx.translate(-cx, -pistonTopY);
+    }
+
+    const rodW = 18;
+    const handleY = Math.max(6, pistonTopY - 24);
+    const rodGrad = ctx.createLinearGradient(cx - rodW / 2, 0, cx + rodW / 2, 0);
+    rodGrad.addColorStop(0, '#475569');
+    rodGrad.addColorStop(0.3, '#f8fafc');
+    rodGrad.addColorStop(0.6, '#94a3b8');
+    rodGrad.addColorStop(1, '#1e293b');
+
+    ctx.fillStyle = rodGrad;
+    ctx.fillRect(cx - rodW / 2, handleY, rodW, pistonTopY - handleY);
+
+    const handleW = 130;
+    const handleH = 11;
+    const hGrad = ctx.createLinearGradient(0, handleY - 5, 0, handleY + 6);
+    hGrad.addColorStop(0, '#94a3b8');
+    hGrad.addColorStop(0.4, '#ffffff');
+    hGrad.addColorStop(1, '#334155');
+    ctx.fillStyle = hGrad;
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.roundRect(cx - handleW / 2, handleY - 5, handleW, handleH, 5);
+    ctx.fill();
+    ctx.stroke();
+
+    const bodyGrad = ctx.createLinearGradient(left, 0, right, 0);
+    bodyGrad.addColorStop(0, '#1e293b');
+    bodyGrad.addColorStop(0.14, '#64748b');
+    bodyGrad.addColorStop(0.3, '#f8fafc');
+    bodyGrad.addColorStop(0.5, '#cbd5e1');
+    bodyGrad.addColorStop(0.75, '#475569');
+    bodyGrad.addColorStop(0.9, '#e2e8f0');
+    bodyGrad.addColorStop(1, '#0f172a');
+
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.moveTo(left + 2, pistonTopY);
+    ctx.lineTo(left + 2, pistonBottomY);
+    ctx.ellipse(cx, pistonBottomY, rx - 2, ry * 0.88, 0, Math.PI, 0, true);
+    ctx.lineTo(right - 2, pistonTopY);
+    ctx.ellipse(cx, pistonTopY, rx - 2, ry * 0.88, 0, 0, Math.PI, true);
+    ctx.closePath();
+    ctx.fill();
+
+    [pistonTopY + 7, pistonBottomY - 5].forEach(oy => {
+      ctx.strokeStyle = '#090d16';
+      ctx.lineWidth = 2.6;
+      ctx.beginPath();
+      ctx.ellipse(cx, oy, rx - 1, ry * 0.88, 0, 0, Math.PI);
+      ctx.stroke();
+    });
+
+    const topDiskGrad = ctx.createRadialGradient(cx - rx * 0.25, pistonTopY - 2, 4, cx, pistonTopY, rx);
+    topDiskGrad.addColorStop(0, '#ffffff');
+    topDiskGrad.addColorStop(0.55, '#94a3b8');
+    topDiskGrad.addColorStop(1, '#334155');
+    ctx.fillStyle = topDiskGrad;
+    ctx.beginPath();
+    ctx.ellipse(cx, pistonTopY, rx - 2, ry * 0.88, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
+
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.ellipse(cx, pistonBottomY, rx - 2, ry * 0.88, 0, 0, Math.PI);
+    ctx.stroke();
+
+    if (isExploded) {
+      ctx.fillStyle = '#ef4444';
+      ctx.font = '900 15px "PingFang TC", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('💥 活塞衝破爆開！', cx, (pistonTopY + pistonBottomY) / 2 + 8);
+    } else {
+      const isSnappedToDry = Math.abs(volumeL - (totalH2O / TEMP_CONFIG[currentTemp].cSat)) < 0.005;
+      ctx.fillStyle = isSnappedToDry ? '#f43f5e' : '#020617';
+      ctx.font = '900 15.5px "PingFang TC", sans-serif';
+      ctx.textAlign = 'center';
+      const snapLabel = isSnappedToDry ? `🧲 恰蒸乾點 V = ${volumeL.toFixed(2)} L` : `↕ 活塞體積 V = ${volumeL.toFixed(2)} L`;
+      ctx.fillText(snapLabel, cx, (pistonTopY + pistonBottomY) / 2 + 8);
+    }
+    ctx.restore();
+  }
+
+  // 物理速率箭頭長度精確映射函數：升溫時蒸發箭頭立即變長，凝結箭頭嚴格保持原長度，絕不隨升溫跳長；
+  // 隨後隨氣相分子蒸發累積，凝結箭頭平滑伸長，平衡時與蒸發箭頭等長！
+  function getRateArrowLen(rateVal, baseArrowPx) {
+    if (rateVal <= 0) return 0;
+    const pts = [
+      { r: 0, mult: 0 },
+      { r: 100, mult: TEMP_CONFIG[25].arrowLenMult },
+      { r: 125, mult: TEMP_CONFIG[55].arrowLenMult },
+      { r: 155, mult: TEMP_CONFIG[80].arrowLenMult },
+      { r: 190, mult: TEMP_CONFIG[100].arrowLenMult }
+    ];
+    if (rateVal >= pts[pts.length - 1].r) {
+      const last = pts[pts.length - 1];
+      const prev = pts[pts.length - 2];
+      const slope = (last.mult - prev.mult) / (last.r - prev.r);
+      return baseArrowPx * (last.mult + slope * (rateVal - last.r));
+    }
+    for (let i = 0; i < pts.length - 1; i++) {
+      if (rateVal >= pts[i].r && rateVal <= pts[i + 1].r) {
+        const frac = (rateVal - pts[i].r) / (pts[i + 1].r - pts[i].r);
+        const m = pts[i].mult + frac * (pts[i + 1].mult - pts[i].mult);
+        return baseArrowPx * m;
+      }
+    }
+    return baseArrowPx;
+  }
+
+  function renderSimCanvas() {
+    const g = getCylinderGeometry();
+    const st = getThermodynamicState();
+    simCtx.clearRect(0, 0, g.w, g.h);
+
+    const zoom = surfaceZoomCurrent;
+    const isZoomingSurface = zoom > 1.01;
+    const focusX = g.cx;
+    const focusY = g.surfaceY - 10;
+
+    simCtx.save();
+    if (shakeMagnitude > 0) {
+      simCtx.translate(shakeOffset.x, shakeOffset.y);
+    }
+    if (isZoomingSurface) {
+      simCtx.translate(g.w * 0.5, g.h * 0.58);
+      simCtx.scale(zoom, zoom);
+      simCtx.translate(-focusX, -focusY);
+    }
+
+    // 1. 底部厚實圓弧玻璃底座
+    const baseStandY = g.vesselBottomY + 2;
+    const standGrad = simCtx.createLinearGradient(g.left - 12, 0, g.right + 12, 0);
+    standGrad.addColorStop(0, '#0f172a');
+    standGrad.addColorStop(0.25, '#475569');
+    standGrad.addColorStop(0.5, '#cbd5e1');
+    standGrad.addColorStop(0.75, '#475569');
+    standGrad.addColorStop(1, '#0f172a');
+
+    simCtx.fillStyle = standGrad;
+    simCtx.beginPath();
+    simCtx.ellipse(g.cx, baseStandY + 4, g.rx + 10, g.ry + 3, 0, 0, Math.PI * 2);
+    simCtx.fill();
+
+    // 2. 修長玻璃圓柱背牆與立體圓柱側光影
+    const cylBackGrad = simCtx.createLinearGradient(g.left, 0, g.right, 0);
+    cylBackGrad.addColorStop(0, 'rgba(71, 85, 105, 0.72)');
+    cylBackGrad.addColorStop(0.09, 'rgba(30, 41, 59, 0.38)');
+    cylBackGrad.addColorStop(0.22, 'rgba(226, 232, 240, 0.14)');
+    cylBackGrad.addColorStop(0.5, 'rgba(15, 23, 42, 0.2)');
+    cylBackGrad.addColorStop(0.85, 'rgba(30, 41, 59, 0.42)');
+    cylBackGrad.addColorStop(1, 'rgba(71, 85, 105, 0.75)');
+
+    simCtx.fillStyle = cylBackGrad;
+    simCtx.beginPath();
+    simCtx.moveTo(g.left, g.vesselTopRimY);
+    simCtx.lineTo(g.left, g.vesselBottomY);
+    simCtx.ellipse(g.cx, g.vesselBottomY, g.rx, g.ry, 0, Math.PI, 0, true);
+    simCtx.lineTo(g.right, g.vesselTopRimY);
+    simCtx.ellipse(g.cx, g.vesselTopRimY, g.rx, g.ry, 0, 0, Math.PI, true);
+    simCtx.closePath();
+    simCtx.fill();
+
+    // 3. 底部 3D 清澈半透明液態水與雙層水分子
+    if (liquidCount > 0) {
+      const waterBodyGrad = simCtx.createLinearGradient(g.left, 0, g.right, 0);
+      waterBodyGrad.addColorStop(0, 'rgba(14, 165, 233, 0.28)');
+      waterBodyGrad.addColorStop(0.18, 'rgba(56, 189, 248, 0.16)');
+      waterBodyGrad.addColorStop(0.5, 'rgba(56, 189, 248, 0.10)');
+      waterBodyGrad.addColorStop(0.82, 'rgba(56, 189, 248, 0.16)');
+      waterBodyGrad.addColorStop(1, 'rgba(14, 165, 233, 0.28)');
+
+      simCtx.fillStyle = waterBodyGrad;
+      simCtx.beginPath();
+      simCtx.moveTo(g.left, g.surfaceY);
+      simCtx.lineTo(g.left, g.vesselBottomY);
+      simCtx.ellipse(g.cx, g.vesselBottomY, g.rx, g.ry, 0, Math.PI, 0, true);
+      simCtx.lineTo(g.right, g.surfaceY);
+      simCtx.ellipse(g.cx, g.surfaceY, g.rx, g.ry, 0, 0, Math.PI, true);
+      simCtx.closePath();
+      simCtx.fill();
+
+      const usableW = (g.right - g.left) - 30;
+      const usableH = Math.max(8, g.waterH - 8);
+
+      const jitter = 1.4 * st.cfg.speedMult;
+      visualLiquidPool.forEach(m => {
+        const xRel = ((m.colNorm ?? 0.5) - 0.5) * 2;
+        const arcMult = m.arcOffsetMult !== undefined ? m.arcOffsetMult : (m.depthLayer === 0 ? -0.35 : 0.35);
+        const arcOffset = Math.sqrt(Math.max(0, 1 - xRel * xRel)) * (g.ry * 0.65) * arcMult;
+        m.baseX = g.left + 15 + (m.colNorm ?? 0.5) * usableW;
+        m.baseY = g.surfaceY - 2 + (m.rowNorm ?? 0.5) * usableH + arcOffset;
+
+        if (m.depthLayer === 0) {
+          const jx = Math.sin(simTick * 0.08 + m.phase) * jitter;
+          const jy = Math.cos(simTick * 0.09 + m.phase * 1.3) * jitter;
+          draw3DH2OMolecule(simCtx, m.baseX + jx, m.baseY + jy, m.angle, 0.84, 0);
+        }
+      });
+
+      const surfGrad = simCtx.createRadialGradient(g.cx, g.surfaceY - 2, 6, g.cx, g.surfaceY, g.rx);
+      surfGrad.addColorStop(0, 'rgba(224, 242, 254, 0.40)');
+      surfGrad.addColorStop(0.65, 'rgba(56, 189, 248, 0.22)');
+      surfGrad.addColorStop(1, 'rgba(2, 132, 199, 0.35)');
+      simCtx.fillStyle = surfGrad;
+      simCtx.beginPath();
+      simCtx.ellipse(g.cx, g.surfaceY, g.rx, g.ry * 0.9, 0, 0, Math.PI * 2);
+      simCtx.fill();
+
+      // 水面清澈高光折射輪廓弧線
+      simCtx.strokeStyle = 'rgba(186, 230, 253, 0.65)';
+      simCtx.lineWidth = 1.6;
+      simCtx.beginPath();
+      simCtx.ellipse(g.cx, g.surfaceY, g.rx, g.ry * 0.9, 0, 0, Math.PI * 2);
+      simCtx.stroke();
+
+      ripples.forEach(rp => {
+        simCtx.save();
+        simCtx.strokeStyle = rp.color;
+        simCtx.globalAlpha = Math.max(0, rp.alpha);
+        simCtx.lineWidth = 2.2;
+        simCtx.beginPath();
+        simCtx.ellipse(rp.x, rp.y, rp.rx, rp.rx * 0.35, 0, 0, Math.PI * 2);
+        simCtx.stroke();
+        simCtx.restore();
+      });
+
+      visualLiquidPool.forEach((m, idx) => {
+        if (m.depthLayer === 1) {
+          let jx = Math.sin(simTick * 0.085 + m.phase) * jitter;
+          let jy = Math.cos(simTick * 0.095 + m.phase * 1.4) * jitter;
+          let rot = m.angle + Math.sin(simTick * 0.04 + idx) * 0.16;
+
+          // 🌟 若正處於活化蓄力狀態：高頻激烈振盪＋桔黃色活化能量光圈！
+          if (m.isActivating) {
+            const actProg = Math.max(0, Math.min(1, 1 - (m.actFrames / (m.actMax || 12))));
+            jx += (Math.random() - 0.5) * 4.2;
+            jy += (Math.random() - 0.5) * 4.2 - actProg * 3.5; // 向上微幅掙脫
+            m.lastX = m.baseX + jx;
+            m.lastY = m.baseY + jy;
+
+            // 桔黃色活化能量光圈
+            simCtx.save();
+            const haloR = 11 + actProg * 4;
+            const pulse = 0.7 + 0.3 * Math.sin(actProg * Math.PI * 4);
+            simCtx.strokeStyle = `rgba(251, 146, 60, ${pulse})`;
+            simCtx.lineWidth = 2.2;
+            simCtx.shadowColor = '#f97316';
+            simCtx.shadowBlur = 8;
+            simCtx.beginPath();
+            simCtx.arc(m.lastX, m.lastY, haloR, 0, Math.PI * 2);
+            simCtx.stroke();
+            simCtx.restore();
+
+            draw3DH2OMolecule(simCtx, m.lastX, m.lastY, rot, 1.08, 1, 'rgba(251, 146, 60, 0.95)');
+          } else {
+            m.lastX = m.baseX + jx;
+            m.lastY = m.baseY + jy;
+            draw3DH2OMolecule(simCtx, m.lastX, m.lastY, rot, 0.94, 1, null);
+          }
+        }
+      });
+
+      // 100°C 沸點劇烈沸騰氣泡渲染（已達飽和平衡時自然停止冒泡）
+      if (currentTemp === 100 && mainBoilBubbles.length > 0) {
+        mainBoilBubbles.forEach(b => {
+          simCtx.save();
+          simCtx.beginPath();
+          simCtx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+          simCtx.fillStyle = 'rgba(254, 240, 138, 0.45)';
+          simCtx.strokeStyle = 'rgba(255, 255, 255, 0.92)';
+          simCtx.lineWidth = 1.3;
+          simCtx.fill();
+          simCtx.stroke();
+          simCtx.beginPath();
+          simCtx.arc(b.x - b.r * 0.35, b.y - b.r * 0.35, b.r * 0.32, 0, Math.PI * 2);
+          simCtx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+          simCtx.fill();
+          simCtx.restore();
+        });
+      }
+
+      simCtx.strokeStyle = '#e0f2fe';
+      simCtx.lineWidth = 2.2;
+      simCtx.beginPath();
+      simCtx.ellipse(g.cx, g.surfaceY, g.rx, g.ry * 0.9, 0, 0, Math.PI);
+      simCtx.stroke();
+    } else {
+      simCtx.save();
+      simCtx.font = '900 13px "PingFang TC", sans-serif';
+      simCtx.textAlign = 'center';
+      if (isOpenContainer) {
+        simCtx.fillStyle = '#fda4af';
+        simCtx.fillText(`⚠️ 敞開系統水已全數蒸乾！`, g.cx, g.vesselBottomY - 6);
+      } else if (Math.abs(volumeL - st.vDry) < 0.05) {
+        simCtx.fillStyle = '#38bdf8';
+        simCtx.fillText(`✨ 恰好全數蒸乾（氣相恰達飽和）`, g.cx, g.vesselBottomY - 6);
+      } else {
+        simCtx.fillStyle = '#fda4af';
+        simCtx.fillText(`⚠️ 液態水已全數蒸乾 (波以耳區)`, g.cx, g.vesselBottomY - 6);
+      }
+      simCtx.restore();
+    }
+
+    // 5A. 凝結落水水花微粒 (Splash droplets)
+    splashParticles.forEach(sp => {
+      simCtx.save();
+      simCtx.globalAlpha = Math.max(0, sp.alpha);
+      simCtx.fillStyle = '#7dd3fc';
+      simCtx.shadowColor = '#38bdf8';
+      simCtx.shadowBlur = 6;
+      simCtx.beginPath();
+      simCtx.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2);
+      simCtx.fill();
+      simCtx.restore();
+    });
+
+    // 5B. 正在凝結俯衝入水的水分子（藍色專屬光圈＋隨行標籤）
+    condensingMolecules.forEach(cm => {
+      simCtx.save();
+      // 外圍藍色凝結微光圈
+      simCtx.strokeStyle = 'rgba(56, 189, 248, 0.95)';
+      simCtx.lineWidth = 2.2;
+      simCtx.shadowColor = '#38bdf8';
+      simCtx.shadowBlur = 8;
+      simCtx.beginPath();
+      simCtx.arc(cm.x, cm.y, 12, 0, Math.PI * 2);
+      simCtx.stroke();
+      simCtx.shadowBlur = 0;
+
+      // 水分子本體
+      draw3DH2OMolecule(simCtx, cm.x, cm.y, cm.rot, 1.1, 1, 'rgba(56, 189, 248, 0.9)', false);
+
+      // 隨行「↓ 凝結」微光膠囊標籤（僅液面放大特寫時顯示，避免全景畫面雜亂）
+      if (isZoomingSurface) {
+        simCtx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+        simCtx.strokeStyle = '#38bdf8';
+        simCtx.lineWidth = 1.3;
+        simCtx.beginPath();
+        simCtx.roundRect(cm.x + 11, cm.y - 9, 40, 17, 5);
+        simCtx.fill();
+        simCtx.stroke();
+        simCtx.fillStyle = '#7dd3fc';
+        simCtx.font = 'bold 10px "PingFang TC", sans-serif';
+        simCtx.textAlign = 'center';
+        simCtx.fillText('↓凝結', cm.x + 31, cm.y + 3);
+      }
+      simCtx.restore();
+    });
+
+    // 5C. 氣相水蒸氣分子（含正在蒸發躍起的水分子，桔黃色高動能光圈）
+    gasMolecules.forEach(m => {
+      if (m.evapAnim && m.evapAnim.active) {
+        simCtx.save();
+        // 外圍桔黃色蒸發專屬高動能突破光圈
+        const ringR = 12 + Math.sin((m.evapAnim.prog || 0) * Math.PI * 3) * 1.5;
+        simCtx.strokeStyle = 'rgba(251, 146, 60, 0.95)';
+        simCtx.lineWidth = 2.2;
+        simCtx.shadowColor = '#f97316';
+        simCtx.shadowBlur = 8;
+        simCtx.beginPath();
+        simCtx.arc(m.x, m.y, ringR, 0, Math.PI * 2);
+        simCtx.stroke();
+        simCtx.shadowBlur = 0;
+
+        // 蒸發水分子本體
+        draw3DH2OMolecule(simCtx, m.x, m.y, m.rot, 1.12, 1, 'rgba(249, 115, 22, 0.95)', m.isInjected);
+
+        // 隨行「↑ 蒸發」微光膠囊標籤（僅液面放大特寫時顯示）
+        if (isZoomingSurface) {
+          simCtx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+          simCtx.strokeStyle = '#fb923c';
+          simCtx.lineWidth = 1.3;
+          simCtx.beginPath();
+          simCtx.roundRect(m.x - 51, m.y - 9, 40, 17, 5);
+          simCtx.fill();
+          simCtx.stroke();
+          simCtx.fillStyle = '#fdba74';
+          simCtx.font = 'bold 10px "PingFang TC", sans-serif';
+          simCtx.textAlign = 'center';
+          simCtx.fillText('↑蒸發', m.x - 31, m.y + 3);
+        }
+        simCtx.restore();
+      } else {
+        const glow = m.isInjected ? 'rgba(250, 204, 21, 0.55)' : null;
+        draw3DH2OMolecule(simCtx, m.x, m.y, m.rot, 1.0, 1, glow, m.isInjected);
+      }
+    });
+
+    // 5D. 抽出氣體煙霧粒子渲染
+    extractParticles.forEach(p => {
+      simCtx.save();
+      simCtx.globalAlpha = Math.max(0, p.alpha);
+      simCtx.fillStyle = '#38bdf8';
+      simCtx.shadowColor = '#0284c7';
+      simCtx.shadowBlur = 6;
+      simCtx.beginPath();
+      simCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      simCtx.fill();
+      simCtx.restore();
+    });
+
+    // 5E. 活塞爆炸火花與碎片微粒渲染
+    explosionParticles.forEach(ep => {
+      simCtx.save();
+      simCtx.globalAlpha = Math.max(0, ep.alpha);
+      simCtx.translate(ep.x, ep.y);
+      simCtx.rotate(ep.rot);
+      simCtx.fillStyle = ep.color;
+      simCtx.shadowColor = ep.color;
+      simCtx.shadowBlur = 8;
+      simCtx.beginPath();
+      simCtx.rect(-ep.size / 2, -ep.size / 2, ep.size, ep.size);
+      simCtx.fill();
+      simCtx.restore();
+    });
+
+    // 6. 局部蒸發↑ / 凝結↓ 特效
+    if (isZoomingSurface) localArrows.forEach(ar => { // 小箭頭特效僅於液面放大時顯示
+      simCtx.save();
+      simCtx.globalAlpha = Math.max(0, ar.alpha);
+      const y1 = ar.y + ar.dy;
+      const y2 = ar.type === 'evap' ? y1 - 28 : y1 + 28;
+      const col = ar.type === 'evap' ? '#fb923c' : '#38bdf8';
+      simCtx.strokeStyle = col;
+      simCtx.fillStyle = col;
+      simCtx.lineWidth = 3.2;
+      simCtx.beginPath();
+      simCtx.moveTo(ar.x, y1);
+      simCtx.lineTo(ar.x, y2);
+      simCtx.stroke();
+      simCtx.beginPath();
+      if (ar.type === 'evap') {
+        simCtx.moveTo(ar.x, y2 - 5);
+        simCtx.lineTo(ar.x - 5, y2 + 4);
+        simCtx.lineTo(ar.x + 5, y2 + 4);
+      } else {
+        simCtx.moveTo(ar.x, y2 + 5);
+        simCtx.lineTo(ar.x - 5, y2 - 4);
+        simCtx.lineTo(ar.x + 5, y2 - 4);
+      }
+      simCtx.closePath();
+      simCtx.fill();
+      simCtx.restore();
+    });
+
+    // 7. 瓶內流暢立體箭頭（純箭頭、無底框文字，完全不阻擋水分子熱運動）
+    // 蒸發箭頭長度：純粹由目前溫度決定！升溫立刻變長（25°C 短、100°C 長很多）
+    const baseArrow25Px = isZoomingSurface ? 28 : 38;
+    const evapArrowLen = getRateArrowLen(st.rEvap, baseArrow25Px);
+
+    // 🌟 凝結箭頭物理長度：
+    // 平衡時：R凝結 ＝ R蒸發 ➜ 凝結箭頭長度嚴格等於蒸發箭頭長度！
+    // 升溫瞬間（暫停）：氣相水分子數尚未增加 ➜ 凝結箭頭長度嚴格保持原長度，絕不隨升溫跳長！
+    // 開始蒸發後：隨 smoothRCond 平滑爬升，凝結箭頭肉眼可見地慢慢變長，直到與蒸發箭頭等長！
+    const condArrowLen = isOpenContainer ? 0 : getRateArrowLen(smoothRCond, baseArrow25Px);
+
+    const effectiveTopBound = isZoomingSurface ? (g.surfaceY - 95) : (isOpenContainer ? g.vesselTopRimY + 10 : g.pistonBottomY);
+
+    if (st.liquidCount > 0) {
+      drawSleekInBottleArrow(simCtx, g.left + 26, g.surfaceY, evapArrowLen, true, '#fb923c', effectiveTopBound);
+      // 凝結箭頭改為亮青色 (#00f5d4)，在藍色水面襯托下極度醒目！
+      drawSleekInBottleArrow(simCtx, g.right - 26, g.surfaceY, condArrowLen, false, '#00f5d4', effectiveTopBound);
+    }
+
+    // 若未開啟液面放大特寫，直接在世界座標繪製瓶外兩側速率標籤卡片
+    if (!isZoomingSurface) {
+      drawOutsideRateBadge(simCtx, g.left, g.surfaceY, true, '#fb923c', st.rEvap, st.isDry);
+      drawOutsideRateBadge(simCtx, g.right, g.surfaceY, false, '#38bdf8', smoothRCond || 0, st.isDry);
+    }
+
+    // 8. 3D 金屬活塞
+    draw3DMetallicPiston(simCtx, g);
+
+    // 9. 玻璃圓柱前表面立體高光條與 1L~6L 刻度線
+    const glassReflect = simCtx.createLinearGradient(g.left + 8, 0, g.left + 24, 0);
+    glassReflect.addColorStop(0, 'rgba(255,255,255,0)');
+    glassReflect.addColorStop(0.5, 'rgba(255,255,255,0.22)');
+    glassReflect.addColorStop(1, 'rgba(255,255,255,0)');
+    simCtx.fillStyle = glassReflect;
+    simCtx.fillRect(g.left + 8, g.vesselTopRimY, 16, g.vesselBottomY - g.vesselTopRimY);
+
+    simCtx.fillStyle = '#e2e8f0';
+    simCtx.strokeStyle = 'rgba(226, 232, 240, 0.75)';
+    simCtx.lineWidth = 1.6;
+    simCtx.font = 'bold 12px monospace';
+    simCtx.textAlign = 'right';
+    const totalSpanY = g.vesselBottomY - g.highestPistonBottomY;
+    [1, 2, 3, 4, 5, 6].forEach(vMark => {
+      // 絕對刻度：0L 在 vesselBottomY，6L 在 highestPistonBottomY，不隨水量變動！
+      const my = g.vesselBottomY - (vMark / MAX_V) * totalSpanY;
+      simCtx.beginPath();
+      simCtx.moveTo(g.right - 10, my);
+      simCtx.lineTo(g.right, my);
+      simCtx.stroke();
+      simCtx.fillText(`${vMark}L`, g.right - 13, my + 4);
+    });
+
+    simCtx.strokeStyle = '#e2e8f0';
+    simCtx.lineWidth = 3.0;
+    simCtx.beginPath();
+    simCtx.moveTo(g.left, g.vesselTopRimY);
+    simCtx.lineTo(g.left, g.vesselBottomY);
+    simCtx.ellipse(g.cx, g.vesselBottomY, g.rx, g.ry, 0, Math.PI, 0, true);
+    simCtx.lineTo(g.right, g.vesselTopRimY);
+    simCtx.stroke();
+
+    simCtx.strokeStyle = '#94a3b8';
+    simCtx.lineWidth = 2;
+    simCtx.beginPath();
+    simCtx.ellipse(g.cx, g.vesselTopRimY, g.rx, g.ry, 0, 0, Math.PI * 2);
+    simCtx.stroke();
+
+    simCtx.restore(); // 結束液面特寫縮放座標系
+
+    // 若處於「🔬 液面放大特寫」模式，在螢幕固定邊緣繪製兩側速率卡片與頂部提示列
+    if (isZoomingSurface) {
+      drawOutsideRateBadge(simCtx, 92, g.h * 0.56, true, '#fb923c', st.rEvap, st.isDry);
+      drawOutsideRateBadge(simCtx, g.w - 92, g.h * 0.56, false, '#38bdf8', st.rCond, st.isDry);
+
+      simCtx.save();
+      simCtx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+      simCtx.strokeStyle = '#38bdf8';
+      simCtx.lineWidth = 1.5;
+      const bw = Math.min(g.w - 24, 420);
+      simCtx.beginPath();
+      simCtx.roundRect(g.cx - bw / 2, 10, bw, 26, 7);
+      simCtx.fill();
+      simCtx.stroke();
+      simCtx.fillStyle = '#fde047';
+      simCtx.font = 'bold 12px "PingFang TC", sans-serif';
+      simCtx.textAlign = 'center';
+      simCtx.fillText('🔬 液面微觀放大特寫 (2.4x) ｜ 🔥橘色↑：蒸發躍起　💧藍色↓：凝結落水', g.cx, 27);
+      simCtx.restore();
+    }
+
+    // 若處於「💥 活塞爆炸衝脫」狀態，在中央上方顯示醒目紅字警告與一鍵復原提示
+    if (isExploded) {
+      simCtx.save();
+      const py = 12;
+      const pw = Math.min(g.w - 40, 440);
+      simCtx.fillStyle = 'rgba(153, 27, 27, 0.95)';
+      simCtx.strokeStyle = '#ef4444';
+      simCtx.lineWidth = 2.2;
+      simCtx.shadowColor = '#ef4444';
+      simCtx.shadowBlur = 10;
+      simCtx.beginPath();
+      simCtx.roundRect(g.cx - pw / 2, py, pw, 32, 8);
+      simCtx.fill();
+      simCtx.stroke();
+      simCtx.fillStyle = '#fef08a';
+      simCtx.font = 'bold 12.5px "PingFang TC", sans-serif';
+      simCtx.textAlign = 'center';
+      simCtx.fillText('💥 蒸氣過載！活塞被衝破爆開！點擊畫面或點「🔧 裝回活塞」可復原', g.cx, py + 21);
+      simCtx.restore();
+    } else if (!isPlaying) {
+      // 若處於「待機未開始」或「⏸ 暫停講解模式」，在上方留出的頂部空間通欄獨立顯示醒目提示（左按鈕下移至75px，此處絕對不遮擋！）
+      simCtx.save();
+      const isInitialStandby = (simTimeSec === 0 && gasMolecules.length === 0);
+      const py = 12;
+      const pw = Math.min(g.w - 40, 450);
+      simCtx.fillStyle = isInitialStandby ? 'rgba(6, 78, 59, 0.95)' : 'rgba(124, 45, 18, 0.95)';
+      simCtx.strokeStyle = isInitialStandby ? '#34d399' : '#fb923c';
+      simCtx.lineWidth = 1.8;
+      simCtx.beginPath();
+      simCtx.roundRect(g.cx - pw / 2, py, pw, 28, 7);
+      simCtx.fill();
+      simCtx.stroke();
+      simCtx.fillStyle = isInitialStandby ? '#a7f3d0' : '#fed7aa';
+      simCtx.font = 'bold 12.5px "PingFang TC", sans-serif';
+      simCtx.textAlign = 'center';
+      const msg = isInitialStandby
+        ? '▶️ 準備就緒：請點擊左上角「開始」按鈕啟動蒸發與凝結實驗！'
+        : '⏸ 已暫停：水分子數凍結，拉動活塞或變溫可觀察箭頭與瞬間壓變！';
+      simCtx.fillText(msg, g.cx, py + 18);
+      simCtx.restore();
+    }
+  }
+
+  /* =====================================================================
+   * 5. 右上：蒸發速率 vs. 凝結速率圖（永遠從 0 秒開始，等比例壓縮時間軸）
+   * ===================================================================== */
+  function renderRateChart() {
+    const w = rateCanvas.width / window.devicePixelRatio;
+    const h = rateCanvas.height / window.devicePixelRatio;
+    rateCtx.clearRect(0, 0, w, h);
+    const st = getThermodynamicState();
+
+    // 圖表整體右移：左邊加大至 125px，右邊縮至 36px，讓左邊 Y 軸溫度刻度與標題有充裕空間顯著放大
+    const padL = 125, padR = 36, padT = 24, padB = 34;
+    const pw = w - padL - padR;
+    const ph = h - padT - padB;
+    const maxR = 210; // R蒸發 最大刻度對應 100°C (190)
+
+    // 橫軸永遠從 0s 開始，最大時間動態取 max(15s, 當前時間)，將完整歷史等比例壓縮在圖表內！
+    const maxTimeSpan = Math.max(15, simTimeSec);
+    const tToX = t => padL + (t / maxTimeSpan) * pw;
+    const rToY = r => padT + ph * (1 - Math.min(maxR, r) / maxR);
+
+    // Y 軸標籤名稱（大字體、高對比）
+    rateCtx.fillStyle = '#f8fafc';
+    rateCtx.font = 'bold 15px "PingFang TC", sans-serif';
+    rateCtx.textAlign = 'left';
+    rateCtx.fillText('反應速率 R', padL - 110, padT - 8);
+
+    // 水平格線與各溫度蒸發速率刻度（不寫%，只標清晰溫度標籤，字體放大至 16px 粗體）
+    const rateTicks = [
+      { v: 100, label: '25°C' },
+      { v: 125, label: '55°C' },
+      { v: 155, label: '80°C' },
+      { v: 190, label: '100°C' }
+    ];
+    rateTicks.forEach(tk => {
+      const y = rToY(tk.v);
+      const isCur = (currentTemp === parseInt(tk.label));
+      rateCtx.strokeStyle = isCur ? 'rgba(251, 146, 60, 0.45)' : '#334155';
+      rateCtx.lineWidth = isCur ? 1.6 : 1.0;
+      rateCtx.beginPath();
+      rateCtx.moveTo(padL, y);
+      rateCtx.lineTo(padL + pw, y);
+      rateCtx.stroke();
+
+      rateCtx.fillStyle = isCur ? '#fde047' : '#e2e8f0';
+      rateCtx.font = 'bold 16px "JetBrains Mono", monospace';
+      rateCtx.textAlign = 'right';
+      rateCtx.fillText(tk.label, padL - 12, y + 5);
+    });
+
+    // 時間軸垂直格線與秒數刻度（0s、中點、當前總秒數）
+    rateCtx.textAlign = 'center';
+    [0, 0.25, 0.5, 0.75, 1.0].forEach(frac => {
+      const tVal = frac * maxTimeSpan;
+      const x = padL + frac * pw;
+      rateCtx.strokeStyle = '#1e293b';
+      rateCtx.lineWidth = 1.0;
+      rateCtx.beginPath();
+      rateCtx.moveTo(x, padT);
+      rateCtx.lineTo(x, padT + ph);
+      rateCtx.stroke();
+      rateCtx.fillStyle = '#cbd5e1';
+      rateCtx.font = 'bold 13.5px "JetBrains Mono", monospace';
+      rateCtx.fillText(`${tVal.toFixed(0)}s`, x, padT + ph + 22);
+    });
+
+    // 座標軸外框
+    rateCtx.strokeStyle = '#64748b';
+    rateCtx.lineWidth = 2.2;
+    rateCtx.beginPath();
+    rateCtx.moveTo(padL, padT);
+    rateCtx.lineTo(padL, padT + ph);
+    rateCtx.lineTo(padL + pw, padT + ph);
+    rateCtx.stroke();
+
+    if (fullRateHistory.length < 1) return;
+
+    // 1. 繪製從 0 秒開始的蒸發速率曲線 (橘色)
+    rateCtx.strokeStyle = '#fb923c';
+    rateCtx.lineWidth = 3.6;
+    rateCtx.beginPath();
+    fullRateHistory.forEach((pt, i) => {
+      const x = tToX(pt.t);
+      const y = rToY(pt.rEvap);
+      if (i === 0) rateCtx.moveTo(x, y);
+      else rateCtx.lineTo(x, y);
+    });
+    rateCtx.stroke();
+
+    // 2. 繪製從 0 秒 (0%) 開始爬升的凝結速率曲線 (亮藍色)
+    rateCtx.strokeStyle = '#38bdf8';
+    rateCtx.lineWidth = 3.4;
+    rateCtx.beginPath();
+    fullRateHistory.forEach((pt, i) => {
+      const x = tToX(pt.t);
+      const y = rToY(pt.rCond);
+      if (i === 0) rateCtx.moveTo(x, y);
+      else rateCtx.lineTo(x, y);
+    });
+    rateCtx.stroke();
+
+    // 當前時間點雙圓點
+    const last = fullRateHistory[fullRateHistory.length - 1];
+    const cx = tToX(last.t);
+    const ye = rToY(last.rEvap);
+    const yc = rToY(last.rCond);
+
+    rateCtx.fillStyle = '#fb923c';
+    rateCtx.beginPath();
+    rateCtx.arc(cx, ye, 6, 0, Math.PI * 2);
+    rateCtx.fill();
+
+    rateCtx.fillStyle = '#38bdf8';
+    rateCtx.beginPath();
+    rateCtx.arc(cx, yc, 6, 0, Math.PI * 2);
+    rateCtx.fill();
+
+    // 動態狀態標籤：位置充裕，不換行單行大字清晰顯示，不寫%數
+    rateCtx.textAlign = 'left';
+    if (last.rEvap > 0 && Math.abs(last.rEvap - last.rCond) < 2.0) {
+      rateCtx.fillStyle = '#4ade80';
+      rateCtx.font = '900 15px "PingFang TC", sans-serif';
+      rateCtx.fillText('✨ R蒸發 ＝ R凝結 ➔ 飽和動態平衡', padL + 16, padT + 22);
+    } else if (last.rEvap === 0) {
+      rateCtx.fillStyle = '#fda4af';
+      rateCtx.font = '900 15px "PingFang TC", sans-serif';
+      if (isOpenContainer) {
+        rateCtx.fillText('⚠️ 敞開系統水已全數蒸乾（逸散大氣）', padL + 16, padT + 22);
+      } else if (volumeL > st.vDry + 0.05) {
+        rateCtx.fillText('⚠️ 水已全數蒸乾 ➔ 進入波以耳定律區', padL + 16, padT + 22);
+      } else {
+        rateCtx.fillText('✨ 水已全數蒸乾 ➔ 達飽和狀態', padL + 16, padT + 22);
+      }
+    } else if (last.rEvap > last.rCond + 2.0) {
+      rateCtx.fillStyle = '#fdba74';
+      rateCtx.font = '900 15px "PingFang TC", sans-serif';
+      rateCtx.fillText('🔥 R蒸發 ＞ R凝結 ➔ 淨蒸發補償中', padL + 16, padT + 22);
+    } else if (last.rCond > last.rEvap + 2.0) {
+      rateCtx.fillStyle = '#7dd3fc';
+      rateCtx.font = '900 15px "PingFang TC", sans-serif';
+      rateCtx.fillText('💧 R凝結 ＞ R蒸發 ➔ 淨凝結回水中', padL + 16, padT + 22);
+    }
+  }
+
+  /* =====================================================================
+   * 6. 右下：巨觀 P-V 圖 (1.0L~6.0L，水平線 + 瞬間垂直壓變異色標示 + 波以耳雙曲線)
+   * ===================================================================== */
+  function renderPVChart() {
+    const w = pvCanvas.width / window.devicePixelRatio;
+    const h = pvCanvas.height / window.devicePixelRatio;
+    pvCtx.clearRect(0, 0, w, h);
+
+    // 圖表整體右移：左邊加大至 125px，右邊縮至 36px，讓左邊 mmHg 數值與標題有充裕空間顯著放大
+    const padL = 125, padR = 36, padT = 24, padB = 34;
+    const pw = w - padL - padR;
+    const ph = h - padT - padB;
+
+    const st = getThermodynamicState();
+    const { pSat_mmHg } = st.cfg;
+    const vDry = st.vDry;
+
+    // 刻度模式：若壓縮活塞導致瞬間壓力衝高超過預設上限，自動彈性撐開 Y 軸以完整顯示垂直衝高！
+    const peakP = Math.max(st.pressureMmHg, pvTransient ? pvTransient.pPeak : 0);
+    const maxP = pvScaleMode === 'global'
+      ? Math.max(850, peakP * 1.12)
+      : Math.max(st.cfg.chartMaxP, peakP * 1.15);
+
+    const vToX = v => padL + ((v - MIN_V) / (MAX_V - MIN_V)) * pw;
+    const pToY = p => padT + ph * (1 - Math.min(maxP, Math.max(0, p)) / maxP);
+
+    // 水平壓力格線與真實 mmHg 刻度（字體放大至 15px~16px 粗體）
+    let pTicks = [];
+    if (pvScaleMode === 'global') {
+      pTicks = [100, 200, 355.1, 500, 760];
+    } else {
+      if (currentTemp === 25) pTicks = [5, 10, 15, 20, 23.8, 30, 45];
+      else if (currentTemp === 55) pTicks = [30, 60, 90, 118, 150, 220];
+      else if (currentTemp === 80) pTicks = [100, 200, 300, 355.1, 420, 600];
+      else pTicks = [200, 400, 600, 760, 900];
+    }
+
+    pvCtx.lineWidth = 1.2;
+    pTicks.forEach(pVal => {
+      if (pVal > maxP * 0.98) return;
+      const y = pToY(pVal);
+      const isSat = Math.abs(pVal - pSat_mmHg) < 0.2;
+      pvCtx.beginPath();
+      pvCtx.strokeStyle = isSat ? 'rgba(34, 197, 94, 0.45)' : '#1e293b';
+      pvCtx.lineWidth = isSat ? 1.8 : 1.2;
+      pvCtx.moveTo(padL, y);
+      pvCtx.lineTo(padL + pw, y);
+      pvCtx.stroke();
+
+      pvCtx.fillStyle = isSat ? '#4ade80' : '#e2e8f0';
+      pvCtx.font = isSat ? 'bold 16px "JetBrains Mono", monospace' : 'bold 14px "JetBrains Mono", monospace';
+      pvCtx.textAlign = 'right';
+      pvCtx.fillText(`${pVal}`, padL - 10, y + 5);
+    });
+
+    // 標籤：壓力單位 (mmHg)（字體放大至 15px 粗體）
+    pvCtx.fillStyle = '#f8fafc';
+    pvCtx.font = 'bold 15px "PingFang TC", sans-serif';
+    pvCtx.textAlign = 'left';
+    pvCtx.fillText('P (mmHg)', padL - 110, padT - 8);
+
+    // 垂直體積格線 (1L ~ 6L)
+    pvCtx.textAlign = 'center';
+    [1, 2, 3, 4, 5, 6].forEach(vVal => {
+      const x = vToX(vVal);
+      pvCtx.strokeStyle = '#1e293b';
+      pvCtx.lineWidth = 1.2;
+      pvCtx.beginPath();
+      pvCtx.moveTo(x, padT);
+      pvCtx.lineTo(x, padT + ph);
+      pvCtx.stroke();
+      pvCtx.fillStyle = '#cbd5e1';
+      pvCtx.font = 'bold 13.5px "JetBrains Mono", monospace';
+      pvCtx.fillText(`${vVal.toFixed(0)}L`, x, padT + ph + 22);
+    });
+
+    // 座標軸外框
+    pvCtx.strokeStyle = '#64748b';
+    pvCtx.lineWidth = 2.2;
+    pvCtx.beginPath();
+    pvCtx.moveTo(padL, padT);
+    pvCtx.lineTo(padL, padT + ph);
+    pvCtx.lineTo(padL + pw, padT + ph);
+    pvCtx.stroke();
+
+    // 1. 理論飽和定值水平虛線 (1.0L ~ V_乾) — 固定不動供對照
+    const clampVDry = Math.min(MAX_V, Math.max(MIN_V, vDry));
+    pvCtx.save();
+    pvCtx.setLineDash([6, 4]);
+    pvCtx.strokeStyle = 'rgba(34, 197, 94, 0.55)';
+    pvCtx.lineWidth = 2.4;
+    pvCtx.beginPath();
+    pvCtx.moveTo(vToX(MIN_V), pToY(pSat_mmHg));
+    pvCtx.lineTo(vToX(clampVDry), pToY(pSat_mmHg));
+    pvCtx.stroke();
+    pvCtx.restore();
+
+    // 3. 標示「蒸乾轉折點 V_乾」垂直虛線與標籤（單行顯示不換行，清楚展示波以耳定律）
+    if (vDry >= MIN_V && vDry <= MAX_V) {
+      const xDry = vToX(vDry);
+      const yDry = pToY(pSat_mmHg);
+      pvCtx.save();
+      pvCtx.setLineDash([4, 4]);
+      pvCtx.strokeStyle = 'rgba(244, 63, 94, 0.85)';
+      pvCtx.lineWidth = 2.0;
+      pvCtx.beginPath();
+      pvCtx.moveTo(xDry, yDry);
+      pvCtx.lineTo(xDry, padT + ph);
+      pvCtx.stroke();
+      pvCtx.restore();
+
+      pvCtx.fillStyle = '#fda4af';
+      pvCtx.beginPath();
+      pvCtx.arc(xDry, yDry, 5.5, 0, Math.PI * 2);
+      pvCtx.fill();
+      pvCtx.font = '900 13px "PingFang TC", sans-serif';
+      const boyleConst = (pSat_mmHg * vDry).toFixed(0);
+      const isDryAlignRight = xDry > padL + pw - 240;
+      pvCtx.textAlign = isDryAlignRight ? 'right' : 'left';
+      const tagDryX = isDryAlignRight ? (xDry - 10) : (xDry + 10);
+      const tagDryY = Math.max(padT + 14, yDry - 25);
+
+      // 🌟 波以耳區文字：等到體積真的拉大超過蒸乾點時 (V > V_乾) 才出現！
+      const isBeyondDry = (volumeL > vDry + 0.05);
+      const dryText = isBeyondDry
+        ? `蒸乾點 V乾 = ${vDry.toFixed(2)}L (波以耳區 P×V=${boyleConst})`
+        : `蒸乾點 V乾 = ${vDry.toFixed(2)}L`;
+      pvCtx.fillText(dryText, tagDryX, tagDryY);
+    }
+
+    // 4A. 繪製已探索體積範圍的「黃色平衡實測線」（1~3L 水平線 + 3~6L 波以耳反比線）
+    const isPausedHoldingAtDry = !isPlaying && (volumeL > vDry);
+    const activePV_V = isPausedHoldingAtDry ? vDry : pvDisplayV;
+    const activePV_P = (activePV_V > vDry)
+      ? (pSat_mmHg * (vDry / activePV_V))
+      : (hasReachedEquilibriumOnce ? pSat_mmHg : st.pressureMmHg);
+
+    if (!hasReachedEquilibriumOnce) {
+      // 初次從 0 蒸氣爬升至平衡的垂直爬升線
+      pvCtx.strokeStyle = '#facc15';
+      pvCtx.lineWidth = 3.8;
+      pvCtx.beginPath();
+      pvCtx.moveTo(vToX(activePV_V), pToY(0));
+      pvCtx.lineTo(vToX(activePV_V), pToY(activePV_P));
+      pvCtx.stroke();
+    } else {
+      const minV = Math.min(eqVisitedMinV, activePV_V);
+      const maxV = isPausedHoldingAtDry ? vDry : Math.max(eqVisitedMaxV, activePV_V);
+      // 有水水平段 (黃色實線)
+      if (minV <= vDry) {
+        const segEnd = Math.min(maxV, vDry);
+        pvCtx.strokeStyle = '#facc15';
+        pvCtx.lineWidth = 4.2;
+        pvCtx.beginPath();
+        pvCtx.moveTo(vToX(minV), pToY(pSat_mmHg));
+        pvCtx.lineTo(vToX(segEnd), pToY(pSat_mmHg));
+        pvCtx.stroke();
+      }
+      // 蒸乾波以耳反比線段 (亮珊瑚紅實線) — 暫停且大於3L時先不畫，等開始後跑反比線！
+      if (maxV > vDry && !isPausedHoldingAtDry) {
+        const segStart = Math.max(minV, vDry);
+        pvCtx.strokeStyle = '#fb7185';
+        pvCtx.lineWidth = 4.2;
+        pvCtx.beginPath();
+        for (let v = segStart; v <= maxV + 0.001; v += 0.03) {
+          const cv = Math.min(maxV, v);
+          const pB = pSat_mmHg * (vDry / cv);
+          const x = vToX(cv);
+          const y = pToY(pB);
+          if (v === segStart) pvCtx.moveTo(x, y);
+          else pvCtx.lineTo(x, y);
+        }
+        pvCtx.stroke();
+      }
+    }
+
+    // 4B. 繪製拉動活塞時的「瞬間垂直下降／垂直上升」與「垂直恢復平衡」異色軌跡！
+    if (pvTransient && !isPausedHoldingAtDry) {
+      const xT = vToX(pvTransient.v);
+      const yEq = pToY(pvTransient.pEq);
+      const yPeak = pToY(pvTransient.pPeak);
+      const yCur = pToY(st.pressureMmHg);
+      const isDrop = pvTransient.type === 'drop';
+      // 採用高對比異色：瞬間減壓下降用亮青藍 (#00f5d4)，瞬間增壓上升用亮洋紅 (#e879f9)
+      const jumpCol = isDrop ? '#00f5d4' : '#e879f9';
+
+      // (1) 瞬間垂直跳變線 (由平衡線垂直往下掉 / 垂直往上衝)
+      pvCtx.save();
+      pvCtx.strokeStyle = jumpCol;
+      pvCtx.fillStyle = jumpCol;
+      pvCtx.lineWidth = 3.6;
+      pvCtx.shadowColor = jumpCol;
+      pvCtx.shadowBlur = 8;
+      pvCtx.beginPath();
+      pvCtx.moveTo(xT, yEq);
+      pvCtx.lineTo(xT, yPeak);
+      pvCtx.stroke();
+
+      // 瞬間跳變方向箭頭
+      const dirY = isDrop ? 1 : -1;
+      if (Math.abs(yPeak - yEq) > 10) {
+        pvCtx.beginPath();
+        pvCtx.moveTo(xT, yPeak);
+        pvCtx.lineTo(xT - 5.5, yPeak - dirY * 9);
+        pvCtx.lineTo(xT + 5.5, yPeak - dirY * 9);
+        pvCtx.closePath();
+        pvCtx.fill();
+      }
+      pvCtx.shadowBlur = 0;
+
+      // 瞬間極值點空心圓標記
+      pvCtx.fillStyle = '#0f172a';
+      pvCtx.lineWidth = 2.4;
+      pvCtx.beginPath();
+      pvCtx.arc(xT, yPeak, 5, 0, Math.PI * 2);
+      pvCtx.fill();
+      pvCtx.stroke();
+
+      // 瞬間壓變文字標籤
+      pvCtx.fillStyle = jumpCol;
+      pvCtx.font = '900 11.5px "PingFang TC", sans-serif';
+      const alignRight = xT > padL + pw - 165;
+      pvCtx.textAlign = alignRight ? 'right' : 'left';
+      const offX = alignRight ? -10 : 10;
+      const peakText = isDrop
+        ? `⚡瞬間減壓↓ ${pvTransient.pPeak.toFixed(1)} mmHg`
+        : `⚡瞬間增壓↑ ${pvTransient.pPeak.toFixed(1)} mmHg`;
+      const labelY = isDrop ? Math.min(padT + ph - 6, yPeak + 14) : Math.max(padT + 12, yPeak - 8);
+      pvCtx.fillText(peakText, xT + offX, labelY);
+
+      // (2) 隨水分子蒸發/凝結，沿垂直線恢復平衡的綠色箭頭軌跡
+      if (Math.abs(st.pressureMmHg - pvTransient.pPeak) > 0.25 && Math.abs(pvTransient.v - volumeL) < 0.02) {
+        const recX = xT + 3.5; // 微幅平移 3.5px 讓「瞬間跳變線」與「垂直回升/回落線」並列清晰可見
+        pvCtx.strokeStyle = '#4ade80';
+        pvCtx.fillStyle = '#4ade80';
+        pvCtx.lineWidth = 3.2;
+        pvCtx.beginPath();
+        pvCtx.moveTo(recX, yPeak);
+        pvCtx.lineTo(recX, yCur);
+        pvCtx.stroke();
+
+        const recDir = isDrop ? -1 : 1; // 減壓後向上回升(-1)，增壓後向下回落(+1)
+        if (Math.abs(yCur - yPeak) > 8) {
+          pvCtx.beginPath();
+          pvCtx.moveTo(recX, yCur);
+          pvCtx.lineTo(recX - 5, yCur - recDir * 8);
+          pvCtx.lineTo(recX + 5, yCur - recDir * 8);
+          pvCtx.closePath();
+          pvCtx.fill();
+        }
+
+        const isBackToEq = Math.abs(st.pressureMmHg - pvTransient.pEq) <= 0.35;
+        pvCtx.fillStyle = '#4ade80';
+        pvCtx.font = 'bold 11px "PingFang TC", sans-serif';
+        const recText = isBackToEq
+          ? `✓ 已垂直恢復平衡 (${pvTransient.pEq.toFixed(1)} mmHg)`
+          : (isDrop ? '↑ 淨蒸發垂直回升中' : '↓ 淨凝結垂直回落中');
+        const midY = (yPeak + yCur) * 0.5;
+        const recY = isBackToEq ? Math.min(padT + ph - 8, yEq + 34) : midY;
+        pvCtx.fillText(recText, xT + offX, recY);
+      }
+      pvCtx.restore();
+    }
+
+    // 5. 當前 (V, P) 亮黃色動態狀態點與即時座標文字
+    const curX = vToX(activePV_V);
+    const curY = pToY(activePV_P);
+
+    const glow = pvCtx.createRadialGradient(curX, curY, 2, curX, curY, 15);
+    glow.addColorStop(0, 'rgba(250, 204, 21, 0.98)');
+    glow.addColorStop(1, 'rgba(250, 204, 21, 0)');
+    pvCtx.fillStyle = glow;
+    pvCtx.beginPath();
+    pvCtx.arc(curX, curY, 15, 0, Math.PI * 2);
+    pvCtx.fill();
+
+    pvCtx.fillStyle = '#fde047';
+    pvCtx.strokeStyle = '#0f172a';
+    pvCtx.lineWidth = 2.2;
+    pvCtx.beginPath();
+    pvCtx.arc(curX, curY, 6.5, 0, Math.PI * 2);
+    pvCtx.fill();
+    pvCtx.stroke();
+
+    // 在狀態點旁即時顯示 (V, P) 座標（放大至 14px 粗體，課堂投影更清晰）
+    pvCtx.fillStyle = '#fef08a';
+    pvCtx.font = '900 14px "JetBrains Mono", Consolas, monospace';
+    const isAlignRight = curX > padL + pw - 175;
+    pvCtx.textAlign = isAlignRight ? 'right' : 'left';
+    const labelOffset = isAlignRight ? -12 : 12;
+    const ptText = isPausedHoldingAtDry
+      ? `(恰蒸乾 ${vDry.toFixed(2)}L, ${activePV_P.toFixed(1)} mmHg) ⏸ 按開始跑反比線`
+      : `(${activePV_V.toFixed(2)}L, ${activePV_P.toFixed(1)} mmHg)`;
+
+    // 🌟 智慧避讓：當動態點靠近蒸乾點 V_乾 (3.50L) 時，將座標字卡放於下方 (curY + 20)，pink 標籤在上方 (yDry - 25)，徹底分開絕不重疊！
+    const isNearDryPoint = Math.abs(curX - vToX(vDry)) < 45 && Math.abs(curY - pToY(pSat_mmHg)) < 35;
+    const ptY = isNearDryPoint ? (curY + 20) : Math.max(padT + 16, curY - 12);
+    pvCtx.fillText(ptText, curX + labelOffset, ptY);
+  }
+
+  /* =====================================================================
+   * 7. 互動控制：拉動活塞時「瞬間維持分子數不變 ➜ 呈現瞬間垂直壓變與箭頭長短變化」
+   * ===================================================================== */
+  function setVolume(newV) {
+    const oldG = getCylinderGeometry();
+    const oldTop = oldG.pistonBottomY + 14;
+    const oldBot = Math.max(oldTop + 10, oldG.surfaceY - 10);
+
+    volumeL = Math.max(MIN_V, Math.min(MAX_V, newV));
+    if (volSlider) volSlider.value = volumeL.toFixed(2);
+    if (volNumInput) volNumInput.value = volumeL.toFixed(2);
+    if (volSliderLabel) volSliderLabel.textContent = volumeL.toFixed(2) + ' L';
+
+    // 拉動活塞瞬間：不改變氣相與液態水分子顆數！設定短暫冷卻讓師生先看清瞬間壓變與箭頭變化
+    volumeChangeCooldown = 16;
+
+    const g = getCylinderGeometry();
+    // 當拉動活塞改變氣體體積時：
+    // 水分子本體形狀絕不拉伸！僅確保所有分子仍在「活塞底面」與「液面」之間的氣相室內：
+    gasMolecules.forEach(m => {
+      // 若活塞向下壓縮，將高於活塞底部的分子輕推至活塞下方
+      if (m.y < g.pistonBottomY + 16) {
+        m.y = g.pistonBottomY + 17 + Math.random() * 6;
+        m.vy = Math.abs(m.vy); // 轉向朝下運動
+      }
+      // 若活塞向上拉大，分子維持自然物理熱運動自由擴散，不必人工拉長或整體拉扯
+      if (m.y > g.surfaceY - 2) {
+        m.y = g.surfaceY - 2;
+        m.vy = -Math.abs(m.vy);
+      }
+    });
+
+    const st = getThermodynamicState();
+    if (hasReachedEquilibriumOnce) {
+      if (isPlaying || volumeL <= st.vDry) {
+        eqVisitedMinV = Math.min(eqVisitedMinV, volumeL);
+        eqVisitedMaxV = Math.max(eqVisitedMaxV, volumeL);
+      } else {
+        eqVisitedMinV = Math.min(eqVisitedMinV, st.vDry);
+        eqVisitedMaxV = Math.max(eqVisitedMaxV, st.vDry);
+      }
+
+      const diff = st.pressureMmHg - st.eqPressureMmHg;
+      if (Math.abs(diff) > 0.25) {
+        const newType = diff < 0 ? 'drop' : 'spike';
+        if (!pvTransient || Math.abs(pvTransient.v - volumeL) > 0.01 || pvTransient.type !== newType) {
+          pvTransient = {
+            v: volumeL,
+            pEq: st.eqPressureMmHg,
+            pPeak: st.pressureMmHg,
+            type: newType
+          };
+        } else {
+          if (newType === 'drop' && st.pressureMmHg < pvTransient.pPeak) pvTransient.pPeak = st.pressureMmHg;
+          if (newType === 'spike' && st.pressureMmHg > pvTransient.pPeak) pvTransient.pPeak = st.pressureMmHg;
+        }
+      } else {
+        // 在 3.0L ~ 6.0L 全蒸乾波以耳區拉動時，無液態水相變，壓力直接沿波以耳曲線移動
+        pvTransient = null;
+      }
+    }
+
+    recordHistoryPoint(true);
+    updateUIAndBanner();
+  }
+
+  function getPointerY(e) {
+    const rect = simCanvas.getBoundingClientRect();
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const rawY = clientY - rect.top;
+    if (surfaceZoomCurrent > 1.01) {
+      const g = getCylinderGeometry();
+      const focusY = g.surfaceY - 10;
+      return (rawY - g.h * 0.58) / surfaceZoomCurrent + focusY;
+    }
+    return rawY;
+  }
+
+  simCanvas.addEventListener('pointerdown', (e) => {
+    if (isOpenContainer) return;
+    if (isExploded) {
+      repairCylinder();
+      return;
+    }
+    const py = getPointerY(e);
+    const g = getCylinderGeometry();
+    if (py >= g.pistonTopY - 40 && py <= g.pistonBottomY + 25) {
+      isDraggingPiston = true;
+      simCanvas.setPointerCapture(e.pointerId);
+    }
+  });
+
+  simCanvas.addEventListener('pointermove', (e) => {
+    if (!isDraggingPiston) return;
+    const py = getPointerY(e);
+    const g = getCylinderGeometry();
+    const totalSpanY = g.vesselBottomY - g.highestPistonBottomY;
+    let targetV = ((g.vesselBottomY - py) / totalSpanY) * MAX_V;
+    targetV = Math.max(MIN_V, Math.min(MAX_V, targetV));
+
+    // 🧲 磁吸效果：若靠近當前溫度的蒸乾體積 V_乾 (±0.09 L)，產生吸引力精準吸附到點！
+    const st = getThermodynamicState();
+    if (Math.abs(targetV - st.vDry) < 0.09) {
+      targetV = st.vDry;
+    }
+    setVolume(targetV);
+  });
+
+  window.addEventListener('pointerup', () => {
+    isDraggingPiston = false;
+  });
+
+  if (volSlider) {
+    volSlider.addEventListener('input', (e) => {
+      let v = parseFloat(e.target.value);
+      const st = getThermodynamicState();
+      // 🧲 滑桿拖動時亦具備磁吸吸引力
+      if (Math.abs(v - st.vDry) < 0.08) {
+        v = st.vDry;
+      }
+      setVolume(v);
+    });
+  }
+
+  if (volNumInput) {
+    const handleNumInput = (e) => {
+      const val = parseFloat(e.target.value);
+      if (!isNaN(val)) {
+        setVolume(val);
+      }
+    };
+    volNumInput.addEventListener('input', handleNumInput);
+    volNumInput.addEventListener('change', handleNumInput);
+  }
+
+  function updateSpeedUI() {
+    if (speedLabel) speedLabel.textContent = simSpeed.toFixed(1) + 'x';
+    const speedIcon = document.getElementById('speedIcon');
+    if (speedIcon) {
+      speedIcon.textContent = (simSpeed >= 2.5 ? '⚡ 速度：' : (simSpeed >= 1.0 ? '🐇 速度：' : '🐢 速度：'));
+    }
+  }
+
+  if (speedSlider) {
+    speedSlider.addEventListener('input', (e) => {
+      simSpeed = parseFloat(e.target.value);
+      updateSpeedUI();
+    });
+  }
+  const btnSpeed3x = document.getElementById('btnSpeed3x');
+  if (btnSpeed3x) {
+    btnSpeed3x.addEventListener('click', () => {
+      simSpeed = 3.0;
+      if (speedSlider) speedSlider.value = '3.0';
+      updateSpeedUI();
+    });
+  }
+
+  function jumpToCurrentEquilibrium() {
+    hasReachedEquilibriumOnce = true;
+    const st = getThermodynamicState();
+    const targetGas = st.achievableEqGas;
+
+    gasMolecules = [];
+    condensingMolecules = [];
+    splashParticles = [];
+    localArrows = [];
+    liquidCount = totalH2O - targetGas;
+    eqVisitedMinV = Math.min(eqVisitedMinV, volumeL);
+    eqVisitedMaxV = Math.max(eqVisitedMaxV, volumeL);
+    pvTransient = null;
+    rebuildVisualLiquidBed();
+
+    const gUpdated = getCylinderGeometry();
+    for (let i = 0; i < targetGas; i++) {
+      const spd = 1.45 * st.cfg.speedMult;
+      const ang = Math.random() * Math.PI * 2;
+      gasMolecules.push({
+        x: gUpdated.left + 24 + Math.random() * (gUpdated.right - gUpdated.left - 48),
+        y: gUpdated.pistonBottomY + 18 + Math.random() * Math.max(18, gUpdated.surfaceY - gUpdated.pistonBottomY - 36),
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd,
+        rot: Math.random() * Math.PI * 2,
+        vRot: (Math.random() - 0.5) * 0.04,
+        bornGlow: 0,
+        isInjected: false,
+        age: 100,
+        evapAnim: null
+      });
+    }
+
+    pvDisplayV = volumeL;
+    smoothRCond = st.rEvap;
+    recordHistoryPoint(true);
+    updateUIAndBanner();
+  }
+
+  function triggerExplosion() {
+    if (isExploded) return;
+    isExploded = true;
+    pistonExplodeY = 0;
+    pistonExplodeVy = -18;
+    pistonExplodeRot = -0.22;
+    shakeMagnitude = 18;
+
+    const g = getCylinderGeometry();
+    const btnRepair = document.getElementById('btnRepair');
+    if (btnRepair) btnRepair.style.display = 'inline-flex';
+
+    // 產生大量向外噴射的橙黃與灰白爆炸火花碎片微粒
+    explosionParticles = [];
+    const colors = ['#f59e0b', '#ef4444', '#fbbf24', '#ffffff', '#cbd5e1'];
+    for (let i = 0; i < 45; i++) {
+      const spd = 4 + Math.random() * 12;
+      const ang = -Math.PI / 2 + (Math.random() - 0.5) * 1.8;
+      explosionParticles.push({
+        x: g.cx + (Math.random() - 0.5) * (g.rx * 1.2),
+        y: g.pistonTopY + Math.random() * 20,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd,
+        size: 3 + Math.random() * 5,
+        rot: Math.random() * Math.PI * 2,
+        vRot: (Math.random() - 0.5) * 0.3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        alpha: 1.0
+      });
+    }
+
+    // 將現有氣相水分子施加向上爆衝速度
+    gasMolecules.forEach(m => {
+      m.vy = -(3 + Math.random() * 6);
+      m.vx = (Math.random() - 0.5) * 8;
+    });
+
+    updateUIAndBanner();
+  }
+
+  function repairCylinder() {
+    if (!isExploded) return;
+    isExploded = false;
+    pistonExplodeY = 0;
+    pistonExplodeVy = 0;
+    pistonExplodeRot = 0;
+    shakeMagnitude = 0;
+    explosionParticles = [];
+
+    const btnRepair = document.getElementById('btnRepair');
+    if (btnRepair) btnRepair.style.display = 'none';
+
+    // 復原活塞：修剪過多氣體分子回當前飽和平衡值
+    const st = getThermodynamicState();
+    const safeGas = st.achievableEqGas;
+    if (gasMolecules.length > safeGas) {
+      gasMolecules.length = safeGas;
+    }
+    const g = getCylinderGeometry();
+    gasMolecules.forEach(m => {
+      m.x = Math.max(g.left + 16, Math.min(g.right - 16, m.x));
+      m.y = Math.max(g.pistonBottomY + 16, Math.min(g.surfaceY - 12, m.y));
+      const spd = 1.45 * st.cfg.speedMult;
+      const ang = Math.random() * Math.PI * 2;
+      m.vx = Math.cos(ang) * spd;
+      m.vy = Math.sin(ang) * spd;
+    });
+
+    pvTransient = null;
+    recordHistoryPoint(true);
+    updateUIAndBanner();
+  }
+
+  function extractSteam() {
+    if (isExploded) return;
+    if (gasMolecules.length === 0) return;
+
+    const g = getCylinderGeometry();
+    const removeCount = Math.min(6, gasMolecules.length);
+
+    // 抽出氣相水分子
+    for (let i = 0; i < removeCount; i++) {
+      const m = gasMolecules.pop();
+      // 在抽出位置向上散發抽出青藍色冷煙霧
+      for (let k = 0; k < 3; k++) {
+        extractParticles.push({
+          x: m ? m.x : g.cx + (Math.random() - 0.5) * 30,
+          y: m ? m.y : g.pistonBottomY + 20,
+          vx: (Math.random() - 0.5) * 2.0,
+          vy: -(2.5 + Math.random() * 3.5),
+          r: 2.5 + Math.random() * 3,
+          alpha: 0.95
+        });
+      }
+    }
+    totalH2O = Math.max(liquidCount + gasMolecules.length, totalH2O - removeCount);
+
+    const stAfter = getThermodynamicState();
+    // 抽出造成氣相濃度驟降，引發「瞬間減壓跳變」
+    if (stAfter.pressureMmHg < stAfter.eqPressureMmHg - 0.25) {
+      pvTransient = {
+        v: volumeL,
+        pEq: stAfter.eqPressureMmHg,
+        pPeak: stAfter.pressureMmHg,
+        type: 'drop'
+      };
+    } else {
+      pvTransient = null;
+    }
+
+    recordHistoryPoint(true);
+    updateUIAndBanner();
+  }
+
+  function injectExtraSteam() {
+    if (isExploded) return;
+
+    const g = getCylinderGeometry();
+    const stBefore = getThermodynamicState();
+    const addCount = 6;
+
+    // 檢查若氣體分子累積超過 110 顆（遠大於 100°C 飽和量），壓力過大衝破活塞爆開！
+    if (gasMolecules.length + addCount >= 110) {
+      triggerExplosion();
+      return;
+    }
+
+    totalH2O += addCount;
+
+    for (let i = 0; i < addCount; i++) {
+      const spd = 1.6 * stBefore.cfg.speedMult;
+      const ang = Math.PI / 2 + (Math.random() - 0.5) * 0.9;
+      gasMolecules.push({
+        x: g.cx + (Math.random() - 0.5) * (g.rx * 1.1),
+        y: g.pistonBottomY + 18 + Math.random() * 18,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd,
+        rot: Math.random() * Math.PI * 2,
+        vRot: (Math.random() - 0.5) * 0.05,
+        bornGlow: 50,
+        isInjected: true,
+        age: 50,
+        evapAnim: null
+      });
+    }
+    const stAfter = getThermodynamicState();
+    if (stAfter.pressureMmHg > stAfter.eqPressureMmHg + 0.25) {
+      pvTransient = {
+        v: volumeL,
+        pEq: stAfter.eqPressureMmHg,
+        pPeak: stAfter.pressureMmHg,
+        type: 'spike'
+      };
+    }
+    recordHistoryPoint(true);
+    updateUIAndBanner();
+  }
+
+  const btnPlay = document.getElementById('btnPlay');
+  function updatePlayButtonUI() {
+    if (!btnPlay) return;
+    if (isPlaying) {
+      btnPlay.textContent = '⏸ 暫停';
+      btnPlay.style.background = '#2563eb';
+      btnPlay.style.borderColor = '#60a5fa';
+      btnPlay.style.boxShadow = 'none';
+    } else if (simTimeSec === 0 && gasMolecules.length === 0) {
+      btnPlay.textContent = '▶️ 開始';
+      btnPlay.style.background = '#059669';
+      btnPlay.style.borderColor = '#34d399';
+      btnPlay.style.boxShadow = '0 0 10px rgba(16,185,129,0.45)';
+    } else {
+      btnPlay.textContent = '▶️ 繼續';
+      btnPlay.style.background = '#059669';
+      btnPlay.style.borderColor = '#34d399';
+      btnPlay.style.boxShadow = '0 0 10px rgba(16,185,129,0.45)';
+    }
+  }
+
+  function resetSimulation() {
+    isPlaying = false; // 重置後回到未開始待機狀態，按「▶️ 開始」才起跑
+    isExploded = false;
+    pistonExplodeY = 0;
+    pistonExplodeVy = 0;
+    pistonExplodeRot = 0;
+    shakeMagnitude = 0;
+    explosionParticles = [];
+    extractParticles = [];
+    const btnRepair = document.getElementById('btnRepair');
+    if (btnRepair) btnRepair.style.display = 'none';
+
+    simTick = 0;
+    simTimeSec = 0;
+    evapTimer = 30;
+    condTimer = 0;
+    netTransferTimer = 0;
+    volumeChangeCooldown = 0;
+    lastEvapColNorm = -1;
+    hasReachedEquilibriumOnce = false;
+    totalH2O = INITIAL_TOTAL_H2O;
+    liquidCount = INITIAL_TOTAL_H2O;
+    gasMolecules = [];
+    condensingMolecules = [];
+    splashParticles = [];
+    ripples = [];
+    localArrows = [];
+    volumeL = INITIAL_VOLUME;
+    smoothRCond = 0;
+    pvDisplayV = INITIAL_VOLUME;
+    eqVisitedMinV = INITIAL_VOLUME;
+    eqVisitedMaxV = INITIAL_VOLUME;
+    pvTransient = null;
+    isOpenContainer = false;
+    const btnToggleLid = document.getElementById('btnToggleLid');
+    if (btnToggleLid) {
+      btnToggleLid.innerHTML = '🪟 拿走蓋子';
+      btnToggleLid.style.background = '#334155';
+      btnToggleLid.style.borderColor = '#64748b';
+      btnToggleLid.title = '在『敞開系統（無蓋逸散）』與『密閉系統（活塞封閉）』之間切換';
+    }
+    if (volSlider) volSlider.disabled = false;
+    if (volNumInput) volNumInput.disabled = false;
+    if (volSlider) volSlider.value = volumeL.toFixed(2);
+    if (volNumInput) volNumInput.value = volumeL.toFixed(2);
+    if (volSliderLabel) volSliderLabel.textContent = volumeL.toFixed(2) + ' L';
+    rebuildVisualLiquidBed();
+    updatePlayButtonUI();
+
+    const st = getThermodynamicState();
+    fullRateHistory = [{ t: 0, rEvap: st.rEvap, rCond: 0 }];
+    pvMeasuredTrace = [{ v: volumeL, pMmHg: 0, pAtm: 0 }];
+    updateUIAndBanner();
+  }
+
+  function switchTemperature(t) {
+    if (t === currentTemp) return;
+    const oldEvap = TEMP_CONFIG[currentTemp].rEvapBase;
+    const curRCond = smoothRCond;
+
+    // 🌟 在升溫切換瞬間，於同一個時間點 simTimeSec 連續壓入兩點：
+    // 1. 舊溫度的水平末端點 (simTimeSec, oldEvap)
+    // 2. 新溫度的垂直頂端點 (simTimeSec, newEvap)
+    // 這樣在折線圖上繪製時，X 座標相同，橘色線嚴格呈現 90 度垂直向上的瞬時躍升直線！
+    if (fullRateHistory.length > 0) {
+      fullRateHistory.push({
+        t: simTimeSec,
+        rEvap: liquidCount > 0 ? oldEvap : 0,
+        rCond: Math.round(curRCond * 10) / 10
+      });
+    }
+
+    // 記錄升溫起點：藍色凝結速率 smoothRCond 從當前值起跑，時間差計時器歸零！
+    tempTransStartTime = simTimeSec;
+    tempTransStartRCond = smoothRCond;
+
+    currentTemp = t;
+    ['25', '55', '80', '100'].forEach(k => {
+      const btn = document.getElementById('tBtn' + k);
+      if (btn) btn.className = 't-btn-vert' + (t === parseInt(k) ? ` active-${k}` : '');
+    });
+
+    const cfg = TEMP_CONFIG[t];
+    // 🌟 嚴格質量守恆：若為尚未開始的初始狀態，總水量依該溫度 3.5L 飽和量設定；
+    // 若已在運轉中變溫，總水量與液態水分子數絕對保持不變，水面絕不變高！
+    // 🌟 嚴格質量守恆：總水量 totalH2O 永恆固定為 INITIAL_TOTAL_H2O (42顆)！
+
+    const mult = cfg.speedMult;
+    gasMolecules.forEach(m => {
+      const cur = Math.hypot(m.vx, m.vy) || 1;
+      const targetSpd = 1.45 * mult;
+      m.vx = (m.vx / cur) * targetSpd;
+      m.vy = (m.vy / cur) * targetSpd;
+    });
+
+    // 升溫或變溫時：分子數完全保持不變！未開始播放前維持不平衡狀態
+    const newTargetGas = Math.round(cfg.cSat * volumeL);
+    if (gasMolecules.length < newTargetGas && liquidCount > 0) {
+      hasReachedEquilibriumOnce = false;
+    }
+
+    pvMeasuredTrace = [];
+    pvTransient = null;
+    pvDisplayV = volumeL;
+    eqVisitedMinV = volumeL;
+    eqVisitedMaxV = volumeL;
+
+    fullRateHistory.push({
+      t: simTimeSec,
+      rEvap: liquidCount > 0 ? cfg.rEvapBase : 0,
+      rCond: Math.round(curRCond * 10) / 10
+    });
+
+    updateUIAndBanner();
+  }
+
+  // 一鍵下載獨立 HTML 檔案功能
+  document.getElementById('btnDownloadHTML').addEventListener('click', () => {
+    const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '水蒸發凝結平衡與波以耳定律_3D課堂版.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  if (btnPlay) {
+    btnPlay.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      updatePlayButtonUI();
+    });
+  }
+  const btnStep = document.getElementById('btnStep');
+  if (btnStep) {
+    btnStep.addEventListener('click', () => {
+      stepEvaporationAndBalance();
+      updateUIAndBanner();
+    });
+  }
+  document.getElementById('btnEq').addEventListener('click', jumpToCurrentEquilibrium);
+  document.getElementById('btnInject').addEventListener('click', injectExtraSteam);
+  const btnExtract = document.getElementById('btnExtract');
+  if (btnExtract) btnExtract.addEventListener('click', extractSteam);
+  const btnRepair = document.getElementById('btnRepair');
+  if (btnRepair) btnRepair.addEventListener('click', repairCylinder);
+  document.getElementById('btnReset').addEventListener('click', resetSimulation);
+
+  const btnToggleLid = document.getElementById('btnToggleLid');
+  if (btnToggleLid) {
+    btnToggleLid.addEventListener('click', () => {
+      isOpenContainer = !isOpenContainer;
+      if (isOpenContainer) {
+        btnToggleLid.innerHTML = '🔒 蓋上活塞';
+        btnToggleLid.style.background = '#ea580c';
+        btnToggleLid.style.borderColor = '#fb923c';
+        btnToggleLid.title = '點擊將活塞蓋回，轉為密閉系統開始累積蒸氣壓與建立動態平衡';
+        if (volSlider) volSlider.disabled = true;
+        if (volNumInput) volNumInput.disabled = true;
+      } else {
+        btnToggleLid.innerHTML = '🪟 拿走蓋子';
+        btnToggleLid.style.background = '#334155';
+        btnToggleLid.style.borderColor = '#64748b';
+        btnToggleLid.title = '點擊拿走活塞蓋子，轉為敞開系統觀察水分子持續蒸發逸散且無法平衡';
+        if (volSlider) volSlider.disabled = false;
+        if (volNumInput) volNumInput.disabled = false;
+      }
+      updateUIAndBanner();
+    });
+  }
+
+  // 右側圖表檢視模式切換：雙圖對照 / 僅速率圖 / 僅 P-V 圖
+  function setChartMode(mode) {
+    if (!rightStack) return;
+    rightStack.classList.remove('mode-rate', 'mode-pv');
+    if (mode === 'rate') rightStack.classList.add('mode-rate');
+    if (mode === 'pv') rightStack.classList.add('mode-pv');
+
+    [btnViewDual, btnViewRate, btnViewPV].forEach(btn => {
+      if (btn) btn.classList.remove('active');
+    });
+    if (mode === 'dual' && btnViewDual) btnViewDual.classList.add('active');
+    if (mode === 'rate' && btnViewRate) btnViewRate.classList.add('active');
+    if (mode === 'pv' && btnViewPV) btnViewPV.classList.add('active');
+
+    requestAnimationFrame(() => {
+      resizeAllCanvases();
+    });
+  }
+
+  if (btnViewDual) btnViewDual.addEventListener('click', () => setChartMode('dual'));
+  if (btnViewRate) btnViewRate.addEventListener('click', () => setChartMode('rate'));
+  if (btnViewPV) btnViewPV.addEventListener('click', () => setChartMode('pv'));
+
+  document.getElementById('tBtn25').addEventListener('click', () => switchTemperature(25));
+  document.getElementById('tBtn55').addEventListener('click', () => switchTemperature(55));
+  document.getElementById('tBtn80').addEventListener('click', () => switchTemperature(80));
+  const tBtn100 = document.getElementById('tBtn100');
+  if (tBtn100) tBtn100.addEventListener('click', () => switchTemperature(100));
+
+  const btnScaleToggle = document.getElementById('btnScaleToggle');
+  if (btnScaleToggle) {
+    btnScaleToggle.addEventListener('click', () => {
+      pvScaleMode = (pvScaleMode === 'auto') ? 'global' : 'auto';
+      btnScaleToggle.textContent = (pvScaleMode === 'auto') ? '🔍 最適刻度' : '🌐 全域刻度';
+      renderPVChart();
+    });
+  }
+
+  // 液面微觀放大特寫 (2.4x) 切換
+  if (btnSurfaceZoom) {
+    btnSurfaceZoom.addEventListener('click', () => {
+      isSurfaceZoomed = !isSurfaceZoomed;
+      btnSurfaceZoom.classList.toggle('active-zoom', isSurfaceZoomed);
+      btnSurfaceZoom.innerHTML = isSurfaceZoomed ? '🔭 恢復<br>全景' : '液面<br>特寫';
+    });
+  }
+
+  // 三大區塊獨立放大檢視切換
+  function togglePanelZoom(panelName) {
+    if (panelName === 'rate' || panelName === 'pv' || panelName === 'charts') {
+      zoomedPanel = (zoomedPanel === 'charts') ? null : 'charts';
+    } else {
+      zoomedPanel = (zoomedPanel === panelName) ? null : panelName;
+    }
+    if (mainGrid) {
+      mainGrid.className = zoomedPanel ? `zoom-${zoomedPanel}` : '';
+    }
+    const isChartZoomed = (zoomedPanel === 'charts');
+    if (btnZoomSim) {
+      const isSim = (zoomedPanel === 'sim');
+      btnZoomSim.classList.toggle('active-zoom', isSim);
+      btnZoomSim.innerHTML = isSim ? '🗗 恢復<br>雙圖' : '全景<br>放大';
+    }
+    if (btnZoomCharts) {
+      btnZoomCharts.classList.toggle('active-zoom', isChartZoomed);
+      btnZoomCharts.textContent = isChartZoomed ? '🗗 恢復並排' : '⛶ 放大圖表';
+    }
+    [btnZoomRate, btnZoomPV].forEach(btn => {
+      if (!btn) return;
+      btn.classList.toggle('active-zoom', isChartZoomed);
+      btn.textContent = isChartZoomed ? '🗗 恢復並排' : '⛶ 放大此區';
+    });
+    requestAnimationFrame(() => {
+      resizeAllCanvases();
+    });
+  }
+
+  if (btnZoomSim) btnZoomSim.addEventListener('click', () => togglePanelZoom('sim'));
+  if (btnZoomRate) btnZoomRate.addEventListener('click', () => togglePanelZoom('rate'));
+  if (btnZoomPV) btnZoomPV.addEventListener('click', () => togglePanelZoom('pv'));
+  if (btnZoomCharts) btnZoomCharts.addEventListener('click', () => togglePanelZoom('charts'));
+
+  /* =====================================================================
+   * 8. 蒸發 vs 沸騰 微觀氣泡動力學動畫（蒸氣壓 vs 外界大氣壓對抗模型）
+   * ===================================================================== */
+  function drawVectorArrow(ctx, x1, y1, x2, y2, color, lineWidth = 2.5, headSize = 8, label = '', isBold = false) {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 6;
+
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - headSize * Math.cos(angle - Math.PI / 6), y2 - headSize * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(x2 - headSize * Math.cos(angle + Math.PI / 6), y2 - headSize * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+
+    if (label) {
+      ctx.shadowBlur = 0;
+      ctx.font = isBold ? 'bold 11px "PingFang TC", sans-serif' : '10px "PingFang TC", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const midX = (x1 + x2) / 2 + Math.cos(angle + Math.PI / 2) * 11;
+      const midY = (y1 + y2) / 2 + Math.sin(angle + Math.PI / 2) * 11;
+
+      // 文字微型深色背景框，避免被背景線條干擾
+      const tw = ctx.measureText(label).width + 6;
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+      ctx.fillRect(midX - tw / 2, midY - 7, tw, 14);
+
+      ctx.fillStyle = color;
+      ctx.fillText(label, midX, midY);
+    }
+    ctx.restore();
+  }
+
+  function renderEvapCanvas() {
+    if (!evapCanvas) return;
+    const w = evapCanvas.width / window.devicePixelRatio;
+    const h = evapCanvas.height / window.devicePixelRatio;
+    if (w <= 0 || h <= 0) return;
+    evapCtx.clearRect(0, 0, w, h);
+
+    const surfY = h * 0.32;
+    const botY = h - 14;
+    const leftX = 22;
+    const rightX = w - 22;
+    const cx = w * 0.5;
+
+    // 1. 空氣與外壓大氣層背景
+    const airGrad = evapCtx.createLinearGradient(0, 0, 0, surfY);
+    airGrad.addColorStop(0, '#090d16');
+    airGrad.addColorStop(1, '#1e293b');
+    evapCtx.fillStyle = airGrad;
+    evapCtx.fillRect(leftX, 10, rightX - leftX, surfY - 10);
+
+    // 2. 下方液態水
+    const waterGrad = evapCtx.createLinearGradient(0, surfY, 0, botY);
+    waterGrad.addColorStop(0, 'rgba(14, 165, 233, 0.7)');
+    waterGrad.addColorStop(0.5, 'rgba(2, 132, 199, 0.82)');
+    waterGrad.addColorStop(1, 'rgba(3, 105, 161, 0.95)');
+    evapCtx.fillStyle = waterGrad;
+    evapCtx.fillRect(leftX, surfY, rightX - leftX, botY - surfY);
+
+    // 3. 水中游離水分子
+    for (let i = 0; i < 18; i++) {
+      const mx = leftX + 16 + ((i * 37 + 13) % (rightX - leftX - 32));
+      const my = surfY + 20 + ((i * 29 + 17) % (botY - surfY - 35));
+      const jx = Math.sin(bmAnimTime * 2 + i) * 1.5;
+      const jy = Math.cos(bmAnimTime * 2.3 + i * 1.4) * 1.5;
+      evapCtx.beginPath();
+      evapCtx.arc(mx + jx, my + jy, 3.2, 0, Math.PI * 2);
+      evapCtx.fillStyle = 'rgba(224, 242, 254, 0.45)';
+      evapCtx.fill();
+    }
+
+    // 4. 水面上方空氣中的外壓下壓箭頭
+    const extCol = isDecompressed ? '#38bdf8' : '#60a5fa';
+    const extLabel = isDecompressed ? 'P外=23.8' : 'P外=760';
+    [0.26, 0.5, 0.74].forEach(f => {
+      const ax = leftX + (rightX - leftX) * f;
+      drawVectorArrow(evapCtx, ax, surfY - 26, ax, surfY - 4, extCol, 2.2, 6, extLabel);
+    });
+
+    // 5. 燒杯玻璃外框
+    evapCtx.strokeStyle = '#94a3b8';
+    evapCtx.lineWidth = 2.4;
+    evapCtx.beginPath();
+    evapCtx.moveTo(leftX, 10);
+    evapCtx.lineTo(leftX, botY);
+    evapCtx.lineTo(rightX, botY);
+    evapCtx.lineTo(rightX, 10);
+    evapCtx.stroke();
+
+    // 6. 水面分界線
+    evapCtx.strokeStyle = '#e0f2fe';
+    evapCtx.lineWidth = 2.0;
+    evapCtx.beginPath();
+    evapCtx.moveTo(leftX, surfY);
+    evapCtx.lineTo(rightX, surfY);
+    evapCtx.stroke();
+
+    // 7. 微觀氣泡動力學核心動畫
+    const cy = surfY + (botY - surfY) * 0.55;
+
+    if (!isDecompressed) {
+      // 正常外壓 760 mmHg，未達沸點 (80°C，P_vap = 355 mmHg < 760 mmHg)
+      const tCycle = (bmAnimTime * 0.9) % 4.2;
+
+      if (tCycle < 2.0) {
+        // 階段一：微小氣泡嘗試在內部成核（但受外壓極度壓制）
+        const r = 16 + Math.sin(tCycle * Math.PI) * 2.5;
+
+        // 氣泡本體
+        const bg = evapCtx.createRadialGradient(cx - 3, cy - 3, 2, cx, cy, r);
+        bg.addColorStop(0, 'rgba(254, 215, 170, 0.55)');
+        bg.addColorStop(0.7, 'rgba(249, 115, 22, 0.35)');
+        bg.addColorStop(1, 'rgba(234, 88, 12, 0.85)');
+        evapCtx.fillStyle = bg;
+        evapCtx.strokeStyle = '#fb923c';
+        evapCtx.lineWidth = 2;
+        evapCtx.beginPath();
+        evapCtx.arc(cx, cy, r, 0, Math.PI * 2);
+        evapCtx.fill();
+        evapCtx.stroke();
+
+        // 氣泡內微弱蒸氣壓向量（向外，長度較短 16px，橘色）
+        const pLen = 16;
+        drawVectorArrow(evapCtx, cx - 4, cy, cx - 4 - pLen, cy, '#fb923c', 2.2, 5, '355');
+        drawVectorArrow(evapCtx, cx + 4, cy, cx + 4 + pLen, cy, '#fb923c', 2.2, 5, '355');
+        drawVectorArrow(evapCtx, cx, cy - 4, cx, cy - 4 - pLen, '#fb923c', 2.2, 5, '355');
+        drawVectorArrow(evapCtx, cx, cy + 4, cx, cy + 4 + pLen, '#fb923c', 2.2, 5, '355');
+
+        // 周圍液體壓過來的外壓向量（向內，長度長達 40px，藍色）
+        const outLen = 38;
+        drawVectorArrow(evapCtx, cx - r - outLen, cy, cx - r - 2, cy, '#38bdf8', 3.0, 7, '760');
+        drawVectorArrow(evapCtx, cx + r + outLen, cy, cx + r + 2, cy, '#38bdf8', 3.0, 7, '760');
+        drawVectorArrow(evapCtx, cx, cy - r - outLen, cx, cy - r - 2, '#38bdf8', 3.0, 7, '760');
+        drawVectorArrow(evapCtx, cx, cy + r + outLen, cx, cy + r + 2, '#38bdf8', 3.0, 7, '760');
+
+        // 提示標籤
+        evapCtx.save();
+        evapCtx.fillStyle = '#fde047';
+        evapCtx.font = 'bold 11px "PingFang TC", sans-serif';
+        evapCtx.textAlign = 'center';
+        evapCtx.fillText('P外壓(760) ＞ P蒸氣(355)：外力強烈壓制氣泡', cx, botY - 8);
+        evapCtx.restore();
+
+      } else if (tCycle < 2.8) {
+        // 階段二：氣泡被外壓瞬間壓扁潰縮瓦解（Collapse）！
+        const prog = (tCycle - 2.0) / 0.8;
+        const rx = Math.max(0, 16 * (1 - prog));
+        const ry = Math.max(0, 8 * (1 - prog) * 0.3);
+
+        if (rx > 0 && ry > 0) {
+          evapCtx.fillStyle = 'rgba(239, 68, 68, 0.7)';
+          evapCtx.strokeStyle = '#ef4444';
+          evapCtx.lineWidth = 2;
+          evapCtx.beginPath();
+          evapCtx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+          evapCtx.fill();
+          evapCtx.stroke();
+        }
+
+        // 潰縮衝擊波環
+        const shockR = 8 + prog * 28;
+        evapCtx.strokeStyle = `rgba(239, 68, 68, ${Math.max(0, 1 - prog)})`;
+        evapCtx.lineWidth = 2.5;
+        evapCtx.beginPath();
+        evapCtx.arc(cx, cy, shockR, 0, Math.PI * 2);
+        evapCtx.stroke();
+
+        // 警示標籤
+        evapCtx.save();
+        evapCtx.fillStyle = '#fda4af';
+        evapCtx.font = '900 12px "PingFang TC", sans-serif';
+        evapCtx.textAlign = 'center';
+        evapCtx.fillText('💥 氣泡受不住外壓，瞬間被壓扁瓦解 (Collapse)！', cx, botY - 8);
+        evapCtx.restore();
+
+      } else {
+        // 階段三：內部氣泡瓦解後，氣化只能在水面上方（蒸發）發生
+        const evapProg = (tCycle - 2.8) / 1.4;
+        const escY = surfY - evapProg * 24;
+
+        // 表面水分子脫離逸出
+        drawVectorArrow(evapCtx, cx - 24, surfY + 3, cx - 24, escY, '#4ade80', 2.4, 6, '蒸發');
+        drawVectorArrow(evapCtx, cx + 24, surfY + 3, cx + 24, escY, '#4ade80', 2.4, 6, '蒸發');
+
+        evapCtx.save();
+        evapCtx.fillStyle = '#a7f3d0';
+        evapCtx.font = 'bold 11px "PingFang TC", sans-serif';
+        evapCtx.textAlign = 'center';
+        evapCtx.fillText('表面分子無液體圍壓，方可順利逸出（蒸發）', cx, botY - 8);
+        evapCtx.restore();
+      }
+
+    } else {
+      // 演示針筒抽氣減壓沸騰（常溫 25°C，外壓降至 23.8 mmHg）
+      const riseProg = ((bmAnimTime * 0.45) % 2.5) / 2.5;
+      const curY = (botY - 20) - riseProg * (botY - 20 - surfY);
+      const curR = 12 + riseProg * 14;
+
+      // 減壓下氣泡順利膨脹並上升
+      const bg = evapCtx.createRadialGradient(cx - 3, curY - 3, 2, cx, curY, curR);
+      bg.addColorStop(0, '#fef08a');
+      bg.addColorStop(0.5, 'rgba(56, 189, 248, 0.45)');
+      bg.addColorStop(1, '#0284c7');
+      evapCtx.fillStyle = bg;
+      evapCtx.strokeStyle = '#38bdf8';
+      evapCtx.lineWidth = 2.2;
+      evapCtx.beginPath();
+      evapCtx.arc(cx, curY, curR, 0, Math.PI * 2);
+      evapCtx.fill();
+      evapCtx.stroke();
+
+      // 兩側箭頭等長（力學平衡 23.8 mmHg）
+      drawVectorArrow(evapCtx, cx - 4, curY, cx - 4 - 20, curY, '#facc15', 2.2, 5, '23.8');
+      drawVectorArrow(evapCtx, cx + 4, curY, cx + 4 + 20, curY, '#facc15', 2.2, 5, '23.8');
+      drawVectorArrow(evapCtx, cx - curR - 22, curY, cx - curR - 2, curY, '#38bdf8', 2.2, 5, '23.8');
+      drawVectorArrow(evapCtx, cx + curR + 22, curY, cx + curR + 2, curY, '#38bdf8', 2.2, 5, '23.8');
+
+      if (riseProg > 0.92) {
+        // 水面破裂
+        evapCtx.strokeStyle = '#fde047';
+        evapCtx.lineWidth = 2;
+        evapCtx.beginPath();
+        evapCtx.arc(cx, surfY, 18, 0, Math.PI * 2);
+        evapCtx.stroke();
+      }
+
+      evapCtx.save();
+      evapCtx.fillStyle = '#4ade80';
+      evapCtx.font = '900 12px "PingFang TC", sans-serif';
+      evapCtx.textAlign = 'center';
+      evapCtx.fillText('🎉 減壓成功！P外降至23.8 mmHg，常溫氣泡順利浮升沸騰！', cx, botY - 8);
+      evapCtx.restore();
+    }
+  }
+
+  function renderBoilCanvas() {
+    if (!boilCanvas) return;
+    const w = boilCanvas.width / window.devicePixelRatio;
+    const h = boilCanvas.height / window.devicePixelRatio;
+    if (w <= 0 || h <= 0) return;
+    boilCtx.clearRect(0, 0, w, h);
+
+    const surfY = h * 0.32;
+    const botY = h - 14;
+    const leftX = 22;
+    const rightX = w - 22;
+    const cx = w * 0.5;
+
+    // 1. 上方劇烈水蒸氣雲霧背景
+    const steamGrad = boilCtx.createLinearGradient(0, 0, 0, surfY);
+    steamGrad.addColorStop(0, '#0f172a');
+    steamGrad.addColorStop(0.6, 'rgba(56, 189, 248, 0.25)');
+    steamGrad.addColorStop(1, 'rgba(254, 240, 138, 0.35)');
+    boilCtx.fillStyle = steamGrad;
+    boilCtx.fillRect(leftX, 10, rightX - leftX, surfY - 10);
+
+    // 2. 下方 100°C 沸騰液態水（底部帶加熱橙黃光輝）
+    const waterGrad = boilCtx.createLinearGradient(0, surfY, 0, botY);
+    waterGrad.addColorStop(0, 'rgba(14, 165, 233, 0.75)');
+    waterGrad.addColorStop(0.65, 'rgba(2, 132, 199, 0.88)');
+    waterGrad.addColorStop(1, 'rgba(249, 115, 22, 0.6)');
+    boilCtx.fillStyle = waterGrad;
+    boilCtx.fillRect(leftX, surfY, rightX - leftX, botY - surfY);
+
+    // 底部加熱器示意紅光
+    boilCtx.fillStyle = 'rgba(239, 68, 68, 0.45)';
+    boilCtx.fillRect(leftX + 2, botY - 8, rightX - leftX - 4, 7);
+
+    // 3. 背景不斷生成的上升小沸騰氣泡
+    for (let i = 0; i < 6; i++) {
+      const bx = leftX + 20 + ((i * 53 + 21) % (rightX - leftX - 40));
+      const bSpeed = 0.6 + (i % 3) * 0.3;
+      const bTravel = botY - surfY - 15;
+      const bProg = ((bmAnimTime * bSpeed + i * 0.35) % 1.0);
+      const by = (botY - 10) - bProg * bTravel;
+      const br = 3 + bProg * 5;
+
+      boilCtx.beginPath();
+      boilCtx.arc(bx + Math.sin(bmAnimTime * 3 + i) * 2, by, br, 0, Math.PI * 2);
+      boilCtx.fillStyle = 'rgba(254, 240, 138, 0.45)';
+      boilCtx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+      boilCtx.lineWidth = 1.2;
+      boilCtx.fill();
+      boilCtx.stroke();
+    }
+
+    // 4. 燒杯外框
+    boilCtx.strokeStyle = '#94a3b8';
+    boilCtx.lineWidth = 2.4;
+    boilCtx.beginPath();
+    boilCtx.moveTo(leftX, 10);
+    boilCtx.lineTo(leftX, botY);
+    boilCtx.lineTo(rightX, botY);
+    boilCtx.lineTo(rightX, 10);
+    boilCtx.stroke();
+
+    // 5. 沸滾起伏的水面波動
+    boilCtx.strokeStyle = '#fef08a';
+    boilCtx.lineWidth = 2.5;
+    boilCtx.beginPath();
+    boilCtx.moveTo(leftX, surfY);
+    for (let x = leftX; x <= rightX; x += 6) {
+      const wy = surfY + Math.sin(x * 0.09 + bmAnimTime * 5) * 3;
+      boilCtx.lineTo(x, wy);
+    }
+    boilCtx.stroke();
+
+    // 6. 中央焦點大氣泡：展現 P_蒸氣 (760 mmHg) ＝ P_外壓 (760 mmHg) 完全抗衡！
+    const cy = surfY + (botY - surfY) * 0.52;
+    const r = 26 + Math.sin(bmAnimTime * 2.4) * 1.8;
+
+    // 亮麗金色高光氣泡球體
+    const bg = boilCtx.createRadialGradient(cx - 7, cy - 7, 3, cx, cy, r);
+    bg.addColorStop(0, '#ffffff');
+    bg.addColorStop(0.25, '#fef08a');
+    bg.addColorStop(0.65, '#f59e0b');
+    bg.addColorStop(1, '#d97706');
+    boilCtx.fillStyle = bg;
+    boilCtx.strokeStyle = '#fef08a';
+    boilCtx.lineWidth = 2.4;
+    boilCtx.beginPath();
+    boilCtx.arc(cx, cy, r, 0, Math.PI * 2);
+    boilCtx.fill();
+    boilCtx.stroke();
+
+    // 氣泡內高能水分子跳躍
+    for (let i = 0; i < 5; i++) {
+      const ang = (i / 5) * Math.PI * 2 + bmAnimTime * 2;
+      const d = 8 + (i % 2) * 5;
+      boilCtx.beginPath();
+      boilCtx.arc(cx + Math.cos(ang) * d, cy + Math.sin(ang) * d, 2.5, 0, Math.PI * 2);
+      boilCtx.fillStyle = '#ffffff';
+      boilCtx.fill();
+    }
+
+    // 7. 力學完全平衡向量（長度精準相等 = 35px！）
+    const arrowLen = 34;
+
+    // 氣泡向外撐開推力 P_蒸氣 = 760 mmHg（金色粗箭頭）
+    drawVectorArrow(boilCtx, cx - 8, cy, cx - 8 - arrowLen, cy, '#facc15', 3.2, 7, '760', true);
+    drawVectorArrow(boilCtx, cx + 8, cy, cx + 8 + arrowLen, cy, '#facc15', 3.2, 7, '760', true);
+    drawVectorArrow(boilCtx, cx, cy - 8, cx, cy - 8 - arrowLen, '#facc15', 3.2, 7, '760', true);
+    drawVectorArrow(boilCtx, cx, cy + 8, cx, cy + 8 + arrowLen, '#facc15', 3.2, 7, '760', true);
+
+    // 液體向內擠壓外壓 P_外壓 = 760 mmHg（天藍色粗箭頭，長度完全等於 34px）
+    drawVectorArrow(boilCtx, cx - r - arrowLen - 2, cy, cx - r - 2, cy, '#38bdf8', 3.2, 7, '760', true);
+    drawVectorArrow(boilCtx, cx + r + arrowLen + 2, cy, cx + r + 2, cy, '#38bdf8', 3.2, 7, '760', true);
+    drawVectorArrow(boilCtx, cx, cy - r - arrowLen - 2, cx, cy - r - 2, '#38bdf8', 3.2, 7, '760', true);
+    drawVectorArrow(boilCtx, cx, cy + r + arrowLen + 2, cx, cy + r + 2, '#38bdf8', 3.2, 7, '760', true);
+
+    // 8. 破裂在水面的氣泡與噴出蒸氣
+    const burstX = cx + Math.sin(bmAnimTime * 2) * 35;
+    boilCtx.save();
+    boilCtx.strokeStyle = 'rgba(254, 240, 138, 0.85)';
+    boilCtx.lineWidth = 2;
+    boilCtx.beginPath();
+    boilCtx.arc(burstX, surfY, 14, 0, Math.PI * 2);
+    boilCtx.stroke();
+    drawVectorArrow(boilCtx, burstX, surfY + 2, burstX, surfY - 26, '#fef08a', 2.8, 6, '劇烈沸騰');
+    boilCtx.restore();
+
+    // 9. 底部核心科學結論標籤
+    boilCtx.save();
+    boilCtx.fillStyle = '#fef08a';
+    boilCtx.font = '900 12px "PingFang TC", sans-serif';
+    boilCtx.textAlign = 'center';
+    boilCtx.fillText('✨ P蒸氣(760) ＝ P外壓(760)：內部氣泡穩定抗衡不扁塌，全液劇烈沸騰！', cx, botY - 8);
+    boilCtx.restore();
+  }
+
+  function renderBoilingModal() {
+    renderEvapCanvas();
+    renderBoilCanvas();
+  }
+
+  // 彈窗開關與減壓演示事件監聽
+  if (btnOpenBoilingModal) {
+    btnOpenBoilingModal.addEventListener('click', () => {
+      isBoilingModalOpen = true;
+      if (boilingModal) boilingModal.style.display = 'flex';
+      resizeAllCanvases();
+    });
+  }
+
+  if (btnCloseBoilingModal) {
+    btnCloseBoilingModal.addEventListener('click', () => {
+      isBoilingModalOpen = false;
+      if (boilingModal) boilingModal.style.display = 'none';
+    });
+  }
+
+  if (boilingModal) {
+    boilingModal.addEventListener('click', (e) => {
+      if (e.target === boilingModal) {
+        isBoilingModalOpen = false;
+        boilingModal.style.display = 'none';
+      }
+    });
+  }
+
+  if (btnTriggerDecompression) {
+    btnTriggerDecompression.addEventListener('click', () => {
+      isDecompressed = true;
+      decompressTimer = 360; // 演示持續約 6 秒
+      btnTriggerDecompression.textContent = '⏳ 減壓進行中：外壓降至 23.8 mmHg（常溫劇烈沸騰！）';
+      btnTriggerDecompression.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+      if (evapExtPText) {
+        evapExtPText.innerHTML = 'P<sub>外壓</sub> (已抽氣減壓至 23.8 mmHg)';
+      }
+      if (evapExplanationText) {
+        evapExplanationText.innerHTML =
+          '<b>🎉 減壓沸騰成功！</b>利用針筒將外壓抽降至 23.8 mmHg 後，常溫 25°C 水的蒸氣壓（23.8 mmHg）已達到外壓（<b>P<sub>蒸氣</sub> ＝ P<sub>外壓</sub></b>）！原本會被壓扁的氣泡現在能夠穩定膨脹浮升，<b>常溫水立刻劇烈沸騰！</b>';
+      }
+    });
+  }
+
+  // 點擊主量筒 100°C 沸騰標籤亦可快速打開彈窗
+  simCanvas.addEventListener('click', (e) => {
+    if (currentTemp === 100 && liquidCount > 0) {
+      const g = getCylinderGeometry();
+      const rect = simCanvas.getBoundingClientRect();
+      const clickY = e.clientY - rect.top;
+      const clickX = e.clientX - rect.left;
+      if (Math.abs(clickX - g.cx) <= 110 && Math.abs(clickY - (g.surfaceY - 15)) <= 20) {
+        isBoilingModalOpen = true;
+        if (boilingModal) boilingModal.style.display = 'flex';
+        resizeAllCanvases();
+      }
+    }
+  });
+
+  function animate() {
+    updatePhysics();
+    renderSimCanvas();
+    renderRateChart();
+    renderPVChart();
+    if (isBoilingModalOpen) {
+      renderBoilingModal();
+    }
+    requestAnimationFrame(animate);
+  }
+
+  resizeAllCanvases();
+  resetSimulation();
+  requestAnimationFrame(animate);
+})();
+</script>
+
+</body></html>

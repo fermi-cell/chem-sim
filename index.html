@@ -25,12 +25,12 @@
       padding: 40px 20px;
     }
     .container {
-      max-width: 760px;
+      max-width: 960px;
       width: 100%;
       text-align: center;
     }
     header {
-      margin-bottom: 36px;
+      margin-bottom: 40px;
     }
     .school-tag {
       display: inline-block;
@@ -45,7 +45,7 @@
       letter-spacing: 0.5px;
     }
     h1 {
-      font-size: 2.3rem;
+      font-size: 2.4rem;
       font-weight: 700;
       margin-bottom: 12px;
       letter-spacing: -0.5px;
@@ -56,24 +56,32 @@
     p.description {
       color: #94a3b8;
       font-size: 1.05rem;
-      max-width: 580px;
+      max-width: 620px;
       margin: 0 auto;
       line-height: 1.6;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 480px));
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 40px;
+      text-align: left;
     }
     .card {
       background: rgba(30, 41, 59, 0.65);
       backdrop-filter: blur(16px);
       border: 1px solid rgba(148, 163, 184, 0.18);
       border-radius: 24px;
-      padding: 36px 32px;
+      padding: 32px 28px;
       text-decoration: none;
       color: inherit;
-      display: block;
-      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       overflow: hidden;
-      margin-bottom: 40px;
     }
     .card::before {
       content: "";
@@ -86,11 +94,18 @@
       opacity: 0;
       transition: opacity 0.3s;
     }
+    .card.vapor::before {
+      background: linear-gradient(90deg, #38bdf8, #34d399);
+    }
     .card:hover {
       transform: translateY(-6px);
       border-color: rgba(56, 189, 248, 0.45);
       box-shadow: 0 24px 40px -10px rgba(56, 189, 248, 0.2);
       background: rgba(30, 41, 59, 0.85);
+    }
+    .card.vapor:hover {
+      border-color: rgba(52, 211, 153, 0.45);
+      box-shadow: 0 24px 40px -10px rgba(52, 211, 153, 0.2);
     }
     .card:hover::before {
       opacity: 1;
@@ -110,20 +125,25 @@
       background: rgba(56, 189, 248, 0.15);
       color: #38bdf8;
     }
+    .card.vapor .card-badge {
+      background: rgba(52, 211, 153, 0.15);
+      color: #34d399;
+    }
     .card-icon {
-      font-size: 2.8rem;
+      font-size: 2.6rem;
     }
     .card h2 {
-      font-size: 1.5rem;
+      font-size: 1.45rem;
       font-weight: 700;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       color: #ffffff;
     }
     .card p {
       color: #94a3b8;
-      font-size: 1rem;
+      font-size: 0.96rem;
       line-height: 1.6;
       margin-bottom: 24px;
+      flex-grow: 1;
     }
     .card-footer {
       display: flex;
@@ -131,18 +151,20 @@
       justify-content: space-between;
       border-top: 1px solid rgba(148, 163, 184, 0.12);
       padding-top: 18px;
+      gap: 12px;
     }
     .tag-list {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
     }
     .tag {
-      font-size: 0.8rem;
-      color: #64748b;
+      font-size: 0.78rem;
+      color: #94a3b8;
       background: rgba(15, 23, 42, 0.6);
-      padding: 4px 10px;
+      padding: 4px 8px;
       border-radius: 6px;
+      border: 1px solid rgba(148, 163, 184, 0.1);
     }
     .btn-enter {
       display: inline-flex;
@@ -150,15 +172,24 @@
       gap: 6px;
       background: #0284c7;
       color: #ffffff;
-      padding: 10px 20px;
+      padding: 9px 18px;
       border-radius: 10px;
       font-weight: 600;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .card.vapor .btn-enter {
+      background: #059669;
     }
     .card:hover .btn-enter {
       background: #38bdf8;
       color: #0f172a;
+      transform: translateX(3px);
+    }
+    .card.vapor:hover .btn-enter {
+      background: #34d399;
+      color: #064e3b;
       transform: translateX(3px);
     }
     footer {
@@ -172,27 +203,53 @@
     <header>
       <div class="school-tag">國立中壢高級中學 ‧ 化學科</div>
       <h1>化學互動模擬實驗室</h1>
-      <p class="description">透過高互動性動態演算模型，探索抽象化學原理與微觀分子世界。</p>
+      <p class="description">透過高互動性動態演算模型，探索抽象化學原理、相平衡與微觀分子動力學。</p>
     </header>
 
-    <!-- 單一分壓單元卡片 -->
-    <a href="pressure/" class="card">
-      <div class="card-top">
-        <span class="card-badge">高二化學 ‧ 氣體定律</span>
-        <div class="card-icon">⚗️</div>
-      </div>
-      <h2>道爾頓分壓定律 (Dalton's Law)</h2>
-      <p>探索混合氣體分壓、莫耳分率與固體佔位體積效應。內建「閃耀鑽石」與「天然岩石」雙風格互動模型。</p>
-      <div class="card-footer">
-        <div class="tag-list">
-          <span class="tag">💎 閃耀鑽石版</span>
-          <span class="tag">🪨 天然岩石版</span>
+    <div class="grid">
+      <!-- 單元一：道爾頓分壓定律 -->
+      <a href="pressure/" class="card">
+        <div>
+          <div class="card-top">
+            <span class="card-badge">單元一 ‧ 氣體定律</span>
+            <div class="card-icon">⚗️</div>
+          </div>
+          <h2>道爾頓分壓定律 (Dalton's Law)</h2>
+          <p>探索混合氣體分壓、莫耳分率與固體佔位體積效應。內建「閃耀鑽石」與「天然岩石」雙風格互動微觀模型。</p>
         </div>
-        <div class="btn-enter">
-          進入實驗模擬 &rarr;
+        <div class="card-footer">
+          <div class="tag-list">
+            <span class="tag">💎 閃耀鑽石</span>
+            <span class="tag">🪨 天然岩石</span>
+          </div>
+          <div class="btn-enter">
+            進入實驗 &rarr;
+          </div>
         </div>
-      </div>
-    </a>
+      </a>
+
+      <!-- 單元二：蒸氣壓與波以耳定律 -->
+      <a href="vapor-pressure/" class="card vapor">
+        <div>
+          <div class="card-top">
+            <span class="card-badge">單元二 ‧ 液態與相平衡</span>
+            <div class="card-icon">💧</div>
+          </div>
+          <h2>飽和蒸氣壓與波以耳定律</h2>
+          <p>微觀水分子動態蒸發與凝結平衡、活塞體積壓縮膨脹，以及水分完全乾涸後的波以耳定律 P-V 曲線與三段溫度效應。</p>
+        </div>
+        <div class="card-footer">
+          <div class="tag-list">
+            <span class="tag">💧 3D微觀動態</span>
+            <span class="tag">📈 P-V 曲線</span>
+            <span class="tag">🔥 25/55/80°C</span>
+          </div>
+          <div class="btn-enter">
+            進入實驗 &rarr;
+          </div>
+        </div>
+      </a>
+    </div>
 
     <footer>
       國立中壢高中化學科教學教材庫 ‧ 建議使用 Chrome / Safari / Edge 瀏覽器
