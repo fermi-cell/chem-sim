@@ -80,14 +80,19 @@
     color: #ffffff;
     white-space: nowrap;
   }
-  .header-right {
+  .header-main-row {
     display: flex;
     align-items: center;
-    gap: 6px;
-    flex: 1;
-    justify-content: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
     min-width: 0;
-    overflow: hidden;
+  }
+  .header-feature-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
   }
   .status-pill {
     font-size: clamp(0.72rem, 0.9vw, 0.88rem);
@@ -174,7 +179,8 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
   }
   button {
     background: #1e293b;
@@ -816,29 +822,49 @@
       background: #090e1c !important;
     }
 
-    /* 頂部列：狀態標籤獨立滿版一行 */
+    /* 頂部列：第 1 行標題+功能鈕（左右對稱），第 2 行滿版狀態引導 */
     header {
       padding: 6px 10px !important;
+      display: flex !important;
       flex-direction: column !important;
       align-items: stretch !important;
+      gap: 6px !important;
+    }
+    .header-main-row {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      width: 100% !important;
       gap: 6px !important;
     }
     .brand-group {
       display: flex !important;
       align-items: center !important;
-      width: 100% !important;
+      flex-shrink: 0 !important;
     }
     header h1 {
       font-size: 1.05rem !important;
       margin: 0 !important;
     }
-    .header-right {
-      width: 100% !important;
+    .header-feature-tools {
       display: flex !important;
-      margin: 0 !important;
+      align-items: center !important;
+      gap: 6px !important;
+      flex-shrink: 0 !important;
+    }
+    .btn-boiling-feature, .btn-download {
+      height: 28px !important;
+      padding: 3px 8px !important;
+      font-size: 0.74rem !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-shrink: 0 !important;
     }
     .status-pill {
       width: 100% !important;
+      order: 3 !important;
       font-size: 0.76rem !important;
       white-space: normal !important;
       line-height: 1.35 !important;
@@ -846,9 +872,10 @@
       padding: 5px 8px !important;
       border-radius: 6px !important;
       box-sizing: border-box !important;
+      margin: 0 !important;
     }
 
-    /* 控制列：精簡格狀 4 欄 x 2 列 */
+    /* 控制列：6 顆按鈕 3 欄 x 2 列，滑桿各佔 100% 滿版，3x 鈕寬敞不出框 */
     .top-control-bar {
       padding: 6px 10px !important;
       gap: 6px !important;
@@ -857,7 +884,7 @@
     }
     .ctrl-group {
       display: grid !important;
-      grid-template-columns: repeat(4, 1fr) !important;
+      grid-template-columns: repeat(3, 1fr) !important;
       gap: 4px !important;
       width: 100% !important;
     }
@@ -866,35 +893,40 @@
       min-width: 0 !important;
       min-height: 32px !important;
       padding: 4px 2px !important;
-      font-size: 0.74rem !important;
+      font-size: 0.76rem !important;
       font-weight: 800 !important;
       justify-content: center !important;
       border-radius: 6px !important;
     }
     .sliders-group {
       display: flex !important;
-      flex-direction: row !important;
-      gap: 5px !important;
+      flex-direction: column !important;
+      gap: 6px !important;
       width: 100% !important;
     }
-    .sliders-group .slider-pill {
-      flex: 1 1 0 !important;
-      min-width: 0 !important;
-      width: 50% !important;
-      padding: 3px 6px !important;
-      font-size: 0.72rem !important;
-      gap: 4px !important;
-      min-height: 30px !important;
+    .speed-box, .slider-pill {
+      width: 100% !important;
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      padding: 4px 10px !important;
+      font-size: 0.76rem !important;
+      gap: 8px !important;
+      min-height: 32px !important;
       box-sizing: border-box !important;
     }
-    .slider-pill input[type="range"] {
+    .speed-box input[type="range"] {
       flex: 1 !important;
-      min-width: 45px !important;
+      min-width: 60px !important;
     }
-    .slider-pill input[type="number"] {
-      width: 40px !important;
-      font-size: 0.74rem !important;
-      padding: 1px 2px !important;
+    .vol-box input[type="range"] {
+      flex: 1 !important;
+      min-width: 60px !important;
+    }
+    .vol-box input[type="number"] {
+      width: 48px !important;
+      font-size: 0.78rem !important;
+      padding: 2px 3px !important;
     }
 
     /* 主視覺區：加入 safe-area 留白 */
@@ -939,7 +971,7 @@
       display: block !important;
     }
 
-    /* 🌟 浮動工具與溫度控制器：支援「水平左右滑動」膠囊排版，按鈕完整露出！ */
+    /* 浮動工具與溫度控制器：支援「水平左右滑動」膠囊排版，按鈕完整露出！ */
     .sim-floating-tools {
       position: absolute !important;
       top: 6px !important;
@@ -1130,7 +1162,7 @@
       height: 420px !important;
     }
 
-    /* 🌟 沸騰微觀動畫彈窗：手機全螢幕優化，告別災難排版！ */
+    /* 沸騰微觀動畫彈窗：手機全螢幕優化 */
     .boiling-modal {
       position: fixed !important;
       top: 0 !important;
@@ -1302,18 +1334,22 @@
 <div class="stage-16-9">
   <!-- 第一列：標題、動態階段橫幅與操作按鈕 -->
   <header>
-    <div class="brand-group">
-      <a href="../" class="btn-home" title="返回總目錄" style="text-decoration:none; color:#94a3b8; font-size:1.05rem; padding:3px 7px; border-radius:6px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); margin-right:8px; display:inline-flex; align-items:center; justify-content:center; transition:0.2s;" onmouseover="this.style.color='#fff';this.style.background='rgba(255,255,255,0.18)'" onmouseout="this.style.color='#94a3b8';this.style.background='rgba(255,255,255,0.08)'">🏠</a>
-      <h1>💧 蒸氣壓</h1>
-    </div>
-    <div class="header-right">
+    <div class="header-main-row">
+      <div class="brand-group">
+        <a href="../" class="btn-home" title="返回總目錄" style="text-decoration:none; color:#94a3b8; font-size:1.05rem; padding:3px 7px; border-radius:6px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); margin-right:8px; display:inline-flex; align-items:center; justify-content:center; transition:0.2s;" onmouseover="this.style.color='#fff';this.style.background='rgba(255,255,255,0.18)'" onmouseout="this.style.color='#94a3b8';this.style.background='rgba(255,255,255,0.08)'">🏠</a>
+        <h1>💧 蒸氣壓</h1>
+      </div>
       <div id="statusBanner" class="status-pill eq">✨ 飽和動態平衡！（R蒸發＝R凝結，P = 23.8 mmHg / 0.031 atm 定值）</div>
+      <div class="header-feature-tools">
+        <button id="btnOpenBoilingModal" class="btn-boiling-feature" title="點擊觀看『蒸發 vs 沸騰』蒸氣壓與外界大氣壓微觀力學動畫">🫧 沸騰動畫</button>
+        <button id="btnDownloadHTML" class="btn-download" title="下載完整單一 HTML 檔案至電腦全螢幕播放">💾 下載</button>
+      </div>
     </div>
   </header>
 
-  <!-- 第二列：講台頂部控制列 -->
+  <!-- 第二列：講台頂部控制列（桌機保證全部同一列，不折行！） -->
   <div class="top-control-bar">
-    <!-- 左區：播放與微觀操作按鈕 -->
+    <!-- 左區：6 顆核心實驗操作按鈕 -->
     <div class="ctrl-group">
       <button id="btnPlay" class="btn-play" style="background:#059669; border-color:#34d399; box-shadow:0 0 10px rgba(16,185,129,0.45);">▶️ 開始</button>
       <button id="btnEq" class="btn-eq" title="直接跳至目前體積下的平衡狀態">⚡ 跳至平衡</button>
@@ -1321,11 +1357,9 @@
       <button id="btnToggleLid" style="background:#334155; border:1.5px solid #64748b; color:#fff;" title="在『敞開系統（無蓋逸散）』與『密閉系統（活塞封閉）』之間切換">🪟 拿走蓋子</button>
       <button id="btnInject" class="btn-inject" title="額外注入 6 顆水蒸氣分子（過量注入氣壓過大會衝爆活塞！）">💨 注入(+6)</button>
       <button id="btnExtract" class="btn-extract" title="抽出 6 顆氣相水蒸氣分子（降壓演示）" style="background:#0284c7; border:1.5px solid #38bdf8; color:#fff; padding:5px 10px; border-radius:8px; font-weight:800; cursor:pointer; font-size:clamp(0.78rem, 1.05vw, 0.98rem); transition:all 0.15s ease;">🌪️ 抽出(-6)</button>
-      <button id="btnOpenBoilingModal" class="btn-boiling-feature" title="點擊觀看『蒸發 vs 沸騰』蒸氣壓與外界大氣壓微觀力學動畫">🫧 沸騰動畫</button>
-      <button id="btnDownloadHTML" class="btn-download" title="下載完整單一 HTML 檔案至電腦全螢幕播放">💾 下載</button>
     </div>
 
-    <!-- 右區：滑桿群組容器（桌機單一橫列、手機並排或流式） -->
+    <!-- 右區：滑桿群組容器 -->
     <div class="sliders-group">
       <!-- 速度調節滑桿 -->
       <div class="slider-pill speed-box">
