@@ -1111,10 +1111,13 @@
       height: 100dvh !important;
       z-index: 99999 !important;
       padding: 0 !important;
-      display: flex !important;
       align-items: stretch !important;
       justify-content: stretch !important;
       background: rgba(2, 6, 23, 0.96) !important;
+    }
+    .boiling-modal[style*="display: none"],
+    .boiling-modal[style*="display:none"] {
+      display: none !important;
     }
     .boiling-modal-content {
       width: 100% !important;
@@ -4830,8 +4833,12 @@
   if (btnOpenBoilingModal) {
     btnOpenBoilingModal.addEventListener('click', () => {
       isBoilingModalOpen = true;
-      if (boilingModal) boilingModal.style.display = 'flex';
-      resizeAllCanvases();
+      if (boilingModal) {
+        boilingModal.style.display = 'flex';
+        requestAnimationFrame(() => {
+          resizeAllCanvases();
+        });
+      }
     });
   }
 
