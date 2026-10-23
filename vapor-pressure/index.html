@@ -798,49 +798,54 @@
       background: #090e1c !important;
     }
 
-    /* 頂部列：緊湊排版，避免吃過多垂直高度 */
+    /* 頂部列：狀態標籤獨立滿版一行，按鈕並排不擠壓 */
     header {
       padding: 6px 10px !important;
-      flex-wrap: wrap !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
       gap: 6px !important;
     }
     .brand-group {
-      gap: 6px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      width: 100% !important;
     }
     header h1 {
       font-size: 1.05rem !important;
+      margin: 0 !important;
     }
     .header-right {
       width: 100% !important;
       display: flex !important;
-      flex-wrap: nowrap !important;
+      flex-direction: column !important;
       gap: 5px !important;
-      align-items: center !important;
-      overflow-x: auto !important;
-      -webkit-overflow-scrolling: touch !important;
-      scrollbar-width: none !important;
-    }
-    .header-right::-webkit-scrollbar {
-      display: none !important;
+      margin: 0 !important;
     }
     .status-pill {
-      flex: 1 1 auto !important;
-      font-size: 0.74rem !important;
+      width: 100% !important;
+      font-size: 0.76rem !important;
       white-space: normal !important;
       line-height: 1.35 !important;
       text-align: left !important;
       padding: 5px 8px !important;
       border-radius: 6px !important;
-      min-width: 150px !important;
+      box-sizing: border-box !important;
+    }
+    .header-btns-row {
+      display: flex !important;
+      gap: 6px !important;
+      width: 100% !important;
     }
     .btn-boiling-feature, .btn-download {
-      flex-shrink: 0 !important;
+      flex: 1 1 0 !important;
       padding: 4px 8px !important;
       font-size: 0.74rem !important;
       height: 28px !important;
+      justify-content: center !important;
     }
 
-    /* 控制列：精簡格狀與滑桿，省下大約 80px 垂直高度 */
+    /* 控制列：精簡格狀與滑桿 */
     .top-control-bar {
       padding: 6px 10px !important;
       gap: 6px !important;
@@ -881,7 +886,7 @@
       padding: 2px 3px !important;
     }
 
-    /* 主視覺區：垂直堆疊，底部加入 safe-area-inset 留白，防止 Safari 網址列遮擋 */
+    /* 主視覺區：加入 safe-area 留白 */
     main {
       display: flex !important;
       flex-direction: column !important;
@@ -892,42 +897,59 @@
       overflow: visible !important;
     }
 
-    /* 3D 活塞量筒卡片：溫度列改為橫向頂部排列，圓筒居中放大 */
+    /* 🌟 3D 活塞量筒：高度硬鎖定為 370px，杜絕 Safari resize 循環膨脹！ */
     #panelSim {
       width: 100% !important;
-      height: auto !important;
-      min-height: 0 !important;
+      height: 370px !important;
+      max-height: 370px !important;
+      min-height: 370px !important;
       display: flex !important;
       flex-direction: column !important;
       padding: 6px !important;
       flex-shrink: 0 !important;
-    }
-    .canvas-box {
-      width: 100% !important;
-      height: 380px !important;
-      min-height: 360px !important;
+      overflow: hidden !important;
       position: relative !important;
+      box-sizing: border-box !important;
+    }
+    #panelSim .canvas-box {
+      width: 100% !important;
+      height: 100% !important;
+      flex: 1 1 auto !important;
+      position: relative !important;
+      overflow: hidden !important;
+      min-height: 0 !important;
+    }
+    #panelSim canvas#simCanvas {
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      display: block !important;
     }
 
-    /* 浮動工具與溫度控制器：改為在量筒上方橫向整齊展開 */
+    /* 浮動工具與溫度控制器：定位於頂部懸浮，不佔據 document 縱向空間 */
     .sim-floating-tools {
-      position: static !important;
-      width: 100% !important;
+      position: absolute !important;
+      top: 6px !important;
+      left: 6px !important;
+      right: 6px !important;
+      width: calc(100% - 12px) !important;
       display: flex !important;
       flex-direction: row !important;
       align-items: center !important;
       justify-content: space-between !important;
-      gap: 5px !important;
-      margin-bottom: 6px !important;
+      gap: 4px !important;
       padding: 0 !important;
-      z-index: 5 !important;
+      z-index: 10 !important;
+      pointer-events: auto !important;
     }
     .temp-control-pod {
       display: flex !important;
       flex-direction: row !important;
       align-items: center !important;
-      gap: 3px !important;
-      flex: 1 !important;
+      gap: 2px !important;
+      flex: 1 1 auto !important;
       width: auto !important;
       margin: 0 !important;
       padding: 2px 4px !important;
@@ -970,6 +992,12 @@
       flex-shrink: 0 !important;
     }
     .sim-floating-tools .btn-zoom-tool br {
+      display: none !important;
+    }
+
+    /* 🌟 修復裝回活塞按鈕：未爆炸衝脫時絕不強制顯示！ */
+    #btnRepair[style*="display:none"],
+    #btnRepair[style*="display: none"] {
       display: none !important;
     }
 
@@ -1479,15 +1507,16 @@
     const h = simCanvas.height / window.devicePixelRatio;
     const isNarrow = w < 520;
 
-    // 頂口位置：手機微調給頂部更多餘裕
-    const vesselTopRimY = isNarrow ? 48 : 60;
-    const vesselBottomY = h - (isNarrow ? 20 : 28);
-    const cylH = Math.max(180, vesselBottomY - vesselTopRimY);
+    // 頂口位置：手機微調給頂部溫度列留出充足空間
+    const vesselTopRimY = isNarrow ? 72 : 60;
+    const vesselBottomY = h - (isNarrow ? 18 : 28);
+    const cylH = Math.max(160, vesselBottomY - vesselTopRimY);
 
-    // 圓柱體玻璃寬度：手機版自適應比例，確保兩側速率小卡與中央圓筒比例完美平衡
-    const maxAllowedW = isNarrow ? Math.max(170, Math.min(w * 0.64, 270)) : Math.max(180, w - 176);
+    // 🌟 等比例縮小量筒比例：寬高比約 1:1.45，呈現如同電腦版的精緻量筒！
+    // 手機窄螢幕下寬度設定為 195px ~ 210px，左右各留 80px 給蒸發/凝結標籤卡片
+    const targetW = isNarrow ? Math.min(w * 0.52, 210) : Math.max(180, w - 176);
     const maxCap = zoomedPanel === 'sim' ? 620 : 380;
-    const cylW = Math.min(maxAllowedW, maxCap);
+    const cylW = Math.min(targetW, maxCap);
     const cx = w * 0.5;
     const left = cx - cylW / 2;
     const right = cx + cylW / 2;
@@ -3186,7 +3215,7 @@
     if (isExploded) {
       simCtx.save();
       const isNarrow = g.w < 520;
-      const py = isNarrow ? 8 : 12;
+      const py = isNarrow ? 38 : 12;
       const pw = Math.min(g.w - 20, 440);
       simCtx.fillStyle = 'rgba(153, 27, 27, 0.95)';
       simCtx.strokeStyle = '#ef4444';
@@ -3206,7 +3235,7 @@
       simCtx.save();
       const isInitialStandby = (simTimeSec === 0 && gasMolecules.length === 0);
       const isNarrow = g.w < 520;
-      const py = isNarrow ? 8 : 12;
+      const py = isNarrow ? 38 : 12;
       const pw = Math.min(g.w - 20, 450);
       simCtx.fillStyle = isInitialStandby ? 'rgba(6, 78, 59, 0.95)' : 'rgba(124, 45, 18, 0.95)';
       simCtx.strokeStyle = isInitialStandby ? '#34d399' : '#fb923c';
