@@ -748,6 +748,66 @@
     display: block;
   }
 
+  /* 即時受力天平 HUD 儀表 */
+  .bm-force-meter {
+    background: rgba(8, 12, 22, 0.95);
+    border-top: 1.5px solid #1e293b;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .meter-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .m-label {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    font-weight: 800;
+    display: flex;
+    justify-content: space-between;
+  }
+  .m-bar-track {
+    background: #1e293b;
+    border-radius: 4px;
+    height: 16px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #334155;
+  }
+  .m-bar-fill {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding-left: 5px;
+    font-size: 0.72rem;
+    font-weight: 900;
+    color: #ffffff;
+    white-space: nowrap;
+    transition: width 0.3s ease, background 0.3s ease;
+  }
+  .inner-fill {
+    background: linear-gradient(90deg, #ea580c, #f97316);
+  }
+  .inner-fill.boil-fill {
+    background: linear-gradient(90deg, #ca8a04, #eab308);
+    color: #0f172a;
+  }
+  .outer-fill {
+    background: linear-gradient(90deg, #0284c7, #38bdf8);
+  }
+  .meter-vs {
+    font-size: 0.95rem;
+    font-weight: 900;
+    color: #fde047;
+    flex-shrink: 0;
+    padding: 0 4px;
+  }
+
   .bm-explanation {
     background: rgba(15, 23, 42, 0.95);
     border-top: 1px solid #1e293b;
@@ -1469,29 +1529,45 @@
       </div>
 
       <div class="bm-body">
-        <!-- 左欄：未達沸點 (蒸發) -->
+        <!-- 左欄：未達沸點 (25°C 常溫蒸發) -->
         <div class="bm-card">
           <div class="bm-card-header left-header">
-            <span class="bm-status-tag tag-evap">未達沸點（例如 80°C）</span>
+            <span class="bm-status-tag tag-evap">🌿 常溫 25°C（未達沸點）</span>
             <div class="bm-pressure-compare">
-              <span class="p-val-inner">P<sub>蒸氣</sub> (355 mmHg)</span>
-              <span class="p-symbol">&lt;</span>
+              <span class="p-val-inner">P<sub>蒸氣</sub> (23.8 mmHg)</span>
+              <span id="evapVsSymbol" class="p-symbol">&lt;&lt;</span>
               <span id="evapExtPText" class="p-val-outer">P<sub>外壓</sub> (760 mmHg)</span>
             </div>
           </div>
           <div class="bm-canvas-box">
             <canvas id="evapCanvas"></canvas>
           </div>
+          <!-- 即時受力天平 HUD 儀表 -->
+          <div class="bm-force-meter">
+            <div class="meter-col">
+              <div class="m-label"><span>內部蒸氣推力</span><span style="color:#fb923c;">P<sub>蒸</sub> = 23.8</span></div>
+              <div class="m-bar-track">
+                <div id="evapInnerBar" class="m-bar-fill inner-fill" style="width: 3.1%;">23.8</div>
+              </div>
+            </div>
+            <div id="evapVsMeter" class="meter-vs">&lt;&lt;</div>
+            <div class="meter-col">
+              <div class="m-label"><span>外部液體圍壓</span><span id="evapOuterLabel" style="color:#38bdf8;">P<sub>外</sub> = 760 (忽略水壓)</span></div>
+              <div class="m-bar-track">
+                <div id="evapOuterBar" class="m-bar-fill outer-fill" style="width: 100%;">760 mmHg</div>
+              </div>
+            </div>
+          </div>
           <div class="bm-explanation">
-            <div class="bm-step-title" style="color:#7dd3fc;">⚠️ 微觀現象：氣泡被外壓壓扁瓦解</div>
-            <p id="evapExplanationText">液體內部偶發生成的小蒸氣泡，內部向外的蒸氣壓（355 mmHg）小於外界大氣壓（760 mmHg），<strong>氣泡立刻被四周外壓擠扁破壞</strong>！因此內部無法產生氣泡，氣化僅能在沒有液體壓力的「<strong>液體表面</strong>」發生（蒸發）。</p>
+            <div id="evapStepTitle" class="bm-step-title" style="color:#7dd3fc;">⚠️ 微觀現象：32 倍外壓巨力包夾，氣泡瞬間爆縮瓦解！</div>
+            <p id="evapExplanationText">常溫 25°C 下，水內部偶發生成的微小蒸氣泡，內部向外的飽和蒸氣壓僅 <strong>23.8 mmHg</strong>，而外界大氣壓高達 <strong>760 mmHg</strong>（相差 32 倍！）。氣泡剛成核就承受不住四周龐大外壓，<strong>瞬間被狠狠擠扁、爆縮瓦解（Collapse）</strong>！因此液體內部無法維持氣泡空腔，氣化只能在沒有水壓的「<strong>液體表面</strong>」平靜進行（<strong>蒸發</strong>）。</p>
           </div>
         </div>
 
-        <!-- 右欄：達到沸點 (沸騰) -->
+        <!-- 右欄：達到沸點 (100°C 沸點) -->
         <div class="bm-card">
           <div class="bm-card-header right-header">
-            <span class="bm-status-tag tag-boil">達到沸點（100°C 沸點）</span>
+            <span class="bm-status-tag tag-boil">🔥 加熱至沸點（100°C 沸點）</span>
             <div class="bm-pressure-compare">
               <span class="p-val-inner">P<sub>蒸氣</sub> (760 mmHg)</span>
               <span class="p-symbol">＝</span>
@@ -1501,9 +1577,25 @@
           <div class="bm-canvas-box">
             <canvas id="boilCanvas"></canvas>
           </div>
+          <!-- 即時受力天平 HUD 儀表 -->
+          <div class="bm-force-meter">
+            <div class="meter-col">
+              <div class="m-label"><span>內部蒸氣推力</span><span style="color:#fde047;">P<sub>蒸</sub> = 760</span></div>
+              <div class="m-bar-track">
+                <div class="m-bar-fill inner-fill boil-fill" style="width: 100%;">760 mmHg</div>
+              </div>
+            </div>
+            <div class="meter-vs">＝</div>
+            <div class="meter-col">
+              <div class="m-label"><span>外部液體圍壓</span><span style="color:#38bdf8;">P<sub>外</sub> = 760 (忽略水壓)</span></div>
+              <div class="m-bar-track">
+                <div class="m-bar-fill outer-fill" style="width: 100%;">760 mmHg</div>
+              </div>
+            </div>
+          </div>
           <div class="bm-explanation">
-            <div class="bm-step-title" style="color:#fde047;">✨ 微觀現象：氣泡抗衡外壓、膨脹浮起破裂！</div>
-            <p>當液體蒸氣壓達到外界大氣壓（<strong>P<sub>蒸氣</sub> ＝ P<sub>外壓</sub></strong>），內部氣泡向外推力足以撐開四周液體！氣泡<strong>穩定存在、不斷吸納蒸氣膨脹變大並浮上水面破裂</strong>，全液體內部與表面同時劇烈氣化（沸騰）！</p>
+            <div class="bm-step-title" style="color:#fde047;">✨ 微觀現象：內壓追平外壓，氣泡剛性抗衡、全液體劇烈沸騰！</div>
+            <p>加熱至 100°C 時，氣泡內高能水分子劇烈撞擊內壁產生強大推力，蒸氣壓達到 <strong>760 mmHg</strong>，與外界大氣壓完全抗衡（<strong>P<sub>蒸氣</sub> ＝ P<sub>外壓</sub></strong>）！氣泡向外推力足以撐開四周液體，<strong>在液體深處穩定存在、呼吸擴張並浮升</strong>，全液體內部與表面同時發生劇烈氣化（<strong>沸騰</strong>）！</p>
           </div>
         </div>
       </div>
@@ -1511,7 +1603,8 @@
       <!-- 底部總結列與互動減壓演示 -->
       <div class="bm-footer">
         <div class="bm-summary-text">
-          💡 <strong>課堂結論</strong>：沸點的科學定義即為「<strong>飽和蒸氣壓等於外界大氣壓力時的溫度</strong>」。在 1 大氣壓下水沸點為 100°C；若以針筒抽氣減壓使外壓降至 23.8 mmHg，水在 25°C 常溫即可劇烈沸騰！
+          💡 <strong>課堂結論</strong>：沸點的科學定義即為「<strong>飽和蒸氣壓等於外界大氣壓力時的溫度</strong>」。在 1 大氣壓下水沸點為 100°C；若以針筒抽氣減壓使外壓降至 23.8 mmHg，手中這杯 25°C 常溫水完全不加熱，當場劇烈沸騰！<br>
+          <span style="color:#94a3b8; font-size:0.85em;">🔬 <strong>物理嚴謹備註</strong>：燒杯水深 10 cm 產生之靜水壓僅約 7.4 mmHg（＜外壓 1%），依高中課綱慣例忽略不計（若在深海數千公尺熱泉，水壓數百大氣壓，水溫達 300°C 仍無法沸騰）。</span>
         </div>
         <button id="btnTriggerDecompression" class="btn-decompress">💨 演示針筒抽氣減壓沸騰（常溫25°C沸騰）</button>
       </div>
@@ -2259,8 +2352,21 @@
         if (decompressTimer <= 0) {
           isDecompressed = false;
           if (evapExtPText) evapExtPText.innerHTML = 'P<sub>外壓</sub> (760 mmHg)';
+          const evapVsSymbol = document.getElementById('evapVsSymbol');
+          if (evapVsSymbol) evapVsSymbol.textContent = '<<';
+          const evapVsMeter = document.getElementById('evapVsMeter');
+          if (evapVsMeter) evapVsMeter.textContent = '<<';
+          const evapOuterBar = document.getElementById('evapOuterBar');
+          if (evapOuterBar) {
+            evapOuterBar.style.width = '100%';
+            evapOuterBar.textContent = '760 mmHg';
+          }
+          const evapOuterLabel = document.getElementById('evapOuterLabel');
+          if (evapOuterLabel) evapOuterLabel.innerHTML = 'P<sub>外</sub> = 760 (忽略水壓)';
+          const evapStepTitle = document.getElementById('evapStepTitle');
+          if (evapStepTitle) evapStepTitle.innerHTML = '⚠️ 微觀現象：32 倍外壓巨力包夾，氣泡瞬間爆縮瓦解！';
           if (evapExplanationText) {
-            evapExplanationText.innerHTML = '液體內部偶發生成的小蒸氣泡，內部向外的蒸氣壓（355 mmHg）小於外界大氣壓（760 mmHg），<strong>氣泡立刻被四周外壓擠扁破壞</strong>！因此內部無法產生氣泡，氣化僅能在沒有液體壓力的「<strong>液體表面</strong>」發生（蒸發）。';
+            evapExplanationText.innerHTML = '常溫 25°C 下，水內部偶發生成的微小蒸氣泡，內部向外的飽和蒸氣壓僅 <strong>23.8 mmHg</strong>，而外界大氣壓高達 <strong>760 mmHg</strong>（相差 32 倍！）。氣泡剛成核就承受不住四周龐大外壓，<strong>瞬間被狠狠擠扁、爆縮瓦解（Collapse）</strong>！因此液體內部無法維持氣泡空腔，氣化只能在沒有水壓的「<strong>液體表面</strong>」平靜進行（<strong>蒸發</strong>）。';
           }
           if (btnTriggerDecompression) {
             btnTriggerDecompression.textContent = '💨 演示針筒抽氣減壓沸騰（常溫25°C沸騰）';
@@ -4552,6 +4658,11 @@
     ctx.restore();
   }
 
+  // 沸騰彈窗微觀解剖：水分子高頻撞擊與火花粒子狀態
+  let boilMolecules = [];
+  let boilHitSparks = [];
+  let evapMolecules = [];
+
   function renderEvapCanvas() {
     if (!evapCanvas) return;
     const w = evapCanvas.width / window.devicePixelRatio;
@@ -4559,7 +4670,7 @@
     if (w <= 0 || h <= 0) return;
     evapCtx.clearRect(0, 0, w, h);
 
-    const surfY = h * 0.32;
+    const surfY = h * 0.30;
     const botY = h - 14;
     const leftX = 22;
     const rightX = w - 22;
@@ -4572,7 +4683,7 @@
     evapCtx.fillStyle = airGrad;
     evapCtx.fillRect(leftX, 10, rightX - leftX, surfY - 10);
 
-    // 2. 下方液態水
+    // 2. 25°C 常溫液態水
     const waterGrad = evapCtx.createLinearGradient(0, surfY, 0, botY);
     waterGrad.addColorStop(0, 'rgba(14, 165, 233, 0.7)');
     waterGrad.addColorStop(0.5, 'rgba(2, 132, 199, 0.82)');
@@ -4580,24 +4691,24 @@
     evapCtx.fillStyle = waterGrad;
     evapCtx.fillRect(leftX, surfY, rightX - leftX, botY - surfY);
 
-    // 3. 水中游離水分子
-    for (let i = 0; i < 18; i++) {
+    // 3. 水中常溫緩慢擾動水分子
+    for (let i = 0; i < 16; i++) {
       const mx = leftX + 16 + ((i * 37 + 13) % (rightX - leftX - 32));
-      const my = surfY + 20 + ((i * 29 + 17) % (botY - surfY - 35));
-      const jx = Math.sin(bmAnimTime * 2 + i) * 1.5;
-      const jy = Math.cos(bmAnimTime * 2.3 + i * 1.4) * 1.5;
+      const my = surfY + 18 + ((i * 29 + 17) % (botY - surfY - 32));
+      const jx = Math.sin(bmAnimTime * 1.5 + i) * 1.2;
+      const jy = Math.cos(bmAnimTime * 1.8 + i * 1.4) * 1.2;
       evapCtx.beginPath();
-      evapCtx.arc(mx + jx, my + jy, 3.2, 0, Math.PI * 2);
-      evapCtx.fillStyle = 'rgba(224, 242, 254, 0.45)';
+      evapCtx.arc(mx + jx, my + jy, 3, 0, Math.PI * 2);
+      evapCtx.fillStyle = 'rgba(224, 242, 254, 0.40)';
       evapCtx.fill();
     }
 
-    // 4. 水面上方空氣中的外壓下壓箭頭
+    // 4. 水面上方大氣壓下壓向量
     const extCol = isDecompressed ? '#38bdf8' : '#60a5fa';
-    const extLabel = isDecompressed ? 'P外=23.8' : 'P外=760';
+    const extLabel = isDecompressed ? 'P外=23.8' : 'P外=760 (忽略水壓)';
     [0.26, 0.5, 0.74].forEach(f => {
       const ax = leftX + (rightX - leftX) * f;
-      drawVectorArrow(evapCtx, ax, surfY - 26, ax, surfY - 4, extCol, 2.2, 6, extLabel);
+      drawVectorArrow(evapCtx, ax, surfY - 24, ax, surfY - 4, extCol, 2.2, 6, extLabel);
     });
 
     // 5. 燒杯玻璃外框
@@ -4622,12 +4733,13 @@
     const cy = surfY + (botY - surfY) * 0.55;
 
     if (!isDecompressed) {
-      // 正常外壓 760 mmHg，未達沸點 (80°C，P_vap = 355 mmHg < 760 mmHg)
-      const tCycle = (bmAnimTime * 0.9) % 4.2;
+      // 常溫 25°C，未達沸點 (P_蒸氣 = 23.8 mmHg vs P_外壓 = 760 mmHg，相差 32 倍！)
+      const tCycle = (bmAnimTime * 0.95) % 4.4;
 
-      if (tCycle < 2.0) {
-        // 階段一：微小氣泡嘗試在內部成核（但受外壓極度壓制）
-        const r = 16 + Math.sin(tCycle * Math.PI) * 2.5;
+      if (tCycle < 1.4) {
+        // 階段一：微小氣泡嘗試成核 (0 ~ 1.4s)
+        const prog = tCycle / 1.4;
+        const r = 14 * Math.min(1, prog * 1.8);
 
         // 氣泡本體
         const bg = evapCtx.createRadialGradient(cx - 3, cy - 3, 2, cx, cy, r);
@@ -4642,79 +4754,111 @@
         evapCtx.fill();
         evapCtx.stroke();
 
-        // 氣泡內微弱蒸氣壓向量（向外，長度較短 16px，橘色）
-        const pLen = 16;
-        drawVectorArrow(evapCtx, cx - 4, cy, cx - 4 - pLen, cy, '#fb923c', 2.2, 5, '355');
-        drawVectorArrow(evapCtx, cx + 4, cy, cx + 4 + pLen, cy, '#fb923c', 2.2, 5, '355');
-        drawVectorArrow(evapCtx, cx, cy - 4, cx, cy - 4 - pLen, '#fb923c', 2.2, 5, '355');
-        drawVectorArrow(evapCtx, cx, cy + 4, cx, cy + 4 + pLen, '#fb923c', 2.2, 5, '355');
+        // 氣泡內部：僅 2 顆常溫慢速水分子
+        const m1x = cx + Math.sin(bmAnimTime * 2.2) * 5;
+        const m1y = cy + Math.cos(bmAnimTime * 2.2) * 4;
+        const m2x = cx - Math.sin(bmAnimTime * 1.8) * 5;
+        const m2y = cy - Math.cos(bmAnimTime * 1.8) * 4;
+        evapCtx.fillStyle = '#fdba74';
+        evapCtx.beginPath(); evapCtx.arc(m1x, m1y, 2.2, 0, Math.PI * 2); evapCtx.fill();
+        evapCtx.beginPath(); evapCtx.arc(m2x, m2y, 2.2, 0, Math.PI * 2); evapCtx.fill();
 
-        // 周圍液體壓過來的外壓向量（向內，長度長達 40px，藍色）
-        const outLen = 38;
-        drawVectorArrow(evapCtx, cx - r - outLen, cy, cx - r - 2, cy, '#38bdf8', 3.0, 7, '760');
-        drawVectorArrow(evapCtx, cx + r + outLen, cy, cx + r + 2, cy, '#38bdf8', 3.0, 7, '760');
-        drawVectorArrow(evapCtx, cx, cy - r - outLen, cx, cy - r - 2, '#38bdf8', 3.0, 7, '760');
-        drawVectorArrow(evapCtx, cx, cy + r + outLen, cx, cy + r + 2, '#38bdf8', 3.0, 7, '760');
+        // 內部微弱蒸氣壓向量（長度極短 8px，相較於 760 渺小）
+        const pLen = 8;
+        drawVectorArrow(evapCtx, cx - 3, cy, cx - 3 - pLen, cy, '#fb923c', 2.0, 5, '23.8');
+        drawVectorArrow(evapCtx, cx + 3, cy, cx + 3 + pLen, cy, '#fb923c', 2.0, 5, '23.8');
+        drawVectorArrow(evapCtx, cx, cy - 3, cx, cy - 3 - pLen, '#fb923c', 2.0, 5, '23.8');
+        drawVectorArrow(evapCtx, cx, cy + 3, cx, cy + 3 + pLen, '#fb923c', 2.0, 5, '23.8');
 
-        // 提示標籤
+        // 周圍 32 倍外壓向量（向內，長度達 44px，深藍色強烈包夾）
+        const outLen = 44;
+        drawVectorArrow(evapCtx, cx - r - outLen, cy, cx - r - 2, cy, '#38bdf8', 3.2, 7, '760 (忽略水壓)');
+        drawVectorArrow(evapCtx, cx + r + outLen, cy, cx + r + 2, cy, '#38bdf8', 3.2, 7, '760 (忽略水壓)');
+        drawVectorArrow(evapCtx, cx, cy - r - outLen, cx, cy - r - 2, '#38bdf8', 3.2, 7, '760');
+        drawVectorArrow(evapCtx, cx, cy + r + outLen, cx, cy + r + 2, '#38bdf8', 3.2, 7, '760');
+
         evapCtx.save();
         evapCtx.fillStyle = '#fde047';
         evapCtx.font = 'bold 11px "PingFang TC", sans-serif';
         evapCtx.textAlign = 'center';
-        evapCtx.fillText('P外壓(760) ＞ P蒸氣(355)：外力強烈壓制氣泡', cx, botY - 8);
+        evapCtx.fillText('P外壓(760) ＞＞ P蒸氣(23.8)：32倍強大外壓強烈包夾！', cx, botY - 8);
         evapCtx.restore();
 
-      } else if (tCycle < 2.8) {
-        // 階段二：氣泡被外壓瞬間壓扁潰縮瓦解（Collapse）！
-        const prog = (tCycle - 2.0) / 0.8;
-        const rx = Math.max(0, 16 * (1 - prog));
-        const ry = Math.max(0, 8 * (1 - prog) * 0.3);
+      } else if (tCycle < 2.5) {
+        // 階段二：劇烈受壓變形與高頻顫抖 (1.4 ~ 2.5s)
+        const prog = (tCycle - 1.4) / 1.1;
+        const rx = Math.max(2, 14 * (1 - prog * 0.72));
+        const ry = Math.max(1.5, 14 * (1 - prog * 0.88));
+        const jx = Math.sin(bmAnimTime * 35) * 1.8;
+        const jy = Math.cos(bmAnimTime * 38) * 1.2;
 
-        if (rx > 0 && ry > 0) {
-          evapCtx.fillStyle = 'rgba(239, 68, 68, 0.7)';
-          evapCtx.strokeStyle = '#ef4444';
-          evapCtx.lineWidth = 2;
-          evapCtx.beginPath();
-          evapCtx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-          evapCtx.fill();
-          evapCtx.stroke();
-        }
+        evapCtx.fillStyle = 'rgba(239, 68, 68, 0.75)';
+        evapCtx.strokeStyle = '#ef4444';
+        evapCtx.lineWidth = 2.2;
+        evapCtx.beginPath();
+        evapCtx.ellipse(cx + jx, cy + jy, rx, ry, 0, 0, Math.PI * 2);
+        evapCtx.fill();
+        evapCtx.stroke();
 
-        // 潰縮衝擊波環
-        const shockR = 8 + prog * 28;
+        // 緊逼的外壓箭頭
+        drawVectorArrow(evapCtx, cx - rx - 36, cy, cx - rx - 2, cy, '#38bdf8', 3.4, 7, '760');
+        drawVectorArrow(evapCtx, cx + rx + 36, cy, cx + rx + 2, cy, '#38bdf8', 3.4, 7, '760');
+
+        evapCtx.save();
+        evapCtx.fillStyle = '#f87171';
+        evapCtx.font = '900 11.5px "PingFang TC", sans-serif';
+        evapCtx.textAlign = 'center';
+        evapCtx.fillText('⚠️ 32倍巨力夾擊！氣泡劇烈凹陷顫抖！', cx, botY - 8);
+        evapCtx.restore();
+
+      } else if (tCycle < 3.2) {
+        // 階段三：爆縮瓦解 (Collapse) 瞬間 (2.5 ~ 3.2s)
+        const prog = (tCycle - 2.5) / 0.7;
+        const shockR = 6 + prog * 34;
+
+        // 震波光環
         evapCtx.strokeStyle = `rgba(239, 68, 68, ${Math.max(0, 1 - prog)})`;
         evapCtx.lineWidth = 2.5;
         evapCtx.beginPath();
         evapCtx.arc(cx, cy, shockR, 0, Math.PI * 2);
         evapCtx.stroke();
 
-        // 警示標籤
+        // 擠散的水滴粒子
+        for (let i = 0; i < 4; i++) {
+          const ang = (i / 4) * Math.PI * 2 + prog * 2;
+          const d = prog * 22;
+          evapCtx.beginPath();
+          evapCtx.arc(cx + Math.cos(ang) * d, cy + Math.sin(ang) * d, 2, 0, Math.PI * 2);
+          evapCtx.fillStyle = `rgba(248, 113, 113, ${Math.max(0, 1 - prog)})`;
+          evapCtx.fill();
+        }
+
         evapCtx.save();
         evapCtx.fillStyle = '#fda4af';
         evapCtx.font = '900 12px "PingFang TC", sans-serif';
         evapCtx.textAlign = 'center';
-        evapCtx.fillText('💥 氣泡受不住外壓，瞬間被壓扁瓦解 (Collapse)！', cx, botY - 8);
+        evapCtx.fillText('💥 氣泡受不住外壓，瞬間爆縮瓦解 (Collapse)！', cx, botY - 8);
         evapCtx.restore();
 
       } else {
-        // 階段三：內部氣泡瓦解後，氣化只能在水面上方（蒸發）發生
-        const evapProg = (tCycle - 2.8) / 1.4;
+        // 階段四：液面平靜蒸發 (3.2 ~ 4.4s)
+        const evapProg = (tCycle - 3.2) / 1.2;
         const escY = surfY - evapProg * 24;
 
-        // 表面水分子脫離逸出
-        drawVectorArrow(evapCtx, cx - 24, surfY + 3, cx - 24, escY, '#4ade80', 2.4, 6, '蒸發');
-        drawVectorArrow(evapCtx, cx + 24, surfY + 3, cx + 24, escY, '#4ade80', 2.4, 6, '蒸發');
+        // 表面分子平靜逸出
+        drawVectorArrow(evapCtx, cx - 28, surfY + 3, cx - 28, escY, '#4ade80', 2.4, 6, '蒸發');
+        drawVectorArrow(evapCtx, cx + 28, surfY + 3, cx + 28, escY, '#4ade80', 2.4, 6, '蒸發');
 
         evapCtx.save();
         evapCtx.fillStyle = '#a7f3d0';
         evapCtx.font = 'bold 11px "PingFang TC", sans-serif';
         evapCtx.textAlign = 'center';
-        evapCtx.fillText('表面分子無液體圍壓，方可順利逸出（蒸發）', cx, botY - 8);
+        evapCtx.fillText('表面分子無液體圍壓，方可自由逸出（蒸發）', cx, botY - 8);
         evapCtx.restore();
       }
 
     } else {
-      // 演示針筒抽氣減壓沸騰（常溫 25°C，外壓降至 23.8 mmHg）
+      // 演示針筒抽氣減壓沸騰（常溫 25°C，外壓抽降至 23.8 mmHg）
       const riseProg = ((bmAnimTime * 0.45) % 2.5) / 2.5;
       const curY = (botY - 20) - riseProg * (botY - 20 - surfY);
       const curR = 12 + riseProg * 14;
@@ -4751,7 +4895,7 @@
       evapCtx.fillStyle = '#4ade80';
       evapCtx.font = '900 12px "PingFang TC", sans-serif';
       evapCtx.textAlign = 'center';
-      evapCtx.fillText('🎉 減壓成功！P外降至23.8 mmHg，常溫氣泡順利浮升沸騰！', cx, botY - 8);
+      evapCtx.fillText('🎉 減壓成功！外壓降至 23.8 mmHg，常溫水當場沸騰！', cx, botY - 8);
       evapCtx.restore();
     }
   }
@@ -4763,13 +4907,13 @@
     if (w <= 0 || h <= 0) return;
     boilCtx.clearRect(0, 0, w, h);
 
-    const surfY = h * 0.32;
+    const surfY = h * 0.30;
     const botY = h - 14;
     const leftX = 22;
     const rightX = w - 22;
     const cx = w * 0.5;
 
-    // 1. 上方劇烈水蒸氣雲霧背景
+    // 1. 上方劇烈蒸氣雲霧
     const steamGrad = boilCtx.createLinearGradient(0, 0, 0, surfY);
     steamGrad.addColorStop(0, '#0f172a');
     steamGrad.addColorStop(0.6, 'rgba(56, 189, 248, 0.25)');
@@ -4777,26 +4921,27 @@
     boilCtx.fillStyle = steamGrad;
     boilCtx.fillRect(leftX, 10, rightX - leftX, surfY - 10);
 
-    // 2. 下方 100°C 沸騰液態水（底部帶加熱橙黃光輝）
+    // 2. 下方 100°C 沸騰液態水（底層加熱橙紅光芒）
     const waterGrad = boilCtx.createLinearGradient(0, surfY, 0, botY);
     waterGrad.addColorStop(0, 'rgba(14, 165, 233, 0.75)');
     waterGrad.addColorStop(0.65, 'rgba(2, 132, 199, 0.88)');
-    waterGrad.addColorStop(1, 'rgba(249, 115, 22, 0.6)');
+    waterGrad.addColorStop(1, 'rgba(249, 115, 22, 0.65)');
     boilCtx.fillStyle = waterGrad;
     boilCtx.fillRect(leftX, surfY, rightX - leftX, botY - surfY);
 
-    // 底部加熱器示意紅光
-    boilCtx.fillStyle = 'rgba(239, 68, 68, 0.45)';
+    // 底部加熱器示意紅光（脈衝呼吸）
+    const heatAlpha = 0.45 + Math.sin(bmAnimTime * 6) * 0.15;
+    boilCtx.fillStyle = `rgba(239, 68, 68, ${heatAlpha})`;
     boilCtx.fillRect(leftX + 2, botY - 8, rightX - leftX - 4, 7);
 
-    // 3. 背景不斷生成的上升小沸騰氣泡
+    // 3. 背景不斷生成的上升小沸騰氣泡（越升越高、越變越大）
     for (let i = 0; i < 6; i++) {
       const bx = leftX + 20 + ((i * 53 + 21) % (rightX - leftX - 40));
       const bSpeed = 0.6 + (i % 3) * 0.3;
       const bTravel = botY - surfY - 15;
       const bProg = ((bmAnimTime * bSpeed + i * 0.35) % 1.0);
       const by = (botY - 10) - bProg * bTravel;
-      const br = 3 + bProg * 5;
+      const br = 3 + bProg * 6; // 氣泡浮升膨脹！
 
       boilCtx.beginPath();
       boilCtx.arc(bx + Math.sin(bmAnimTime * 3 + i) * 2, by, br, 0, Math.PI * 2);
@@ -4828,11 +4973,11 @@
     }
     boilCtx.stroke();
 
-    // 6. 中央焦點大氣泡：展現 P_蒸氣 (760 mmHg) ＝ P_外壓 (760 mmHg) 完全抗衡！
+    // 6. 中央焦點核心大氣泡（放大鏡解剖：P_蒸 760 ＝ P_外 760 完全抗衡）
     const cy = surfY + (botY - surfY) * 0.52;
-    const r = 26 + Math.sin(bmAnimTime * 2.4) * 1.8;
+    const r = 28 + Math.sin(bmAnimTime * 2.8) * 1.5; // 彈性呼吸律動
 
-    // 亮麗金色高光氣泡球體
+    // 氣泡球體：立體漸層與菲涅爾輝光
     const bg = boilCtx.createRadialGradient(cx - 7, cy - 7, 3, cx, cy, r);
     bg.addColorStop(0, '#ffffff');
     bg.addColorStop(0.25, '#fef08a');
@@ -4840,34 +4985,94 @@
     bg.addColorStop(1, '#d97706');
     boilCtx.fillStyle = bg;
     boilCtx.strokeStyle = '#fef08a';
-    boilCtx.lineWidth = 2.4;
+    boilCtx.lineWidth = 2.5;
     boilCtx.beginPath();
     boilCtx.arc(cx, cy, r, 0, Math.PI * 2);
     boilCtx.fill();
     boilCtx.stroke();
 
-    // 氣泡內高能水分子跳躍
-    for (let i = 0; i < 5; i++) {
-      const ang = (i / 5) * Math.PI * 2 + bmAnimTime * 2;
-      const d = 8 + (i % 2) * 5;
-      boilCtx.beginPath();
-      boilCtx.arc(cx + Math.cos(ang) * d, cy + Math.sin(ang) * d, 2.5, 0, Math.PI * 2);
-      boilCtx.fillStyle = '#ffffff';
-      boilCtx.fill();
+    // 玻璃高光弧線（左上方）
+    boilCtx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+    boilCtx.lineWidth = 2;
+    boilCtx.beginPath();
+    boilCtx.arc(cx, cy, r - 3, Math.PI * 1.15, Math.PI * 1.55);
+    boilCtx.stroke();
+
+    // 初始化與更新氣泡內高速狂飆水分子
+    if (boilMolecules.length < 8) {
+      boilMolecules = [];
+      for (let i = 0; i < 8; i++) {
+        const ang = (i / 8) * Math.PI * 2;
+        const spd = 2.4 + Math.random() * 0.8;
+        boilMolecules.push({
+          x: cx + Math.cos(ang) * 10,
+          y: cy + Math.sin(ang) * 10,
+          vx: Math.cos(ang + 0.5) * spd,
+          vy: Math.sin(ang + 0.5) * spd
+        });
+      }
     }
 
-    // 7. 力學完全平衡向量（長度精準相等 = 35px！）
-    const arrowLen = 34;
+    // 更新分子碰撞與產生內壁撞擊火花 (Hit Sparks)
+    boilMolecules.forEach(m => {
+      m.x += m.vx;
+      m.y += m.vy;
+      const dx = m.x - cx;
+      const dy = m.y - cy;
+      const dist = Math.hypot(dx, dy);
+      if (dist >= r - 4) {
+        const nx = dx / dist;
+        const ny = dy / dist;
+        const dot = m.vx * nx + m.vy * ny;
+        if (dot > 0) {
+          m.vx -= 2 * dot * nx;
+          m.vy -= 2 * dot * ny;
+          // 激發撞擊火花
+          boilHitSparks.push({
+            x: cx + nx * (r - 2),
+            y: cy + ny * (r - 2),
+            life: 1.0,
+            size: 3 + Math.random() * 2
+          });
+        }
+      }
+      // 繪製分子
+      boilCtx.beginPath();
+      boilCtx.arc(m.x, m.y, 2.5, 0, Math.PI * 2);
+      boilCtx.fillStyle = '#ffffff';
+      boilCtx.fill();
+    });
+
+    // 繪製與衰減火花粒子
+    for (let i = boilHitSparks.length - 1; i >= 0; i--) {
+      const sp = boilHitSparks[i];
+      sp.life -= 0.1;
+      if (sp.life <= 0) {
+        boilHitSparks.splice(i, 1);
+        continue;
+      }
+      boilCtx.save();
+      boilCtx.fillStyle = `rgba(254, 240, 138, ${sp.life})`;
+      boilCtx.shadowColor = '#fde047';
+      boilCtx.shadowBlur = 6;
+      boilCtx.beginPath();
+      boilCtx.arc(sp.x, sp.y, sp.size * sp.life, 0, Math.PI * 2);
+      boilCtx.fill();
+      boilCtx.restore();
+    }
+
+    // 7. 力學完全平衡向量（長度精準相等 = 36px！）
+    const arrowLen = 36;
 
     // 氣泡向外撐開推力 P_蒸氣 = 760 mmHg（金色粗箭頭）
-    drawVectorArrow(boilCtx, cx - 8, cy, cx - 8 - arrowLen, cy, '#facc15', 3.2, 7, '760', true);
-    drawVectorArrow(boilCtx, cx + 8, cy, cx + 8 + arrowLen, cy, '#facc15', 3.2, 7, '760', true);
+    drawVectorArrow(boilCtx, cx - 8, cy, cx - 8 - arrowLen, cy, '#facc15', 3.2, 7, 'P蒸=760', true);
+    drawVectorArrow(boilCtx, cx + 8, cy, cx + 8 + arrowLen, cy, '#facc15', 3.2, 7, 'P蒸=760', true);
     drawVectorArrow(boilCtx, cx, cy - 8, cx, cy - 8 - arrowLen, '#facc15', 3.2, 7, '760', true);
     drawVectorArrow(boilCtx, cx, cy + 8, cx, cy + 8 + arrowLen, '#facc15', 3.2, 7, '760', true);
 
-    // 液體向內擠壓外壓 P_外壓 = 760 mmHg（天藍色粗箭頭，長度完全等於 34px）
-    drawVectorArrow(boilCtx, cx - r - arrowLen - 2, cy, cx - r - 2, cy, '#38bdf8', 3.2, 7, '760', true);
-    drawVectorArrow(boilCtx, cx + r + arrowLen + 2, cy, cx + r + 2, cy, '#38bdf8', 3.2, 7, '760', true);
+    // 液體向內擠壓外壓 P_外壓 = 760 mmHg（天藍色粗箭頭，長度精準完全等於 36px）
+    drawVectorArrow(boilCtx, cx - r - arrowLen - 2, cy, cx - r - 2, cy, '#38bdf8', 3.2, 7, 'P外=760 (忽略水壓)', true);
+    drawVectorArrow(boilCtx, cx + r + arrowLen + 2, cy, cx + r + 2, cy, '#38bdf8', 3.2, 7, 'P外=760 (忽略水壓)', true);
     drawVectorArrow(boilCtx, cx, cy - r - arrowLen - 2, cx, cy - r - 2, '#38bdf8', 3.2, 7, '760', true);
     drawVectorArrow(boilCtx, cx, cy + r + arrowLen + 2, cx, cy + r + 2, '#38bdf8', 3.2, 7, '760', true);
 
@@ -4887,7 +5092,7 @@
     boilCtx.fillStyle = '#fef08a';
     boilCtx.font = '900 12px "PingFang TC", sans-serif';
     boilCtx.textAlign = 'center';
-    boilCtx.fillText('✨ P蒸氣(760) ＝ P外壓(760)：內部氣泡穩定抗衡不扁塌，全液劇烈沸騰！', cx, botY - 8);
+    boilCtx.fillText('✨ P蒸氣(760) ＝ P外壓(760)：內力剛性抗衡，氣泡穩定存在並擴張！', cx, botY - 8);
     boilCtx.restore();
   }
 
@@ -4934,9 +5139,22 @@
       if (evapExtPText) {
         evapExtPText.innerHTML = 'P<sub>外壓</sub> (已抽氣減壓至 23.8 mmHg)';
       }
+      const evapVsSymbol = document.getElementById('evapVsSymbol');
+      if (evapVsSymbol) evapVsSymbol.textContent = '＝';
+      const evapVsMeter = document.getElementById('evapVsMeter');
+      if (evapVsMeter) evapVsMeter.textContent = '＝';
+      const evapOuterBar = document.getElementById('evapOuterBar');
+      if (evapOuterBar) {
+        evapOuterBar.style.width = '3.1%';
+        evapOuterBar.textContent = '23.8';
+      }
+      const evapOuterLabel = document.getElementById('evapOuterLabel');
+      if (evapOuterLabel) evapOuterLabel.innerHTML = 'P<sub>外</sub> = 23.8 (減壓)';
+      const evapStepTitle = document.getElementById('evapStepTitle');
+      if (evapStepTitle) evapStepTitle.innerHTML = '🎉 減壓沸騰成功！常溫水當場劇烈沸騰！';
       if (evapExplanationText) {
         evapExplanationText.innerHTML =
-          '<b>🎉 減壓沸騰成功！</b>利用針筒將外壓抽降至 23.8 mmHg 後，常溫 25°C 水的蒸氣壓（23.8 mmHg）已達到外壓（<b>P<sub>蒸氣</sub> ＝ P<sub>外壓</sub></b>）！原本會被壓扁的氣泡現在能夠穩定膨脹浮升，<b>常溫水立刻劇烈沸騰！</b>';
+          '<b>🎉 減壓沸騰成功！</b>利用針筒將外壓抽降至 23.8 mmHg 後，常溫 25°C 水的蒸氣壓（23.8 mmHg）已達到外壓（<b>P<sub>蒸氣</sub> ＝ P<sub>外壓</sub></b>）！原本會被壓扁的氣泡現在能夠穩定膨脹浮升，<b>常溫水完全不加熱，當場劇烈沸騰！</b>';
       }
     });
   }
